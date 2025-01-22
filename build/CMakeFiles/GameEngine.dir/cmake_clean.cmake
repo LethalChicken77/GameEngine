@@ -1,0 +1,43 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/GameEngine.dir/src/core/game_object.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/core/game_object.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/core/input.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/core/input.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/engine.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/engine.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/buffer.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/buffer.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/descriptors.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/descriptors.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/device.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/device.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/main.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/main.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj.d"
+  "GameEngine.exe"
+  "GameEngine.exe.manifest"
+  "GameEngine.pdb"
+  "libGameEngine.dll.a"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/GameEngine.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
