@@ -40,6 +40,15 @@ namespace graphics
             vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
     }
 
+    void Mesh::drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount)
+    {
+        // TODO: Implement
+        if(useIndexBuffer)
+            vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, 0, 0, 0);
+        else
+            vkCmdDraw(commandBuffer, vertexCount, instanceCount, 0, 0);
+    }
+
     void Mesh::createVertexBuffer(const std::vector<Vertex>& vertices)
     {
         vertexCount = static_cast<uint32_t>(vertices.size());

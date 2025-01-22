@@ -45,6 +45,7 @@ namespace graphics
 
         void bind(VkCommandBuffer commandBuffer);
         void draw(VkCommandBuffer commandBuffer);
+        void drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
 
         static std::unique_ptr<Mesh> createCube(Device& device, float edgeLength);
         static std::unique_ptr<Mesh> loadObj(Device& device, const std::string& filename);

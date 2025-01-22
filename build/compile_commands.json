@@ -67,6 +67,12 @@
 },
 {
   "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\shader.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\shader.cpp",
+  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/shader.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\swap_chain.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\swap_chain.cpp",
   "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/swap_chain.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"

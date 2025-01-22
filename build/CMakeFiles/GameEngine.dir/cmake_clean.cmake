@@ -21,6 +21,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj"
   "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj.d"
+  "CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj"
+  "CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"
   "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj.d"
   "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"

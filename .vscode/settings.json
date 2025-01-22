@@ -60,6 +60,7 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "map": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "expected": "cpp"
     }
 }

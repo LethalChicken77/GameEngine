@@ -87,12 +87,12 @@ clean: CMakeFiles/compile_shaders.dir/clean
 CMakeFiles/GameEngine.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Built target GameEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Built target GameEngine"
 .PHONY : CMakeFiles/GameEngine.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/GameEngine.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles 17
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles 18
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 CMakeFiles/GameEngine.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles 0
 .PHONY : CMakeFiles/GameEngine.dir/rule
@@ -104,7 +104,7 @@ GameEngine: CMakeFiles/GameEngine.dir/rule
 # codegen rule for target.
 CMakeFiles/GameEngine.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 "Finished codegen for target GameEngine"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 "Finished codegen for target GameEngine"
 .PHONY : CMakeFiles/GameEngine.dir/codegen
 
 # clean rule for target.
@@ -119,7 +119,7 @@ CMakeFiles/GameEngine.dir/clean:
 CMakeFiles/compile_shaders.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\compile_shaders.dir\build.make CMakeFiles/compile_shaders.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\compile_shaders.dir\build.make CMakeFiles/compile_shaders.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=18,19 "Built target compile_shaders"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=19,20 "Built target compile_shaders"
 .PHONY : CMakeFiles/compile_shaders.dir/all
 
 # Build rule for subdir invocation for target.
@@ -136,7 +136,7 @@ compile_shaders: CMakeFiles/compile_shaders.dir/rule
 # codegen rule for target.
 CMakeFiles/compile_shaders.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\compile_shaders.dir\build.make CMakeFiles/compile_shaders.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=18,19 "Finished codegen for target compile_shaders"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=19,20 "Finished codegen for target compile_shaders"
 .PHONY : CMakeFiles/compile_shaders.dir/codegen
 
 # clean rule for target.

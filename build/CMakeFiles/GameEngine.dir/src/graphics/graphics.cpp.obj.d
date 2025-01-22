@@ -190,10 +190,7 @@ CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj: \
  C:/msys64/ucrt64/include/c++/14.2.0/bits/erase_if.h \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics\graphics_pipeline.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics\device.hpp \
- C:\Users\dante\Desktop\Development\GameEngine\src\graphics\renderer.hpp \
- C:\Users\dante\Desktop\Development\GameEngine\src\graphics\swap_chain.hpp \
- C:\Users\dante\Desktop\Development\GameEngine\src\graphics\mesh.hpp \
- C:\Users\dante\Desktop\Development\GameEngine\src\graphics\buffer.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\shader.hpp \
  C:/VulkanSDK/1.3.296.0/Include/glm/glm.hpp \
  C:/VulkanSDK/1.3.296.0/Include/glm/detail/_fixes.hpp \
  C:/msys64/ucrt64/include/c++/14.2.0/cmath \
@@ -352,10 +349,17 @@ CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj: \
  C:/VulkanSDK/1.3.296.0/Include/glm/detail/type_half.inl \
  C:/VulkanSDK/1.3.296.0/Include/glm/integer.hpp \
  C:/VulkanSDK/1.3.296.0/Include/glm/detail/func_integer.inl \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\renderer.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\swap_chain.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\mesh.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\buffer.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics\descriptors.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics\frame_info.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics\camera.hpp \
  C:/Users/dante/Desktop/Development/GameEngine/src/core/game_object.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics\material.hpp \
+ C:/msys64/ucrt64/include/c++/14.2.0/variant \
+ C:/msys64/ucrt64/include/c++/14.2.0/bits/parse_numbers.h \
  C:/Users/dante/Desktop/Development/GameEngine/src/core/input.hpp \
  C:/VulkanSDK/1.3.296.0/Include/glm/gtc/matrix_transform.hpp \
  C:/VulkanSDK/1.3.296.0/Include/glm/ext/matrix_projection.hpp \

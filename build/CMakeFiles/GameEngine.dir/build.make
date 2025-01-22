@@ -236,11 +236,26 @@ CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\dante\Desktop\Development\GameEngine\src\graphics\renderer.cpp -o CMakeFiles\GameEngine.dir\src\graphics\renderer.cpp.s
 
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj: CMakeFiles/GameEngine.dir/flags.make
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/graphics/shader.cpp
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj -MF CMakeFiles\GameEngine.dir\src\graphics\shader.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\graphics\shader.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\graphics\shader.cpp
+
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\dante\Desktop\Development\GameEngine\src\graphics\shader.cpp > CMakeFiles\GameEngine.dir\src\graphics\shader.cpp.i
+
+CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\dante\Desktop\Development\GameEngine\src\graphics\shader.cpp -o CMakeFiles\GameEngine.dir\src\graphics\shader.cpp.s
+
 CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj: CMakeFiles/GameEngine.dir/flags.make
 CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
 CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/graphics/swap_chain.cpp
 CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj -MF CMakeFiles\GameEngine.dir\src\graphics\swap_chain.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\graphics\swap_chain.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\graphics\swap_chain.cpp
 
 CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.i: cmake_force
@@ -255,7 +270,7 @@ CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj: CMakeFiles/GameEngine.dir
 CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
 CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/graphics/window.cpp
 CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj -MF CMakeFiles\GameEngine.dir\src\graphics\window.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\graphics\window.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\graphics\window.cpp
 
 CMakeFiles/GameEngine.dir/src/graphics/window.cpp.i: cmake_force
@@ -270,7 +285,7 @@ CMakeFiles/GameEngine.dir/src/main.cpp.obj: CMakeFiles/GameEngine.dir/flags.make
 CMakeFiles/GameEngine.dir/src/main.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
 CMakeFiles/GameEngine.dir/src/main.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/main.cpp
 CMakeFiles/GameEngine.dir/src/main.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/GameEngine.dir/src/main.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/GameEngine.dir/src/main.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/main.cpp.obj -MF CMakeFiles\GameEngine.dir\src\main.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\main.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\main.cpp
 
 CMakeFiles/GameEngine.dir/src/main.cpp.i: cmake_force
@@ -285,7 +300,7 @@ CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj: CMakeFiles/GameEngine.dir/fla
 CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
 CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/utils/debug.cpp
 CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj -MF CMakeFiles\GameEngine.dir\src\utils\debug.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\utils\debug.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\utils\debug.cpp
 
 CMakeFiles/GameEngine.dir/src/utils/debug.cpp.i: cmake_force
@@ -300,7 +315,7 @@ CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj: CMakeFiles/GameEngine.dir
 CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj: CMakeFiles/GameEngine.dir/includes_CXX.rsp
 CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj: C:/Users/dante/Desktop/Development/GameEngine/src/utils/file_util.cpp
 CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj: CMakeFiles/GameEngine.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj -MF CMakeFiles\GameEngine.dir\src\utils\file_util.cpp.obj.d -o CMakeFiles\GameEngine.dir\src\utils\file_util.cpp.obj -c C:\Users\dante\Desktop\Development\GameEngine\src\utils\file_util.cpp
 
 CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.i: cmake_force
@@ -324,6 +339,7 @@ GameEngine_OBJECTS = \
 "CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj" \
+"CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj" \
 "CMakeFiles/GameEngine.dir/src/main.cpp.obj" \
@@ -344,6 +360,7 @@ GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj
+GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj
 GameEngine.exe: CMakeFiles/GameEngine.dir/src/main.cpp.obj
@@ -355,7 +372,7 @@ GameEngine.exe: C:/VulkanSDK/1.3.296.0/Lib/vulkan-1.lib
 GameEngine.exe: CMakeFiles/GameEngine.dir/linkLibs.rsp
 GameEngine.exe: CMakeFiles/GameEngine.dir/objects1.rsp
 GameEngine.exe: CMakeFiles/GameEngine.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable GameEngine.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\Users\dante\Desktop\Development\GameEngine\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX executable GameEngine.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\GameEngine.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

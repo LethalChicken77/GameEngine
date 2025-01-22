@@ -86,10 +86,10 @@ void Engine::update(double deltaTime)
     int counter = 0;
     for(GameObject &obj : gameObjects)
     {
-        obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
-        // obj.transform.position = glm::vec3(glm::sin(324.f) * (counter % 2 ? 1 : -1));
-        obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
-        // obj.transform.rotation = glm::vec3(glm::radians(324.f * 90.f));
+        // obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
+        obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
+        // obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
+        obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
     }

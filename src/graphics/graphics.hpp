@@ -15,6 +15,8 @@
 
 #include "mesh.hpp"
 #include "camera.hpp"
+#include "shader.hpp"
+#include "material.hpp"
 #include "../core/game_object.hpp"
 
 namespace graphics
@@ -46,7 +48,8 @@ public:
     void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects);
 
 private:
-    void loadGameObjects();
+    void loadShaders();
+    void loadMaterials();
     void createPipelineLayout();
     void createPipeline();
 
@@ -64,11 +67,19 @@ private:
     PipelineConfigInfo configInfo;
 
     // Declaration order matters
+    // Global Descriptor Set
     std::unique_ptr<DescriptorPool> globalPool{};
     std::unique_ptr<DescriptorSetLayout> globalSetLayout{};
     std::vector<VkDescriptorSet> globalDescriptorSets{};
-
+    // Material Descriptor Set
+public: // Public so they are accessible to the Material class
+    std::unique_ptr<DescriptorPool> materialPool{};
+    std::unique_ptr<DescriptorSetLayout> materialSetLayout{};
+private:
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
+
+    std::vector<std::unique_ptr<Shader>> shaders;
+    std::unordered_map<uint32_t, Material> materials;
 
     Camera* camera;
 };

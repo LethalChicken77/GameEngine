@@ -405,6 +405,30 @@ src/graphics/renderer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.s
 .PHONY : src/graphics/renderer.cpp.s
 
+src/graphics/shader.obj: src/graphics/shader.cpp.obj
+.PHONY : src/graphics/shader.obj
+
+# target to build an object file
+src/graphics/shader.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj
+.PHONY : src/graphics/shader.cpp.obj
+
+src/graphics/shader.i: src/graphics/shader.cpp.i
+.PHONY : src/graphics/shader.i
+
+# target to preprocess a source file
+src/graphics/shader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.i
+.PHONY : src/graphics/shader.cpp.i
+
+src/graphics/shader.s: src/graphics/shader.cpp.s
+.PHONY : src/graphics/shader.s
+
+# target to generate assembly for a file
+src/graphics/shader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\GameEngine.dir\build.make CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.s
+.PHONY : src/graphics/shader.cpp.s
+
 src/graphics/swap_chain.obj: src/graphics/swap_chain.cpp.obj
 .PHONY : src/graphics/swap_chain.obj
 
@@ -568,6 +592,9 @@ help:
 	@echo ... src/graphics/renderer.obj
 	@echo ... src/graphics/renderer.i
 	@echo ... src/graphics/renderer.s
+	@echo ... src/graphics/shader.obj
+	@echo ... src/graphics/shader.i
+	@echo ... src/graphics/shader.s
 	@echo ... src/graphics/swap_chain.obj
 	@echo ... src/graphics/swap_chain.i
 	@echo ... src/graphics/swap_chain.s

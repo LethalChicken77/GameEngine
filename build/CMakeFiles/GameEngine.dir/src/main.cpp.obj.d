@@ -350,6 +350,7 @@ CMakeFiles/GameEngine.dir/src/main.cpp.obj: \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/graphics.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/graphics_pipeline.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/device.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics/shader.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/renderer.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/swap_chain.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/mesh.hpp \
@@ -358,6 +359,9 @@ CMakeFiles/GameEngine.dir/src/main.cpp.obj: \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/frame_info.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\graphics/camera.hpp \
  C:/Users/dante/Desktop/Development/GameEngine/src/core/game_object.hpp \
+ C:\Users\dante\Desktop\Development\GameEngine\src\graphics/material.hpp \
+ C:/msys64/ucrt64/include/c++/14.2.0/variant \
+ C:/msys64/ucrt64/include/c++/14.2.0/bits/parse_numbers.h \
  C:\Users\dante\Desktop\Development\GameEngine\src\utils/debug.hpp \
  C:\Users\dante\Desktop\Development\GameEngine\src\core/input.hpp \
  C:/Users/dante/Desktop/Development/GameEngine/lib/stbimage/stb_image.h \

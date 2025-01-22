@@ -6,6 +6,7 @@
 #include "graphics.hpp"
 #include "mesh.hpp"
 #include "../core/input.hpp"
+#include "material.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -31,6 +32,10 @@ struct PushConstants
 Graphics::Graphics(const std::string& name, const std::string& engine_name)
 {
     globalPool = DescriptorPool::Builder(device)
+        .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .build();
+    materialPool = DescriptorPool::Builder(device)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
@@ -77,6 +82,9 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
             .build(globalDescriptorSets[i]);
     }
 
+    loadShaders();
+    loadMaterials();
+    // TODO: Different pipeline for each pair of shaders
     createPipelineLayout();
     createPipeline();
 
@@ -152,18 +160,36 @@ void Graphics::createPipeline()
 {
     assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
     std::cout << "Creating pipeline" << std::endl;
-    PipelineConfigInfo pipelineConfig{};
-    GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
+    // PipelineConfigInfo pipelineConfig{};
+    // GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
+    PipelineConfigInfo &pipelineConfig = shaders[0]->getConfigInfo();
 
     pipelineConfig.renderPass = renderer.getRenderPass();
     pipelineConfig.pipelineLayout = pipelineLayout;
 
     graphicsPipeline = std::make_unique<GraphicsPipeline>(
-        device, 
+        device,
+        *shaders[0]
+    );
+}
+
+void Graphics::loadShaders()
+{
+    shaders.push_back(std::make_unique<Shader>(
+        device,
         "internal/shaders/basicShader.vert.spv", 
         "internal/shaders/basicShader.frag.spv", 
-        pipelineConfig
-    );
+        std::vector<Shader::ShaderInput>{}
+    ));
+}
+
+void Graphics::loadMaterials()
+{
+    
+    // VkDescriptorSet descriptorSet;
+    // if (!materialPool.allocateDescriptor(layout.getDescriptorSetLayout(), descriptorSet)) {
+    //     throw std::runtime_error("Failed to allocate descriptor set for material");
+    // }
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
