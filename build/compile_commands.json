@@ -55,6 +55,12 @@
 },
 {
   "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\material.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\material.cpp",
+  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/material.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/material.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\mesh.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\mesh.cpp",
   "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/mesh.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj"

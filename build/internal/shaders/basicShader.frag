@@ -16,6 +16,12 @@ layout(set = 0, binding = 0) uniform CameraUbo {
     mat4 projection;
 } cameraData;
 
+layout(set = 1, binding = 0) uniform MaterialInfo
+{
+    vec3 color;
+    float roughness;
+} materialInfo;
+
 const float PI = 3.14159265359;
 const float INV_PI = 1.0 / PI;
 
@@ -44,16 +50,15 @@ void main()
     float diffuse = max(dot(normal, lightDir), 0.0);
     float ambient = 0.1;
     // vec3 outColor = (diffuse + ambient) * color * vec3(1.0, 0.8, 0.2);
-    vec3 outColor = (diffuse + ambient) * color;// * vec3(0.4, 0.2, 0.1);
+    vec3 outColor = (diffuse + ambient) * color * materialInfo.color;// * vec3(0.4, 0.2, 0.1);
     // outColor = vec3(0);
 
     vec3 viewDir = normalize(cameraData.view[3].xyz - position);
     // float spec = pow(max(dot(reflDir, viewDir), 0.0), 32);
-    float roughness = 0.3;
     // vec3 ior = vec3(0.27105, 0.67693, 1.31640); // Copper
     // vec3 ior = vec3(0.18299, 0.42108, 1.37340); // Gold
     vec3 ior = vec3(0.04, 0.04, 0.04);
-    vec3 spec = cookTorrance(normal, lightDir, viewDir, roughness, ior);
+    vec3 spec = cookTorrance(normal, lightDir, viewDir, materialInfo.roughness, ior);
 
     outColor += spec;
 

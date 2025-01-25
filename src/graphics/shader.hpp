@@ -68,13 +68,14 @@ namespace graphics
             PipelineConfigInfo& getConfigInfo() { return configInfo; };
             VkShaderModule& getVertexModule() { return vertShaderModule; }
             VkShaderModule& getFragmentModule() { return fragShaderModule; }
+            const std::vector<ShaderInput>& getInputs() const { return inputs; }
             void reloadShader(); // Rereads the shader files and recreates the shader modules
 
             bool dirty = false;
 
         private:
             Device &device;
-            std::vector<ShaderInput> inputs{};
+            const std::vector<ShaderInput> inputs{};
             PipelineConfigInfo configInfo{};
 
             VkShaderModule vertShaderModule;

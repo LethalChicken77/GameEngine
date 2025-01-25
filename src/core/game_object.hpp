@@ -52,6 +52,8 @@ namespace core
         std::shared_ptr<graphics::Mesh> mesh{};
 
         Transform transform;
+
+        id_t materialID{};
     private:
         GameObject(id_t obj_id) : id(obj_id) {};
         id_t id;

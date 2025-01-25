@@ -1,0 +1,173 @@
+#include "material.hpp"
+
+namespace graphics
+{
+    // Align a given offset to the specified alignment
+    size_t alignTo(size_t offset, size_t alignment)
+    {
+        return (offset + alignment - 1) & ~(alignment - 1);
+    }
+
+    // Determine the size and alignment for a given ShaderInput::DataType
+    struct TypeInfo
+    {
+        size_t size;
+        size_t alignment;
+    };
+
+    TypeInfo getTypeInfo(Shader::ShaderInput::DataType type)
+    {
+        switch (type)
+        {
+        case Shader::ShaderInput::DataType::FLOAT: return {sizeof(float), alignof(float)};
+        case Shader::ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), alignof(glm::vec2)};
+        case Shader::ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), alignof(glm::vec4)}; // Vec3 uses Vec4 alignment
+        case Shader::ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), alignof(glm::vec4)};
+        case Shader::ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), alignof(glm::vec4)}; // Matrices align to vec4
+        case Shader::ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), alignof(glm::vec4)}; // Matrices align to vec4
+        case Shader::ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), alignof(glm::vec4)};
+        case Shader::ShaderInput::DataType::INT:   return {sizeof(int), alignof(int)};
+        case Shader::ShaderInput::DataType::BOOL:  return {sizeof(int), alignof(int)}; // bools are treated as 4 bytes in std140
+        default: throw std::runtime_error("Unknown ShaderInput::DataType");
+        }
+    }
+
+    Material::Material(Containers &_containers, id_t mat_id, const Shader *_shader) : containers(_containers), id(mat_id), shader(_shader)
+    {
+        const std::vector<Shader::ShaderInput> &inputs = shader->getInputs();
+        inputValues.resize(inputs.size());
+        
+    }
+
+    void Material::setValue(std::string name, Value value)
+    {
+        const std::vector<Shader::ShaderInput> &shaderInputs = shader->getInputs();
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            if (shaderInputs[i].name == name)
+            {
+                inputValues[i] = value;
+                return;
+            }
+        }
+        throw std::runtime_error("Shader input not found");
+    }
+
+    void Material::createShaderInputBuffer()
+    {
+        const std::vector<Shader::ShaderInput> &shaderInputs = shader->getInputs();
+        assert(inputValues.size() == shader->getInputs().size() && "Input values size must match shader input size");
+
+        size_t offset = 0;
+
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            const Shader::ShaderInput& input = shaderInputs[i];
+            const Value& value = inputValues[i];
+
+            // Get type info for alignment and size
+            TypeInfo typeInfo = getTypeInfo(input.type);
+
+            // Align the offset
+            offset = alignTo(offset, typeInfo.alignment);
+
+            // Resize the buffer to accommodate the new data
+            data.resize(offset + typeInfo.size);
+
+            // Write the value into the buffer
+            std::visit([&](auto&& val) {
+                using T = std::decay_t<decltype(val)>;
+
+                // Ensure the type matches
+                switch (input.type)
+                {
+                case Shader::ShaderInput::DataType::FLOAT:
+                    if constexpr (std::is_same_v<T, float>) memcpy(&data[offset], &val, sizeof(float));
+                    else throw std::runtime_error("Type mismatch for FLOAT");
+                    break;
+
+                case Shader::ShaderInput::DataType::VEC2:
+                    if constexpr (std::is_same_v<T, glm::vec2>) memcpy(&data[offset], &val, sizeof(glm::vec2));
+                    else throw std::runtime_error("Type mismatch for VEC2");
+                    break;
+
+                case Shader::ShaderInput::DataType::VEC3:
+                    if constexpr (std::is_same_v<T, glm::vec3>)
+                    {
+                        glm::vec4 vec4Value(val, 0.0f); // Promote to vec4 for alignment
+                        memcpy(&data[offset], &vec4Value, sizeof(glm::vec4));
+                    }
+                    else throw std::runtime_error("Type mismatch for VEC3");
+                    break;
+
+                case Shader::ShaderInput::DataType::VEC4:
+                    if constexpr (std::is_same_v<T, glm::vec4>) memcpy(&data[offset], &val, sizeof(glm::vec4));
+                    else throw std::runtime_error("Type mismatch for VEC4");
+                    break;
+
+                case Shader::ShaderInput::DataType::MAT2:
+                    if constexpr (std::is_same_v<T, glm::mat2>) memcpy(&data[offset], &val, sizeof(glm::mat2));
+                    else throw std::runtime_error("Type mismatch for MAT2");
+                    break;
+
+                case Shader::ShaderInput::DataType::MAT3:
+                    if constexpr (std::is_same_v<T, glm::mat3>)
+                    {
+                        glm::mat4 mat4Value(1.0f); // Promote to mat4 for alignment
+                        memcpy(&mat4Value, &val, sizeof(glm::mat3));
+                        memcpy(&data[offset], &mat4Value, sizeof(glm::mat4));
+                    }
+                    else throw std::runtime_error("Type mismatch for MAT3");
+                    break;
+
+                case Shader::ShaderInput::DataType::MAT4:
+                    if constexpr (std::is_same_v<T, glm::mat4>) memcpy(&data[offset], &val, sizeof(glm::mat4));
+                    else throw std::runtime_error("Type mismatch for MAT4");
+                    break;
+
+                case Shader::ShaderInput::DataType::INT:
+                    if constexpr (std::is_same_v<T, int>) memcpy(&data[offset], &val, sizeof(int));
+                    else throw std::runtime_error("Type mismatch for INT");
+                    break;
+
+                case Shader::ShaderInput::DataType::BOOL:
+                    if constexpr (std::is_same_v<T, bool>)
+                    {
+                        int intValue = val ? 1 : 0; // Convert bool to 4-byte int
+                        memcpy(&data[offset], &intValue, sizeof(int));
+                    }
+                    else throw std::runtime_error("Type mismatch for BOOL");
+                    break;
+
+                default:
+                    throw std::runtime_error("Unknown ShaderInput::DataType");
+                }
+            }, value);
+
+            // Update the offset
+            offset += typeInfo.size;
+        }
+
+        if(!initialized)
+        {
+            // Initialize buffers
+            buffer = std::make_unique<Buffer>(
+                *containers.device,
+                sizeof(data),
+                1,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                containers.device->properties.limits.minUniformBufferOffsetAlignment
+            );
+            buffer->map();
+            
+            VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
+            DescriptorWriter(*containers.materialSetLayout, *containers.materialPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(descriptorSet);
+            initialized = true;
+        }
+            
+        buffer->writeToBuffer(data.data());
+    }
+} // namespace graphics

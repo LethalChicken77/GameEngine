@@ -4,6 +4,7 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <map>
 
 #include "window.hpp"
 #include "graphics_pipeline.hpp"
@@ -18,9 +19,12 @@
 #include "shader.hpp"
 #include "material.hpp"
 #include "../core/game_object.hpp"
+#include "graphics_containers.hpp"
 
 namespace graphics
 {
+
+#define GR_MAX_MATERIAL_COUNT 128
 
 class Graphics
 {
@@ -61,25 +65,16 @@ private:
     Window window{WIDTH, HEIGHT, "VEngine"};
     Device device{window};
     Renderer renderer{window, device};
+    Containers containers{&device};
 
     std::unique_ptr<GraphicsPipeline> graphicsPipeline;
     VkPipelineLayout pipelineLayout;
     PipelineConfigInfo configInfo;
 
-    // Declaration order matters
-    // Global Descriptor Set
-    std::unique_ptr<DescriptorPool> globalPool{};
-    std::unique_ptr<DescriptorSetLayout> globalSetLayout{};
-    std::vector<VkDescriptorSet> globalDescriptorSets{};
-    // Material Descriptor Set
-public: // Public so they are accessible to the Material class
-    std::unique_ptr<DescriptorPool> materialPool{};
-    std::unique_ptr<DescriptorSetLayout> materialSetLayout{};
-private:
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
 
     std::vector<std::unique_ptr<Shader>> shaders;
-    std::unordered_map<uint32_t, Material> materials;
+    std::vector<Material> materials{};
 
     Camera* camera;
 };

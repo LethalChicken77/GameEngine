@@ -11,14 +11,22 @@ layout(location = 1) out vec3 normalOut;
 layout(location = 2) out vec3 colorOut;
 layout(location = 3) out vec2 uvOut;
 
-layout(push_constant) uniform PushConstants {
+layout(push_constant) uniform PushConstants
+{
     mat4 model;
 } pushConstants;
 
-layout(set = 0, binding = 0) uniform CameraUbo {
+layout(set = 0, binding = 0) uniform CameraUbo
+{
     mat4 view;
     mat4 projection;
 } cameraData;
+
+layout(set = 1, binding = 0) uniform MaterialInfo
+{
+    vec3 color;
+    float roughness;
+} materialInfo;
 
 void main()
 {
