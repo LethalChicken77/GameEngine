@@ -19,11 +19,59 @@ layout(set = 0, binding = 0) uniform CameraUbo {
 layout(set = 1, binding = 0) uniform MaterialInfo
 {
     vec3 color;
+    vec3 ior;
     float roughness;
+    float metallic;
 } materialInfo;
 
 const float PI = 3.14159265359;
 const float INV_PI = 1.0 / PI;
+
+vec3 orenNayar(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 albedo) 
+{
+    // Clamp roughness to avoid invalid results
+    roughness = clamp(roughness, 0.0, 1.0);
+
+    // Compute angles and vectors
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    float NdotV = max(dot(normal, viewDir), 0.0);
+    float LdotV = max(dot(lightDir, viewDir), 0.0);
+
+    if (NdotL <= 0.0 || NdotV <= 0.0) {
+        return vec3(0.0);
+    }
+
+    // Roughness squared
+    float sigma2 = roughness * roughness;
+
+    // Compute A and B terms based on roughness
+    float A = 1.0 - (sigma2 / (2.0 * (sigma2 + 0.33)));
+    float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+    // Compute angles for Oren-Nayar
+    float thetaR = acos(NdotV);
+    float thetaI = acos(NdotL);
+
+    float alpha = max(thetaR, thetaI);
+    float beta = min(thetaR, thetaI);
+
+    // Final diffuse reflection calculation
+    float diffuse = NdotL * (A + B * max(0.0, LdotV) * sin(alpha) * tan(beta));
+
+    // Return the final diffuse term scaled by albedo
+    return diffuse * albedo;
+}
+
+// vec3 orenNayarAmbient(vec3 normal, float roughness, vec3 albedo, float ambientOcclusion, vec3 ambientIrradiance) 
+// {
+//     // Approximated diffuse reflection under ambient light
+//     float sigma2 = roughness * roughness;
+//     float A = 1.0 - (sigma2 / (2.0 * (sigma2 + 0.33)));
+//     float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+//     vec3 diffuse = albedo * ambientIrradiance * (A + B); // Include ambient irradiance
+//     return ambientOcclusion * diffuse / PI; // Scale by AO and normalize
+// }
 
 vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 ior) 
 {
@@ -40,26 +88,72 @@ vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec
     return max(specular, 0.0);
 }
 
+vec3 cookTorranceAmbient(vec3 normal, vec3 viewDir, float roughness, vec3 F0) {
+    // Half-vector between view direction and normal
+    vec3 halfDir = normalize(viewDir + normal);
+
+    // Fresnel-Schlick approximation
+    vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(viewDir, halfDir), 5.0);
+
+    // Geometry term (Schlick-GGX)
+    float k = roughness * roughness / 2.0;
+    float G = 1.0 / max(dot(viewDir, halfDir) * (1.0 - k) + k, 0.001);  // Prevent division by zero
+
+    // Microfacet distribution (GGX)
+    float alpha = roughness * roughness;
+    float alpha2 = alpha * alpha;
+    float NdotH = max(dot(normal, halfDir), 0.0);
+    float D = alpha2 / (PI * pow(NdotH * NdotH * (alpha2 - 1.0) + 1.0, 2.0));
+
+    // Integrating Cook-Torrance for ambient light: we integrate over the hemisphere
+    // The integral of the Cook-Torrance BRDF for omnidirectional light is simplified
+    vec3 specular = (F * G * D) / (4.0 * max(dot(viewDir, normal), 0.001));
+
+    // Return the specular part (ambient)
+    return specular;
+}
+
+
 void main()
 {
     debugPrintfEXT("Hello from vertex shader\n");
     vec3 normal = normalize(fragNormal);
     vec3 position = (pushConstants.model * vec4(fragPosition, 1.0)).xyz;
-    vec3 lightDir = normalize(vec3(2.0, 3.0, 1.0));
-
-    float diffuse = max(dot(normal, lightDir), 0.0);
-    float ambient = 0.1;
-    // vec3 outColor = (diffuse + ambient) * color * vec3(1.0, 0.8, 0.2);
-    vec3 outColor = (diffuse + ambient) * color * materialInfo.color;// * vec3(0.4, 0.2, 0.1);
-    // outColor = vec3(0);
+    vec3 lightPos = vec3(3.0, 7.0, -1.0);
+    // vec3 lightDir = normalize(vec3(2.0, 3.0, -0.5));
+    vec3 lightDir = normalize(lightPos - position);
+    float lightDist = length(lightPos - position);
+    float lightAttenuation = 1.0 / (lightDist * lightDist);
+    // float lightAttenuation = 1.0;
+    float lightStrength = 60;
+    // float lightStrength = 2;
 
     vec3 viewDir = normalize(cameraData.view[3].xyz - position);
     // float spec = pow(max(dot(reflDir, viewDir), 0.0), 32);
     // vec3 ior = vec3(0.27105, 0.67693, 1.31640); // Copper
     // vec3 ior = vec3(0.18299, 0.42108, 1.37340); // Gold
-    vec3 ior = vec3(0.04, 0.04, 0.04);
-    vec3 spec = cookTorrance(normal, lightDir, viewDir, materialInfo.roughness, ior);
+    // vec3 ior = vec3(1.5, 1.5, 1.5);
+    vec3 ior = materialInfo.ior;
 
+    // float cameraDist = length(cameraData.view[3].xyz - position);
+
+    vec3 halfDir = normalize(lightDir + viewDir);
+    vec3 F0 = (ior - 1.0) * (ior - 1.0) / ((ior + 1.0) * (ior + 1.0));
+    vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(halfDir, viewDir), 5.0);
+
+    // Energy conservation term: (1.0 - F) * 
+    vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, materialInfo.roughness, color * materialInfo.color) * lightAttenuation * lightStrength;
+    vec3 ambient = 0.01 * color * materialInfo.color;
+    // vec3 ambient = orenNayarAmbient(normal, materialInfo.roughness, color * materialInfo.color, 1.0, vec3(1.0)) +
+    //     cookTorrance(normal, viewDir, viewDir, materialInfo.roughness, ior);
+    // ambient *= 0.1;
+    // vec3 outColor = (diffuse + ambient) * color * vec3(1.0, 0.8, 0.2);
+    // outColor = vec3(0);
+    vec3 spec = cookTorrance(normal, lightDir, viewDir, materialInfo.roughness, ior) * lightAttenuation * lightStrength;
+
+    vec3 outColor = diffuse + ambient;// * vec3(0.4, 0.2, 0.1);
+    outColor *= (1 - materialInfo.metallic);
+    // outColor += spec * mix(vec3(1.0, 1.0, 1.0), materialInfo.color * color, materialInfo.metallic);
     outColor += spec;
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);

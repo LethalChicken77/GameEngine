@@ -5,6 +5,8 @@ namespace graphics
     // Align a given offset to the specified alignment
     size_t alignTo(size_t offset, size_t alignment)
     {
+        // std::cout << "Offset: " <<  offset << std::endl;
+        // std::cout << "Alignment: " <<  alignment << std::endl;
         return (offset + alignment - 1) & ~(alignment - 1);
     }
 
@@ -19,15 +21,15 @@ namespace graphics
     {
         switch (type)
         {
-        case Shader::ShaderInput::DataType::FLOAT: return {sizeof(float), alignof(float)};
-        case Shader::ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), alignof(glm::vec2)};
-        case Shader::ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), alignof(glm::vec4)}; // Vec3 uses Vec4 alignment
-        case Shader::ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), alignof(glm::vec4)};
-        case Shader::ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), alignof(glm::vec4)}; // Matrices align to vec4
-        case Shader::ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), alignof(glm::vec4)}; // Matrices align to vec4
-        case Shader::ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), alignof(glm::vec4)};
-        case Shader::ShaderInput::DataType::INT:   return {sizeof(int), alignof(int)};
-        case Shader::ShaderInput::DataType::BOOL:  return {sizeof(int), alignof(int)}; // bools are treated as 4 bytes in std140
+        case Shader::ShaderInput::DataType::FLOAT: return {sizeof(float), 4};
+        case Shader::ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), 8};
+        case Shader::ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), 16}; // Vec3 uses Vec4 alignment
+        case Shader::ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), 16};
+        case Shader::ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), 16}; // Matrices align to vec4
+        case Shader::ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16}; // Matrices align to vec4
+        case Shader::ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), 16};
+        case Shader::ShaderInput::DataType::INT:   return {sizeof(int), 4};
+        case Shader::ShaderInput::DataType::BOOL:  return {sizeof(int), 4}; // bools are treated as 4 bytes in std140
         default: throw std::runtime_error("Unknown ShaderInput::DataType");
         }
     }

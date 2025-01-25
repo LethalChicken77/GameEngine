@@ -148,7 +148,7 @@ namespace graphics
     }
 
     
-    std::unique_ptr<Mesh> Mesh::createCube(Device& device, float edgeLength)
+    std::shared_ptr<Mesh> Mesh::createCube(Device& device, float edgeLength)
     {
         edgeLength *= 0.5f;
 
@@ -241,7 +241,91 @@ namespace graphics
             6, 7, 3,
         };
 
-        std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(device, vertices, indices);
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(device, vertices, indices);
+        return mesh;
+    }
+
+    std::vector<Mesh::Vertex> generateSierpinski(float edgeLength, int depth)
+    {
+        float root2 = glm::sqrt(2.0f);
+        float root3 = glm::sqrt(3.0f);
+        glm::vec3 v0 = glm::vec3(0,         0,      root3 / 3.0f) * edgeLength;
+        glm::vec3 v1 = glm::vec3(0.5f,      0,      -root3 / 6.0f) * edgeLength;
+        glm::vec3 v2 = glm::vec3(-0.5f,     0,      -root3 / 6.0f) * edgeLength;
+        glm::vec3 v3 = glm::vec3(0.0f, root3 * 0.5f, 0.0f) * edgeLength;
+        if(depth <= 0)
+        {
+            std::vector<Mesh::Vertex> vertices(12);
+            vertices[0].position = v0;
+            vertices[1].position = v2;
+            vertices[2].position = v1;
+            vertices[0].normal = vertices[1].normal = vertices[2].normal 
+                = glm::normalize(-glm::cross(v1 - v0, v2 - v0));
+
+            vertices[3].position = v0;
+            vertices[4].position = v1;
+            vertices[5].position = v3;
+            vertices[3].normal = vertices[4].normal = vertices[5].normal 
+                = glm::normalize(glm::cross(v1 - v0, v3 - v0));
+
+            vertices[6].position = v0;
+            vertices[7].position = v3;
+            vertices[8].position = v2;
+            vertices[6].normal = vertices[7].normal = vertices[8].normal 
+                = glm::normalize(glm::cross(v3 - v0, v2 - v0));
+
+            vertices[9].position = v3;
+            vertices[10].position = v1;
+            vertices[11].position = v2;
+            vertices[9].normal = vertices[10].normal = vertices[11].normal 
+                = glm::normalize(glm::cross(v1 - v3, v2 - v3));
+            
+            for(Mesh::Vertex& vertex : vertices)
+            {
+                vertex.position = vertex.position * 1.5f;
+            }
+
+            return vertices;
+        }
+        else
+        {
+            std::vector<Mesh::Vertex> vertices0 = generateSierpinski(edgeLength, depth - 1);
+            std::vector<Mesh::Vertex> vertices1 = vertices0;
+            std::vector<Mesh::Vertex> vertices2 = vertices0;
+            std::vector<Mesh::Vertex> vertices3 = vertices0;
+
+            for(Mesh::Vertex& vertex : vertices0)
+            {
+                vertex.position = (vertex.position + v0) * 0.5f;
+            }
+            for(Mesh::Vertex& vertex : vertices1)
+            {
+                vertex.position = (vertex.position + v1) * 0.5f;
+            }
+            for(Mesh::Vertex& vertex : vertices2)
+            {
+                vertex.position = (vertex.position + v2) * 0.5f;
+            }
+            for(Mesh::Vertex& vertex : vertices3)
+            {
+                vertex.position = (vertex.position + v3) * 0.5f;
+            }
+
+
+            std::vector<Mesh::Vertex> vertices{};
+            vertices.insert(vertices.end(), vertices0.begin(), vertices0.end());
+            vertices.insert(vertices.end(), vertices1.begin(), vertices1.end());
+            vertices.insert(vertices.end(), vertices2.begin(), vertices2.end());
+            vertices.insert(vertices.end(), vertices3.begin(), vertices3.end());
+            return vertices;
+        }
+    }
+
+    std::shared_ptr<Mesh> Mesh::createSierpinskiPyramid(Device& device, float edgeLength, int depth)
+    {
+        std::vector<Vertex> vertices = generateSierpinski(edgeLength, depth);
+        
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(device, vertices, std::vector<uint32_t>());
         return mesh;
     }
 

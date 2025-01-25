@@ -64,6 +64,10 @@
         "expected": "cpp",
         "buffer": "cpp",
         "netfwd": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "*.bf": "cpp",
+        "*.cs": "cpp",
+        "*.hpp11": "cpp",
+        "*.d": "cpp"
     }
 }

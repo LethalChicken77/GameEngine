@@ -189,7 +189,9 @@ void Graphics::loadShaders()
         "internal/shaders/basicShader.frag.spv", 
         std::vector<Shader::ShaderInput>{
             {"color", Shader::ShaderInput::DataType::VEC3},
-            {"roughness", Shader::ShaderInput::DataType::FLOAT}
+            {"ior", Shader::ShaderInput::DataType::VEC3},
+            {"roughness", Shader::ShaderInput::DataType::FLOAT},
+            {"metallic", Shader::ShaderInput::DataType::FLOAT}
         }
     ));
 }
@@ -204,16 +206,27 @@ void Graphics::loadMaterials()
 
     Material m1 = Material::instantiate(containers, shaders[0].get());
     m1.setValue("color", glm::vec3(1.0f, 0.0f, 0.0f));
-    m1.setValue("roughness", 0.4f);
+    m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
+    m1.setValue("roughness", 0.7f);
+    m1.setValue("metallic", 0.f);
     m1.createShaderInputBuffer();
     materials.emplace_back(std::move(m1));
 
     Material m2 = Material::instantiate(containers, shaders[0].get());
-    m2.setValue("color", glm::vec3(0.0f, 1.0f, 0.0f));
-    m2.setValue("roughness", 0.6f);
+    m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
+    m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f));
+    m2.setValue("roughness", 0.4f);
+    m2.setValue("metallic", 1.f);
     m2.createShaderInputBuffer();
     materials.emplace_back(std::move(m2));
 
+    Material m3 = Material::instantiate(containers, shaders[0].get());
+    m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
+    m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
+    m3.setValue("roughness", 0.43f);
+    m3.setValue("metallic", 0.f);
+    m3.createShaderInputBuffer();
+    materials.emplace_back(std::move(m3));
     
 
     containers.materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);

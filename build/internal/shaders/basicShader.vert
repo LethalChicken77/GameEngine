@@ -25,7 +25,9 @@ layout(set = 0, binding = 0) uniform CameraUbo
 layout(set = 1, binding = 0) uniform MaterialInfo
 {
     vec3 color;
+    vec3 ior;
     float roughness;
+    float metallic;
 } materialInfo;
 
 void main()

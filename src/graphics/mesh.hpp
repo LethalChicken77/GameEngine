@@ -47,7 +47,8 @@ namespace graphics
         void draw(VkCommandBuffer commandBuffer);
         void drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
 
-        static std::unique_ptr<Mesh> createCube(Device& device, float edgeLength);
+        static std::shared_ptr<Mesh> createCube(Device& device, float edgeLength);
+        static std::shared_ptr<Mesh> createSierpinskiPyramid(Device& device, float edgeLength, int depth);
         static std::unique_ptr<Mesh> loadObj(Device& device, const std::string& filename);
 
     private:

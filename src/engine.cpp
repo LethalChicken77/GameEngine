@@ -86,11 +86,11 @@ void Engine::update(double deltaTime)
     int counter = 0;
     for(GameObject &obj : gameObjects)
     {
-        // obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
-        obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
-        // obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
-        obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
-        obj.materialID = counter % 2;
+        if(obj.get_id() == 2) break;
+        obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
+        // obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
+        obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
+        // obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
     }
@@ -105,6 +105,10 @@ void Engine::run()
         {0.01f, 100.0f, 90.0f},
         false
     );
+    // camera = Camera(
+    //     {0.01f, 100.0f, 20.0f},
+    //     true
+    // );
     camera.transform.position = glm::vec3(0.0f, 2.0f, -5.0f);
     camera.transform.rotation = glm::vec3(glm::radians(20.0f), 0.0f, 0.0f);
 
@@ -152,10 +156,16 @@ void Engine::loadGameObjects()
 
     GameObject obj = GameObject::instantiate();
     GameObject obj2 = GameObject::instantiate();
+    GameObject obj3 = GameObject::instantiate();
     obj.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_high_res.obj");
+    obj.materialID = 0;
     obj2.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_high_res.obj");
+    obj2.materialID = 1;
+    obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
+    obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
     gameObjects.push_back(std::move(obj2));
+    gameObjects.push_back(std::move(obj3));
 }
 
 } // namespace core
