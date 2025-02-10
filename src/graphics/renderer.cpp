@@ -94,7 +94,7 @@ void Renderer::beginRenderPass(VkCommandBuffer commandBuffer)
 
     std::array<VkClearValue, 2> clearValues{};
     // clearValues[0].color = {0.1f, 0.2f, 0.4f, 1.0f};
-    clearValues[0].color = {0.04f, 0.08f, 0.2f, 1.0f};
+    clearValues[0].color = {clearColor.r, clearColor.g, clearColor.b, 1.0f};
     clearValues[1].depthStencil = {1.0f, 0};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();

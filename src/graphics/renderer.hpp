@@ -18,8 +18,15 @@ namespace graphics
 
 struct CameraUbo
 {
-    alignas(64) glm::mat4 view;
-    alignas(64) glm::mat4 proj;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+};
+
+struct LightsUbo
+{
+    alignas(16) glm::vec3 lightPos;
+    alignas(16) glm::vec3 lightColor;
+    alignas(4) float lightIntensity;
 };
 
 class Renderer
@@ -47,6 +54,7 @@ public:
         return commandBuffers[currentFrameIndex]; 
     }
     VkRenderPass getRenderPass() const { return swapChain->getRenderPass(); }
+    VkRenderPass getImGuiRenderPass() const { return swapChain->getImGuiRenderPass(); }
     VkExtent2D getExtent() const { return swapChain->getSwapChainExtent(); }
     uint32_t getFrameIndex() const 
     { 
@@ -54,7 +62,11 @@ public:
         return currentFrameIndex; 
     }
 
+    VkInstance getVkInstance() { return instance; }
+
     static void windowRefreshCallback(GLFWwindow *window);
+
+    glm::vec3 clearColor{0.04f, 0.08f, 0.2f};
 
 private:
     void recordCommandBuffer(int imageIndex);

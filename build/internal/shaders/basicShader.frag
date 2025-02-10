@@ -62,17 +62,6 @@ vec3 orenNayar(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 a
     return diffuse * albedo;
 }
 
-// vec3 orenNayarAmbient(vec3 normal, float roughness, vec3 albedo, float ambientOcclusion, vec3 ambientIrradiance) 
-// {
-//     // Approximated diffuse reflection under ambient light
-//     float sigma2 = roughness * roughness;
-//     float A = 1.0 - (sigma2 / (2.0 * (sigma2 + 0.33)));
-//     float B = 0.45 * sigma2 / (sigma2 + 0.09);
-
-//     vec3 diffuse = albedo * ambientIrradiance * (A + B); // Include ambient irradiance
-//     return ambientOcclusion * diffuse / PI; // Scale by AO and normalize
-// }
-
 vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 ior) 
 {
     vec3 halfDir = normalize(lightDir + viewDir);
@@ -86,31 +75,6 @@ vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec
     vec3 specular = D * G * F / (4.0 * dot(normal, lightDir) * dot(normal, viewDir));
     specular *= dot(normal, lightDir);
     return max(specular, 0.0);
-}
-
-vec3 cookTorranceAmbient(vec3 normal, vec3 viewDir, float roughness, vec3 F0) {
-    // Half-vector between view direction and normal
-    vec3 halfDir = normalize(viewDir + normal);
-
-    // Fresnel-Schlick approximation
-    vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(viewDir, halfDir), 5.0);
-
-    // Geometry term (Schlick-GGX)
-    float k = roughness * roughness / 2.0;
-    float G = 1.0 / max(dot(viewDir, halfDir) * (1.0 - k) + k, 0.001);  // Prevent division by zero
-
-    // Microfacet distribution (GGX)
-    float alpha = roughness * roughness;
-    float alpha2 = alpha * alpha;
-    float NdotH = max(dot(normal, halfDir), 0.0);
-    float D = alpha2 / (PI * pow(NdotH * NdotH * (alpha2 - 1.0) + 1.0, 2.0));
-
-    // Integrating Cook-Torrance for ambient light: we integrate over the hemisphere
-    // The integral of the Cook-Torrance BRDF for omnidirectional light is simplified
-    vec3 specular = (F * G * D) / (4.0 * max(dot(viewDir, normal), 0.001));
-
-    // Return the specular part (ambient)
-    return specular;
 }
 
 
@@ -127,6 +91,7 @@ void main()
     // float lightAttenuation = 1.0;
     float lightStrength = 60;
     // float lightStrength = 2;
+    vec3 ambientColor = vec3(0.04f, 0.08f, 0.2f);
 
     vec3 viewDir = normalize(cameraData.view[3].xyz - position);
     // float spec = pow(max(dot(reflDir, viewDir), 0.0), 32);
@@ -143,7 +108,7 @@ void main()
 
     // Energy conservation term: (1.0 - F) * 
     vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, materialInfo.roughness, color * materialInfo.color) * lightAttenuation * lightStrength;
-    vec3 ambient = 0.01 * color * materialInfo.color;
+    vec3 ambient = color * materialInfo.color * ambientColor;
     // vec3 ambient = orenNayarAmbient(normal, materialInfo.roughness, color * materialInfo.color, 1.0, vec3(1.0)) +
     //     cookTorrance(normal, viewDir, viewDir, materialInfo.roughness, ior);
     // ambient *= 0.1;
@@ -151,10 +116,11 @@ void main()
     // outColor = vec3(0);
     vec3 spec = cookTorrance(normal, lightDir, viewDir, materialInfo.roughness, ior) * lightAttenuation * lightStrength;
 
-    vec3 outColor = diffuse + ambient;// * vec3(0.4, 0.2, 0.1);
+    vec3 outColor = diffuse + (1 - materialInfo.metallic) * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor * materialInfo.color * color;// * vec3(0.4, 0.2, 0.1);
     outColor *= (1 - materialInfo.metallic);
     // outColor += spec * mix(vec3(1.0, 1.0, 1.0), materialInfo.color * color, materialInfo.metallic);
     outColor += spec;
+    outColor += F0 * materialInfo.metallic * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor;
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);
     fragColor = vec4(outColor, 1.0);

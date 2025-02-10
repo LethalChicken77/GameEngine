@@ -25,6 +25,7 @@ class SwapChain {
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
+  VkRenderPass getImGuiRenderPass() { return imGuiRenderPass; }
   VkImageView getImageView(int index) { return swapChainImageViews[index]; }
   size_t imageCount() { return swapChainImages.size(); }
   VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
@@ -55,6 +56,7 @@ class SwapChain {
   void createImageViews();
   void createDepthResources();
   void createRenderPass();
+  void createImGuiRenderPass();
   void createFramebuffers();
   void createSyncObjects();
 
@@ -71,6 +73,7 @@ class SwapChain {
 
   std::vector<VkFramebuffer> swapChainFramebuffers;
   VkRenderPass renderPass;
+  VkRenderPass imGuiRenderPass;
 
   std::vector<VkImage> depthImages;
   std::vector<VkDeviceMemory> depthImageMemorys;

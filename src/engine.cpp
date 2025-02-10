@@ -11,6 +11,11 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_vulkan.h"
+#include "utils/imgui_styles.hpp"
 
 using namespace graphics;
 
@@ -75,7 +80,7 @@ void Engine::update(double deltaTime)
         camera.transform.position.y -= 10.f * deltaTime;
     }
 
-    if(core::Input::getButton(GLFW_MOUSE_BUTTON_LEFT))
+    if(core::Input::getButton(GLFW_MOUSE_BUTTON_RIGHT))
     {
         // std::cout << "Mouse position: " << core::Input::getMousePosition().x << ", " << core::Input::getMousePosition().y << std::endl;
         glm::vec2 mouseDelta = -core::Input::getMouseDelta();
@@ -98,6 +103,32 @@ void Engine::update(double deltaTime)
 
 void Engine::run()
 {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& imguiIO = ImGui::GetIO();
+    (void)imguiIO;
+    // Set style (optional)
+    // ImGui::StyleColorsDark();
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    // Set window rounding
+    // style.WindowRounding = 5.0f;
+    // style.FrameRounding = 3.0f;
+    // style.GrabRounding = 2.0f;
+
+    // Adjust padding and spacing
+    // style.WindowPadding = ImVec2(10, 10);
+    // style.FramePadding = ImVec2(5, 5);
+    // style.ItemSpacing = ImVec2(8, 4);
+
+    // Modify colors
+    StyleColorsDarkLinear(&style);
+
+
+    ImGui_ImplGlfw_InitForVulkan(graphics.getWindow()->getWindow(), true);
+    graphics.graphicsInitImgui();
+
+
     Input::initializeKeys();
 
 
@@ -123,6 +154,16 @@ void Engine::run()
         // Poll for and process events
         glfwPollEvents();
 
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hello ImGui!");
+        ImGui::Text("Test");
+        ImGui::End();
+
+        bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
+        ImGui::Render();
         // Input
         Input::processInput(graphics.getWindow()->getWindow());
         
@@ -135,6 +176,7 @@ void Engine::run()
 
         // Render here
         graphics.drawFrame(gameObjects);
+
 
         // Update Time
         double oldTime = time;

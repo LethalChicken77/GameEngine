@@ -19,6 +19,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 # Specify the output directory for the built binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+set(CMAKE_AUTORCC OFF)
+
 # Find Vulkan
 find_package(Vulkan REQUIRED)
 
@@ -33,6 +35,18 @@ include_directories(${Vulkan_INCLUDE_DIRS})
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
 include_directories("${CMAKE_SOURCE_DIR}/lib/stbimage")
+include_directories("${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
+
+# Add ImGui source files
+set(IMGUI_SOURCES
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_impl_vulkan.cpp
+)
 
 # Add all source files from ./src
 file(GLOB_RECURSE SOURCES 
@@ -43,9 +57,10 @@ file(GLOB_RECURSE SOURCES
 )
 
 # Add executable
-add_executable(GameEngine ${SOURCES})
+add_executable(GameEngine ${SOURCES} ${IMGUI_SOURCES} app.rc)
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/stbimage")
+target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
 
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 

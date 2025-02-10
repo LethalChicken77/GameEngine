@@ -19,5 +19,7 @@ namespace graphics
         std::unique_ptr<DescriptorPool> materialPool;
         std::unique_ptr<DescriptorSetLayout> materialSetLayout;
         std::vector<VkDescriptorSet> materialDescriptorSets;
+        // ImGui Sets
+        std::unique_ptr<DescriptorPool> imguiPool;
     };
 } // namespace graphics

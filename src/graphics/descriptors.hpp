@@ -78,6 +78,8 @@ class DescriptorPool {
 
   void resetPool();
 
+  VkDescriptorPool getPool() const { return descriptorPool; }
+
  private:
   Device &device;
   VkDescriptorPool descriptorPool;

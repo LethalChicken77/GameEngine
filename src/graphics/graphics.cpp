@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include <array>
 #include <GLFW/glfw3.h>
+#include "imgui.h"
+#include "imgui_impl_vulkan.h"
+#include "imgui_impl_glfw.h"
 
 #include "graphics.hpp"
 #include "mesh.hpp"
@@ -94,6 +97,13 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
 
 void Graphics::cleanup()
 {
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    
+    waitForDevice();
+    containers.imguiPool.reset();
+
     vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
     // vkDestroyInstance(instance, nullptr);
     window.close();
@@ -122,13 +132,16 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         // std::cout << "Proj: " << glm::to_string(cameraUbo.proj) << std::endl;
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
-        // std::cout << "Beginning Render Pass" << std::endl;
+        // Objects render pass
         renderer.beginRenderPass(commandBuffer);
-        // std::cout << "Drawing Game Objects" << std::endl;
         renderGameObjects(frameInfo, gameObjects);
-        // std::cout << "Ending Render Pass" << std::endl;
+        // renderer.endRenderPass(commandBuffer);
+
+        // ImGui render pass
+        // renderer.beginRenderPass(commandBuffer);
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         renderer.endRenderPass(commandBuffer);
-        // std::cout << "Ending Frame" << std::endl;
+
         renderer.endFrame();
     }
 }
@@ -213,8 +226,10 @@ void Graphics::loadMaterials()
     materials.emplace_back(std::move(m1));
 
     Material m2 = Material::instantiate(containers, shaders[0].get());
-    m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
-    m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f));
+    // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
+    m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
+    // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
+    m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
     m2.setValue("roughness", 0.4f);
     m2.setValue("metallic", 1.f);
     m2.createShaderInputBuffer();
@@ -302,4 +317,42 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
     }
 }
 
+void Graphics::graphicsInitImgui()
+{
+    // containers.imguiDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    containers.imguiPool = DescriptorPool::Builder(device)
+        .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, SwapChain::MAX_FRAMES_IN_FLIGHT)
+        .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
+        .build();
+
+    ImGui_ImplVulkan_InitInfo initInfo{};
+    initInfo.Instance = renderer.getVkInstance();
+    initInfo.PhysicalDevice = device.getPhysicalDevice();
+    initInfo.Device = device.device();
+    initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily;
+    initInfo.Queue = device.graphicsQueue();
+    initInfo.PipelineCache = VK_NULL_HANDLE;
+    initInfo.DescriptorPool = containers.imguiPool->getPool();
+    initInfo.RenderPass = renderer.getRenderPass();
+    initInfo.Allocator = nullptr;
+    initInfo.MinImageCount = 2;
+    initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
+    initInfo.CheckVkResultFn = [](VkResult err) {
+        if (err != VK_SUCCESS) {
+            fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+        }
+    };
+    ImGui_ImplVulkan_Init(&initInfo);
+}
 } // namespace graphics

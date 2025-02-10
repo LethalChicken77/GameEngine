@@ -21,6 +21,7 @@
 #include "../core/game_object.hpp"
 #include "graphics_containers.hpp"
 
+
 namespace graphics
 {
 
@@ -51,6 +52,8 @@ public:
     Device *getDevice() { return &device; }
     void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects);
 
+    void graphicsInitImgui();
+
 private:
     void loadShaders();
     void loadMaterials();
@@ -59,7 +62,6 @@ private:
 
     static void windowRefreshCallback(GLFWwindow *window);
 
-    VkInstance instance;
     VkApplicationInfo appInfo{};
 
     Window window{WIDTH, HEIGHT, "VEngine"};
