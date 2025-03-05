@@ -84,8 +84,8 @@ void Engine::update(double deltaTime)
     {
         // std::cout << "Mouse position: " << core::Input::getMousePosition().x << ", " << core::Input::getMousePosition().y << std::endl;
         glm::vec2 mouseDelta = -core::Input::getMouseDelta();
-        camera.transform.rotation.y += -mouseDelta.x * 10.f * deltaTime;
-        camera.transform.rotation.x += -mouseDelta.y * 10.f * deltaTime;
+        camera.transform.rotation.y += -mouseDelta.x * 0.016f;
+        camera.transform.rotation.x += -mouseDelta.y * 0.016f;
     }
 
     int counter = 0;
