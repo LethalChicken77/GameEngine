@@ -65,7 +65,7 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.9
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 
     C:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a  # Link GLFW
-    C:/VulkanSDK/1.3.296.0/Lib/vulkan-1.lib  # Link Vulkan
+    C:/VulkanSDK/1.4.304.0/Lib/vulkan-1.lib  # Link Vulkan
     gdi32     # Windows libraries
     user32
     shell32

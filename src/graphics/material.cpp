@@ -34,7 +34,7 @@ namespace graphics
         }
     }
 
-    Material::Material(Containers &_containers, id_t mat_id, const Shader *_shader) : containers(_containers), id(mat_id), shader(_shader)
+    Material::Material(id_t mat_id, const Shader *_shader) : id(mat_id), shader(_shader)
     {
         const std::vector<Shader::ShaderInput> &inputs = shader->getInputs();
         inputValues.resize(inputs.size());
@@ -154,18 +154,18 @@ namespace graphics
         {
             // Initialize buffers
             buffer = std::make_unique<Buffer>(
-                *containers.device,
+                *Shared::device,
                 data.size(), // Use data.size() instead of sizeof(data)
                 1,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                containers.device->properties.limits.minUniformBufferOffsetAlignment
+                Shared::device->properties.limits.minUniformBufferOffsetAlignment
             );
             buffer->map();
             
             VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-            DescriptorWriter(*containers.materialSetLayout, *containers.materialPool)
-                .writeBuffer(0, &bufferInfo)
+            DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
+            .writeBuffer(0, &bufferInfo)
                 .build(descriptorSet);
             initialized = true;
         }

@@ -19,7 +19,7 @@
 #include "shader.hpp"
 #include "material.hpp"
 #include "../core/game_object.hpp"
-#include "graphics_containers.hpp"
+#include "containers.hpp"
 
 
 namespace graphics
@@ -57,7 +57,6 @@ public:
 private:
     void loadShaders();
     void loadMaterials();
-    void createPipelineLayout();
     void createPipeline();
 
     static void windowRefreshCallback(GLFWwindow *window);
@@ -67,16 +66,14 @@ private:
     Window window{WIDTH, HEIGHT, "VEngine"};
     Device device{window};
     Renderer renderer{window, device};
-    Containers containers{&device};
+    // Containers containers{&device};
 
     std::unique_ptr<GraphicsPipeline> graphicsPipeline;
-    VkPipelineLayout pipelineLayout;
     PipelineConfigInfo configInfo;
 
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
 
     std::vector<std::unique_ptr<Shader>> shaders;
-    std::vector<Material> materials{};
 
     Camera* camera;
 };

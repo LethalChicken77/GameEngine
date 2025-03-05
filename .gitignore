@@ -3,4 +3,5 @@ build/CMakeFiles/*
 build/CMakeCache.txt
 build/cmake_install.cmake
 build/Makefile
+build/compile_commands.json
 .vscode/*

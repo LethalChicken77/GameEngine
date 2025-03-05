@@ -92,9 +92,9 @@ void Engine::update(double deltaTime)
     for(GameObject &obj : gameObjects)
     {
         if(obj.get_id() == 2) break;
-        obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
+        // obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
         // obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
-        obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
+        // obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
@@ -103,6 +103,7 @@ void Engine::update(double deltaTime)
 
 void Engine::run()
 {
+    // std::cout << "Configuring IMGUI" << std::endl;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& imguiIO = ImGui::GetIO();
@@ -189,6 +190,7 @@ void Engine::run()
 
 void Engine::loadGameObjects()
 {
+    std::cout << "Loading game objects" << std::endl;
     // Triangle
     // std::vector<Mesh::Vertex> vertices {
     //     {{0.0f, -0.5f, 0.0f}, {0.5f, 1.0f}},
@@ -201,7 +203,7 @@ void Engine::loadGameObjects()
     GameObject obj3 = GameObject::instantiate();
     obj.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_high_res.obj");
     obj.materialID = 0;
-    obj2.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_high_res.obj");
+    obj2.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_wireframe.obj");
     obj2.materialID = 1;
     obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
     obj3.materialID = 2;

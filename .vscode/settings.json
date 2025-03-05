@@ -68,6 +68,22 @@
         "*.bf": "cpp",
         "*.cs": "cpp",
         "*.hpp11": "cpp",
-        "*.d": "cpp"
+        "*.d": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "iomanip": "cpp",
+        "mutex": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp"
+    },
+    "cmake.generator": "MinGW Makefiles",
+    "cmake.configureOnOpen": true,
+    "cmake.configureSettings": {
+        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe"
     }
 }

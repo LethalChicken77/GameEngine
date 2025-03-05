@@ -26,19 +26,13 @@ namespace graphics
 
 // };
 
-struct PushConstants
-{
-    alignas(64) glm::mat4 model;
-    // alignas(4) float time;
-};
-
 Graphics::Graphics(const std::string& name, const std::string& engine_name)
 {
-    containers.globalPool = DescriptorPool::Builder(device)
+    Descriptors::globalPool = DescriptorPool::Builder(device)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
-    containers.materialPool = DescriptorPool::Builder(device)
+    Descriptors::materialPool = DescriptorPool::Builder(device)
         .setMaxSets(GR_MAX_MATERIAL_COUNT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT)
         .build();
@@ -53,7 +47,8 @@ Graphics::~Graphics()
 
 void Graphics::init(const std::string& name, const std::string& engine_name)
 {
-    containers.device = &device;
+    std::cout << "Initializing Graphics\n";
+    Shared::device = &device;
     if(!window.open)
     {
         throw std::runtime_error("Failed to open window");
@@ -73,23 +68,22 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
         cameraUboBuffers[i]->map();
     }
 
-    containers.globalSetLayout = DescriptorSetLayout::Builder(device)
+    Descriptors::globalSetLayout = DescriptorSetLayout::Builder(device)
         .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
         .build();
     
-    containers.globalDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
-    for(int i = 0; i < containers.globalDescriptorSets.size(); i++)
+    Descriptors::globalDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    for(int i = 0; i < Descriptors::globalDescriptorSets.size(); i++)
     {
         VkDescriptorBufferInfo bufferInfo = cameraUboBuffers[i]->descriptorInfo();
-        DescriptorWriter(*containers.globalSetLayout, *containers.globalPool)
+        DescriptorWriter(*Descriptors::globalSetLayout, *Descriptors::globalPool)
             .writeBuffer(0, &bufferInfo)
-            .build(containers.globalDescriptorSets[i]);
+            .build(Descriptors::globalDescriptorSets[i]);
     }
 
     loadShaders();
     loadMaterials();
     // TODO: Different pipeline for each pair of shaders
-    createPipelineLayout();
     createPipeline();
 
     std::cout << "Successfully initialized graphics" << std::endl;
@@ -101,10 +95,18 @@ void Graphics::cleanup()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     
+    cameraUboBuffers.clear();
+    Descriptors::globalPool.reset();
+    Descriptors::materialPool.reset();
+    Descriptors::globalSetLayout.reset();
+    Descriptors::materialSetLayout.reset();
+    Descriptors::materialDescriptorSets.clear();
+    Descriptors::globalDescriptorSets.clear();
+    Descriptors::imguiPool.reset();
+    graphicsPipeline.reset();
+    shaders.clear();
+    Shared::materials.clear();
     waitForDevice();
-    containers.imguiPool.reset();
-
-    vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
     // vkDestroyInstance(instance, nullptr);
     window.close();
 }
@@ -123,7 +125,7 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
     if(VkCommandBuffer commandBuffer = renderer.startFrame())
     {
         uint32_t frameIndex = renderer.getFrameIndex();
-        FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, containers.globalDescriptorSets[frameIndex]};
+        FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSets[frameIndex]};
 
         CameraUbo cameraUbo{};
         cameraUbo.view = camera->getView();
@@ -146,46 +148,16 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
     }
 }
 
-
-void Graphics::createPipelineLayout()
-{
-    std::cout << "Creating pipeline layout" << std::endl;
-
-    VkPushConstantRange pushConstantRange{};
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-    pushConstantRange.offset = 0;
-    pushConstantRange.size = sizeof(PushConstants);
-
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
-        containers.globalSetLayout->getDescriptorSetLayout()
-    };
-    for(auto &m : materials)
-    {
-        descriptorSetLayouts.push_back(containers.materialSetLayout->getDescriptorSetLayout());
-    }
-
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-    pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-    if(vkCreatePipelineLayout(device.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create pipeline layout");
-    }
-}
-
 void Graphics::createPipeline()
 {
-    assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+    // assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
     std::cout << "Creating pipeline" << std::endl;
     // PipelineConfigInfo pipelineConfig{};
     // GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
     PipelineConfigInfo &pipelineConfig = shaders[0]->getConfigInfo();
 
     pipelineConfig.renderPass = renderer.getRenderPass();
-    pipelineConfig.pipelineLayout = pipelineLayout;
+    // pipelineConfig.pipelineLayout = pipelineLayout;
 
     graphicsPipeline = std::make_unique<GraphicsPipeline>(
         device,
@@ -212,20 +184,20 @@ void Graphics::loadShaders()
 void Graphics::loadMaterials()
 {
     std::cout << "Loading materials\n";
-    materials.reserve(GR_MAX_MATERIAL_COUNT);
-    containers.materialSetLayout = DescriptorSetLayout::Builder(device)
+    Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
+    Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
         .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
         .build();
 
-    Material m1 = Material::instantiate(containers, shaders[0].get());
+    Material m1 = Material::instantiate(shaders[0].get());
     m1.setValue("color", glm::vec3(1.0f, 0.0f, 0.0f));
     m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
     m1.setValue("roughness", 0.7f);
     m1.setValue("metallic", 0.f);
     m1.createShaderInputBuffer();
-    materials.emplace_back(std::move(m1));
+    Shared::materials.emplace_back(std::move(m1));
 
-    Material m2 = Material::instantiate(containers, shaders[0].get());
+    Material m2 = Material::instantiate(shaders[0].get());
     // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
     m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
     // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
@@ -233,28 +205,28 @@ void Graphics::loadMaterials()
     m2.setValue("roughness", 0.4f);
     m2.setValue("metallic", 1.f);
     m2.createShaderInputBuffer();
-    materials.emplace_back(std::move(m2));
+    Shared::materials.emplace_back(std::move(m2));
 
-    Material m3 = Material::instantiate(containers, shaders[0].get());
+    Material m3 = Material::instantiate(shaders[0].get());
     m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
     m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
     m3.setValue("roughness", 0.43f);
     m3.setValue("metallic", 0.f);
     m3.createShaderInputBuffer();
-    materials.emplace_back(std::move(m3));
+    Shared::materials.emplace_back(std::move(m3));
     
 
-    containers.materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);
-    containers.materialSetLayout = DescriptorSetLayout::Builder(device)
+    Descriptors::materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);
+    Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
         .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
         .build();
-    for(int i = 0; i < materials.size(); i++)
+    for(int i = 0; i < Shared::materials.size(); i++)
     {
-        Material &m = materials[i];
+        Material &m = Shared::materials[i];
         VkDescriptorBufferInfo bufferInfo = m.getBuffer()->descriptorInfo();
-        DescriptorWriter(*containers.materialSetLayout, *containers.materialPool)
+        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
             .writeBuffer(0, &bufferInfo)
-            .build(containers.materialDescriptorSets[i]);
+            .build(Descriptors::materialDescriptorSets[i]);
     }
 }
 
@@ -273,7 +245,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
     vkCmdBindDescriptorSets(
         commandBuffer, 
         VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        pipelineLayout, 
+        graphicsPipeline->getPipelineLayout(), 
         0,
         static_cast<uint32_t>(descriptorSets.size()),
         descriptorSets.data(), 
@@ -281,18 +253,18 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         nullptr
     );
 
-    materials[0].setValue("color", 
+    Shared::materials[0].setValue("color", 
         glm::vec3((sin(glfwGetTime()) * 0.5f + 0.5f), 
         (sin(glfwGetTime() + glm::pi<float>() * 4.0f * 0.333333f) * 0.5f + 0.5f), 
         (sin(glfwGetTime() + glm::pi<float>() * 2.0f * 0.333333f) * 0.5f + 0.5f)));
-    materials[0].createShaderInputBuffer();
+    Shared::materials[0].createShaderInputBuffer();
     for(core::GameObject& obj : gameObjects)
     {
-        std::vector<VkDescriptorSet> localDescriptorSets = { materials[obj.materialID].getDescriptorSet() };
+        std::vector<VkDescriptorSet> localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };
         vkCmdBindDescriptorSets(
             commandBuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS, 
-            pipelineLayout, 
+            graphicsPipeline->getPipelineLayout(), 
             1,
             1,
             localDescriptorSets.data(), 
@@ -305,7 +277,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         push.model = obj.transform.getTransform();
         vkCmdPushConstants(
             commandBuffer, 
-            pipelineLayout, 
+            graphicsPipeline->getPipelineLayout(), 
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
             0, 
             sizeof(PushConstants), 
@@ -320,7 +292,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
 void Graphics::graphicsInitImgui()
 {
     // containers.imguiDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
-    containers.imguiPool = DescriptorPool::Builder(device)
+    Descriptors::imguiPool = DescriptorPool::Builder(device)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -343,7 +315,7 @@ void Graphics::graphicsInitImgui()
     initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily;
     initInfo.Queue = device.graphicsQueue();
     initInfo.PipelineCache = VK_NULL_HANDLE;
-    initInfo.DescriptorPool = containers.imguiPool->getPool();
+    initInfo.DescriptorPool = Descriptors::imguiPool->getPool();
     initInfo.RenderPass = renderer.getRenderPass();
     initInfo.Allocator = nullptr;
     initInfo.MinImageCount = 2;

@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #include "shader.hpp"
-#include "graphics_containers.hpp"
+#include "containers.hpp"
 
 namespace graphics
 {
@@ -37,11 +37,11 @@ namespace graphics
             Material(Material&&) = default;
             Material& operator=(Material&&) = default;
 
-            static Material instantiate(Containers &_containers, const Shader *_shader)
+            static Material instantiate(const Shader *_shader)
             {
                 static id_t next_id = 0;
 
-                return Material(_containers, next_id++, _shader);
+                return Material(next_id++, _shader);
             }
 
             void assignDescriptorSet(VkDescriptorSet descriptorSet)
@@ -58,7 +58,7 @@ namespace graphics
             Buffer *getBuffer() const { return buffer.get(); }
 
         private:
-            Material(Containers &_contatiners, id_t mat_id, const Shader *_shader);
+            Material(id_t mat_id, const Shader *_shader);
 
             uint32_t id;
             std::vector<Value> inputValues{};
@@ -66,7 +66,6 @@ namespace graphics
             const Shader *shader;
             VkDescriptorSet descriptorSet;
             std::unique_ptr<Buffer> buffer;
-            Containers &containers;
 
             bool initialized = false;
     };

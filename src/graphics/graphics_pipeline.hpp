@@ -5,9 +5,16 @@
 
 #include "device.hpp"
 #include "shader.hpp"
+#include "containers.hpp"
 
 namespace graphics
 {
+    struct PushConstants
+    {
+        alignas(64) glm::mat4 model;
+        // alignas(4) float time;
+    };
+    
     class GraphicsPipeline
     {
     public:
@@ -19,6 +26,7 @@ namespace graphics
         GraphicsPipeline& operator=(const GraphicsPipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
+        VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
     private:
         void createGraphicsPipeline();
@@ -29,5 +37,6 @@ namespace graphics
         VkPipeline m_graphicsPipeline;
         Shader &shader;
         VkPipelineCache pipelineCache;
+        VkPipelineLayout pipelineLayout;
     };
 }

@@ -11,9 +11,10 @@
 using namespace std;
 
 namespace graphics
-{
+{    
     GraphicsPipeline::GraphicsPipeline(Device &_device, Shader &_shader) : device(_device), shader(_shader)
     {
+        createPipelineLayout();
         createGraphicsPipeline();
     }
 
@@ -21,6 +22,36 @@ namespace graphics
     {
         vkDestroyPipeline(device.device(), m_graphicsPipeline, nullptr);
         vkDestroyPipelineCache(device.device(), pipelineCache, nullptr);
+        vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
+    }
+
+    void GraphicsPipeline::createPipelineLayout()
+    {
+        std::cout << "Creating pipeline layout" << std::endl;
+
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(PushConstants);
+
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+            Descriptors::globalSetLayout->getDescriptorSetLayout()
+        };
+        for(auto &m : Shared::materials)
+        {
+            descriptorSetLayouts.push_back(Descriptors::materialSetLayout->getDescriptorSetLayout());
+        }
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+        if(vkCreatePipelineLayout(device.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create pipeline layout");
+        }
     }
 
     void GraphicsPipeline::createGraphicsPipeline()
@@ -28,7 +59,7 @@ namespace graphics
         // TODO: Implement hot reloading of shaders
         PipelineConfigInfo &configInfo = shader.getConfigInfo();
         
-        assert(configInfo.pipelineLayout != nullptr && "Cannot create graphics pipeline:: layout is null");
+        assert(pipelineLayout != nullptr && "Cannot create graphics pipeline:: layout is null");
         assert(configInfo.renderPass != nullptr && "Cannot create graphics pipeline:: render pass is null");
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
@@ -70,7 +101,7 @@ namespace graphics
         pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
         pipelineInfo.pDynamicState = &configInfo.dynamicStateInfo;
 
-        pipelineInfo.layout = configInfo.pipelineLayout;
+        pipelineInfo.layout = pipelineLayout;
         pipelineInfo.renderPass = configInfo.renderPass;
         pipelineInfo.subpass = configInfo.subpass;
 
