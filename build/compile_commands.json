@@ -31,6 +31,12 @@
 },
 {
   "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\color.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\color.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/color.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/color.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_pipeline.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\compute_pipeline.cpp",
   "file": "C:/Users/dante/Development/GameEngine/src/graphics/compute_pipeline.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/compute_pipeline.cpp.obj"

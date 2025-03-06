@@ -1,4 +1,6 @@
 #include "color.hpp"
+#include <algorithm>
+#include <cmath>
 
 namespace graphics
 {
@@ -69,6 +71,74 @@ Color Color::HSL(glm::vec4 hsla)
     return HSL(hsla.r, hsla.g, hsla.b, hsla.a);
 }
 
+glm::vec3 Color::getRGB() const
+{
+    return glm::vec3(r, g, b);
+}
 
+glm::vec3 Color::getHSV() const
+{
+    float maxVal = std::max({r, g, b});
+    float minVal = std::min({r, g, b});
+    float delta = maxVal - minVal;
+    float h = 0.0f, s = 0.0f, v = maxVal;
 
+    if (delta > 0.00001f) {
+        s = delta / maxVal;
+
+        if (maxVal == r) {
+            h = 60.0f * (fmod(((g - b) / delta), 6.0f));
+        } else if (maxVal == g) {
+            h = 60.0f * (((b - r) / delta) + 2.0f);
+        } else { // maxVal == b
+            h = 60.0f * (((r - g) / delta) + 4.0f);
+        }
+        
+        if (h < 0.0f) {
+            h += 360.0f;
+        }
+    }
+    
+    return glm::vec3(h, s, v);
+}
+
+glm::vec3 Color::getHSL() const
+{
+    float maxVal = std::max({r, g, b});
+    float minVal = std::min({r, g, b});
+    float delta = maxVal - minVal;
+    float h = 0.0f, s = 0.0f, l = (maxVal + minVal) * 0.5f;
+
+    if (delta > 0.00001f) {
+        s = delta / (1.0f - std::abs(2.0f * l - 1.0f));
+        
+        if (maxVal == r) {
+            h = 60.0f * (fmod(((g - b) / delta), 6.0f));
+        } else if (maxVal == g) {
+            h = 60.0f * (((b - r) / delta) + 2.0f);
+        } else { // maxVal == b
+            h = 60.0f * (((r - g) / delta) + 4.0f);
+        }
+        
+        if (h < 0.0f) {
+            h += 360.0f;
+        }
+    } else {
+        s = 0.0f; // If delta is zero, it's a shade of gray, so no saturation
+    }
+
+    return glm::vec3(h, s, l);
+}
+
+Color Color::white = Color(1.0f, 1.0f, 1.0f, 1.0f);
+Color Color::gray = Color(0.5f, 0.5f, 0.5f, 1.0f);
+Color Color::black = Color(0.0f, 0.0f, 0.0f, 1.0f);
+Color Color::red = Color(1.0f, 0.0f, 0.0f, 1.0f);
+Color Color::yellow = Color(1.0f, 1.0f, 0.0f, 1.0f);
+Color Color::green = Color(0.0f, 1.0f, 0.0f, 1.0f);
+Color Color::cyan = Color(0.0f, 1.0f, 1.0f, 1.0f);
+Color Color::blue = Color(0.0f, 0.0f, 1.0f, 1.0f);
+Color Color::magenta = Color(1.0f, 0.0f, 1.0f, 1.0f);
+Color Color::clear = Color(1.0f, 1.0f, 1.0f, 0.0f);
+Color Color::zero = Color(0.0f, 0.0f, 0.0f, 0.0f);
 } // namespace graphics

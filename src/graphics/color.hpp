@@ -27,7 +27,6 @@ namespace graphics
         static Color HSL(float h, float s, float l, float a = 1.0f);
         static Color HSL(glm::vec3 hsl);
         static Color HSL(glm::vec4 hsla);
-
         
         // Physical
         static Color wavelength(float wavelength);
@@ -36,17 +35,17 @@ namespace graphics
         static Color IOR(glm::vec3 ior);
         
         // Hardcoded colors
-        static Color white() { return Color(1.0f, 1.0f, 1.0f, 1.0f); }
-        static Color black() { return Color(0.0f, 0.0f, 0.0f, 1.0f); }
-        static Color gray() { return Color(0.5f, 0.5f, 0.5f, 1.0f); }
-        static Color red() { return Color(1.0f, 0.0f, 0.0f, 1.0f); }
-        static Color yellow() { return Color(1.0f, 1.0f, 0.0f, 1.0f); }
-        static Color green() { return Color(0.0f, 1.0f, 0.0f, 1.0f); }
-        static Color cyan() { return Color(0.0f, 1.0f, 1.0f, 1.0f); }
-        static Color blue() { return Color(0.0f, 1.0f, 1.0f, 1.0f); }
-        static Color magenta() { return Color(0.0f, 1.0f, 1.0f, 1.0f); }
-        static Color clear() { return Color(1.0f, 1.0f, 1.0f, 0.0f); }
-        static Color zero() { return Color(0.0f, 0.0f, 0.0f, 0.0f); }
+        static Color white;
+        static Color black;
+        static Color gray;
+        static Color red;
+        static Color yellow;
+        static Color green;
+        static Color cyan;
+        static Color blue;
+        static Color magenta;
+        static Color clear;
+        static Color zero;
         
         // Getters
         glm::vec3 getRGB() const;
