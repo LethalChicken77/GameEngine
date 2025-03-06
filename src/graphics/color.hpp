@@ -34,6 +34,11 @@ namespace graphics
         static Color IOR(float iorR, float iorG, float iorB);
         static Color IOR(glm::vec3 ior);
         
+        // Getters
+        glm::vec3 getRGB() const;
+        glm::vec3 getHSV() const;
+        glm::vec3 getHSL() const;
+        
         // Hardcoded colors
         static Color white;
         static Color black;
@@ -47,24 +52,25 @@ namespace graphics
         static Color clear;
         static Color zero;
         
-        // Getters
-        glm::vec3 getRGB() const;
-        glm::vec3 getHSV() const;
-        glm::vec3 getHSL() const;
-        
         // Operators
-        Color operator+(const Color &other) const { return Color(r + other.r, g + other.g, b + other.b, a + other.a); };
-        Color operator-(const Color &other) const { return Color(r - other.r, g - other.g, b - other.b, a - other.a); };
-        Color operator*(const Color &other) const { return Color(r * other.r, g * other.g, b * other.b, a * other.a); };
-        Color operator/(const Color &other) const { return Color(r / other.r, g / other.g, b / other.b, a / other.a); };
-        Color operator*(float scalar) const { return Color(r * scalar, g * scalar, b * scalar, a * scalar); };
-        Color operator/(float scalar) const { return Color(r / scalar, g / scalar, b / scalar, a / scalar); };
-        Color operator*(const glm::vec4 &other) const { return Color(r * other.r, g * other.g, b * other.b, a * other.a); };
-        Color operator/(const glm::vec4 &other) const { return Color(r / other.r, g / other.g, b / other.b, a / other.a); };
-        Color operator*(const glm::vec3 &other) const { return Color(r * other.r, g * other.g, b * other.b, a); };
-        Color operator/(const glm::vec3 &other) const { return Color(r / other.r, g / other.g, b / other.b, a); };
-        bool operator==(const Color &other) const { return r == other.r && g == other.g && b == other.b && a == other.a; };
-        bool operator!=(const Color &other) const { return r != other.r || g != other.g || b != other.b || a != other.a; };
+        Color operator+(const Color &other) const { return Color(r + other.r, g + other.g, b + other.b, a + other.a); }
+        Color operator-(const Color &other) const { return Color(r - other.r, g - other.g, b - other.b, a - other.a); }
+        Color operator*(const Color &other) const { return Color(r * other.r, g * other.g, b * other.b, a * other.a); }
+        Color operator/(const Color &other) const { return Color(r / other.r, g / other.g, b / other.b, a / other.a); }
+        Color operator*(float scalar) const { return Color(r * scalar, g * scalar, b * scalar, a * scalar); }
+        Color operator/(float scalar) const { return Color(r / scalar, g / scalar, b / scalar, a / scalar); }
+        Color operator*(const glm::vec4 &other) const { return Color(r * other.r, g * other.g, b * other.b, a * other.a); }
+        Color operator/(const glm::vec4 &other) const { return Color(r / other.r, g / other.g, b / other.b, a / other.a); }
+        Color operator*(const glm::vec3 &other) const { return Color(r * other.r, g * other.g, b * other.b, a); }
+        Color operator/(const glm::vec3 &other) const { return Color(r / other.r, g / other.g, b / other.b, a); }
+        bool operator==(const Color &other) const { return r == other.r && g == other.g && b == other.b && a == other.a; }
+        bool operator!=(const Color &other) const { return r != other.r || g != other.g || b != other.b || a != other.a; }
+
+        // Conversions
+        operator glm::vec3() const { return glm::vec3(r, g, b); }
+        operator glm::vec4() const { return glm::vec4(r, g, b, a); }
+        Color operator=(const glm::vec3 &color) { r = color.r; g = color.g; b = color.b; a = 1.0f; }
+        Color operator=(const glm::vec4 &color) { r = color.r; g = color.g; b = color.b; a = color.a; }
     };
 
 } // namespace graphics

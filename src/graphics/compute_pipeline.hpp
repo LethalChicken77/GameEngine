@@ -19,7 +19,7 @@ namespace graphics
         ComputePipeline& operator=(const ComputePipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
-        void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+        void dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 
     private:
         void createComputePipeline();
@@ -30,5 +30,6 @@ namespace graphics
         VkPipeline m_computePipeline;
         ComputeShader &shader;
         VkPipelineCache pipelineCache;
+        VkPipelineLayout pipelineLayout;
     };
 }
