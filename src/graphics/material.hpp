@@ -9,27 +9,14 @@
 
 #include "shader.hpp"
 #include "containers.hpp"
+#include "shader_resource.hpp"
 
 namespace graphics
 {
-    class Material
+    class Material : public ShaderResource
     {
         public:
             using id_t = uint64_t;
-            typedef std::variant<
-                int,
-                bool,
-                float,
-                glm::vec2,
-                glm::vec3,
-                glm::vec4,
-                glm::mat2,
-                glm::mat3,
-                glm::mat4
-                // Texture Reference
-                // Sampler Reference
-                // Whatever else
-            > Value;
 
             Material() = delete;
             Material(const Material&) = delete;

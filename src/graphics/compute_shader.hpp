@@ -24,23 +24,6 @@ namespace graphics
     class ComputeShader
     {
         public:
-            struct ShaderInput
-            {
-                std::string name;
-                enum class DataType
-                {
-                    FLOAT,
-                    VEC2,
-                    VEC3,
-                    VEC4,
-                    MAT2,
-                    MAT3,
-                    MAT4,
-                    INT,
-                    BOOL
-                } type;
-            };
-
             std::string path;
 
             ComputeShader(Device &_device, const std::string &_path, std::vector<ShaderInput> inputs);

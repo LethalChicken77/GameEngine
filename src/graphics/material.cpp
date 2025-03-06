@@ -17,33 +17,33 @@ namespace graphics
         size_t alignment;
     };
 
-    TypeInfo getTypeInfo(Shader::ShaderInput::DataType type)
+    TypeInfo getTypeInfo(ShaderInput::DataType type)
     {
         switch (type)
         {
-        case Shader::ShaderInput::DataType::FLOAT: return {sizeof(float), 4};
-        case Shader::ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), 8};
-        case Shader::ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), 16}; // Vec3 uses Vec4 alignment
-        case Shader::ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), 16};
-        case Shader::ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), 16}; // Matrices align to vec4
-        case Shader::ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16}; // Matrices align to vec4
-        case Shader::ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), 16};
-        case Shader::ShaderInput::DataType::INT:   return {sizeof(int), 4};
-        case Shader::ShaderInput::DataType::BOOL:  return {sizeof(int), 4}; // bools are treated as 4 bytes in std140
+        case ShaderInput::DataType::FLOAT: return {sizeof(float), 4};
+        case ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), 8};
+        case ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), 16}; // Vec3 uses Vec4 alignment
+        case ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), 16};
+        case ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), 16}; // Matrices align to vec4
+        case ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16}; // Matrices align to vec4
+        case ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), 16};
+        case ShaderInput::DataType::INT:   return {sizeof(int), 4};
+        case ShaderInput::DataType::BOOL:  return {sizeof(int), 4}; // bools are treated as 4 bytes in std140
         default: throw std::runtime_error("Unknown ShaderInput::DataType");
         }
     }
 
     Material::Material(id_t mat_id, const Shader *_shader) : id(mat_id), shader(_shader)
     {
-        const std::vector<Shader::ShaderInput> &inputs = shader->getInputs();
+        const std::vector<ShaderInput> &inputs = shader->getInputs();
         inputValues.resize(inputs.size());
         
     }
 
     void Material::setValue(std::string name, Value value)
     {
-        const std::vector<Shader::ShaderInput> &shaderInputs = shader->getInputs();
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             if (shaderInputs[i].name == name)
@@ -57,14 +57,14 @@ namespace graphics
 
     void Material::createShaderInputBuffer()
     {
-        const std::vector<Shader::ShaderInput> &shaderInputs = shader->getInputs();
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
         assert(inputValues.size() == shader->getInputs().size() && "Input values size must match shader input size");
 
         size_t offset = 0;
 
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
-            const Shader::ShaderInput& input = shaderInputs[i];
+            const ShaderInput& input = shaderInputs[i];
             const Value& value = inputValues[i];
 
             // Get type info for alignment and size
@@ -83,17 +83,17 @@ namespace graphics
                 // Ensure the type matches
                 switch (input.type)
                 {
-                case Shader::ShaderInput::DataType::FLOAT:
+                case ShaderInput::DataType::FLOAT:
                     if constexpr (std::is_same_v<T, float>) memcpy(&data[offset], &val, sizeof(float));
                     else throw std::runtime_error("Type mismatch for FLOAT");
                     break;
 
-                case Shader::ShaderInput::DataType::VEC2:
+                case ShaderInput::DataType::VEC2:
                     if constexpr (std::is_same_v<T, glm::vec2>) memcpy(&data[offset], &val, sizeof(glm::vec2));
                     else throw std::runtime_error("Type mismatch for VEC2");
                     break;
 
-                case Shader::ShaderInput::DataType::VEC3:
+                case ShaderInput::DataType::VEC3:
                     if constexpr (std::is_same_v<T, glm::vec3>)
                     {
                         glm::vec4 vec4Value(val, 0.0f); // Promote to vec4 for alignment
@@ -102,17 +102,17 @@ namespace graphics
                     else throw std::runtime_error("Type mismatch for VEC3");
                     break;
 
-                case Shader::ShaderInput::DataType::VEC4:
+                case ShaderInput::DataType::VEC4:
                     if constexpr (std::is_same_v<T, glm::vec4>) memcpy(&data[offset], &val, sizeof(glm::vec4));
                     else throw std::runtime_error("Type mismatch for VEC4");
                     break;
 
-                case Shader::ShaderInput::DataType::MAT2:
+                case ShaderInput::DataType::MAT2:
                     if constexpr (std::is_same_v<T, glm::mat2>) memcpy(&data[offset], &val, sizeof(glm::mat2));
                     else throw std::runtime_error("Type mismatch for MAT2");
                     break;
 
-                case Shader::ShaderInput::DataType::MAT3:
+                case ShaderInput::DataType::MAT3:
                     if constexpr (std::is_same_v<T, glm::mat3>)
                     {
                         glm::mat4 mat4Value(1.0f); // Promote to mat4 for alignment
@@ -122,17 +122,17 @@ namespace graphics
                     else throw std::runtime_error("Type mismatch for MAT3");
                     break;
 
-                case Shader::ShaderInput::DataType::MAT4:
+                case ShaderInput::DataType::MAT4:
                     if constexpr (std::is_same_v<T, glm::mat4>) memcpy(&data[offset], &val, sizeof(glm::mat4));
                     else throw std::runtime_error("Type mismatch for MAT4");
                     break;
 
-                case Shader::ShaderInput::DataType::INT:
+                case ShaderInput::DataType::INT:
                     if constexpr (std::is_same_v<T, int>) memcpy(&data[offset], &val, sizeof(int));
                     else throw std::runtime_error("Type mismatch for INT");
                     break;
 
-                case Shader::ShaderInput::DataType::BOOL:
+                case ShaderInput::DataType::BOOL:
                     if constexpr (std::is_same_v<T, bool>)
                     {
                         int intValue = val ? 1 : 0; // Convert bool to 4-byte int

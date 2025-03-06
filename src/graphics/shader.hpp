@@ -31,28 +31,28 @@ namespace graphics
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
     };
+    
+    struct ShaderInput
+    {
+        std::string name;
+        enum class DataType
+        {
+            FLOAT,
+            VEC2,
+            VEC3,
+            VEC4,
+            MAT2,
+            MAT3,
+            MAT4,
+            INT,
+            BOOL
+        } type;
+    };
 
     // Container to abstract away shader logic
     class Shader
     {
         public:
-            struct ShaderInput
-            {
-                std::string name;
-                enum class DataType
-                {
-                    FLOAT,
-                    VEC2,
-                    VEC3,
-                    VEC4,
-                    MAT2,
-                    MAT3,
-                    MAT4,
-                    INT,
-                    BOOL
-                } type;
-            };
-
             std::string vertexPath;
             std::string fragmentPath;
 

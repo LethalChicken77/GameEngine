@@ -69,8 +69,8 @@ namespace graphics
         // Conversions
         operator glm::vec3() const { return glm::vec3(r, g, b); }
         operator glm::vec4() const { return glm::vec4(r, g, b, a); }
-        Color operator=(const glm::vec3 &color) { r = color.r; g = color.g; b = color.b; a = 1.0f; }
-        Color operator=(const glm::vec4 &color) { r = color.r; g = color.g; b = color.b; a = color.a; }
+        Color& operator=(const glm::vec3 &color) { r = color.r; g = color.g; b = color.b; a = 1.0f; return *this; }
+        Color& operator=(const glm::vec4 &color) { r = color.r; g = color.g; b = color.b; a = color.a; return *this; }
     };
 
 } // namespace graphics

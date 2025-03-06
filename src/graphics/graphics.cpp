@@ -172,11 +172,11 @@ void Graphics::loadShaders()
         device,
         "internal/shaders/basicShader.vert.spv", 
         "internal/shaders/basicShader.frag.spv", 
-        std::vector<Shader::ShaderInput>{
-            {"color", Shader::ShaderInput::DataType::VEC3},
-            {"ior", Shader::ShaderInput::DataType::VEC3},
-            {"roughness", Shader::ShaderInput::DataType::FLOAT},
-            {"metallic", Shader::ShaderInput::DataType::FLOAT}
+        std::vector<ShaderInput>{
+            {"color", ShaderInput::DataType::VEC3},
+            {"ior", ShaderInput::DataType::VEC3},
+            {"roughness", ShaderInput::DataType::FLOAT},
+            {"metallic", ShaderInput::DataType::FLOAT}
         }
     ));
 }
