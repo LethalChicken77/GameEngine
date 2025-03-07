@@ -309,7 +309,7 @@ void Graphics::graphicsInitImgui()
         .build();
 
     ImGui_ImplVulkan_InitInfo initInfo{};
-    initInfo.Instance = renderer.getVkInstance();
+    initInfo.Instance = Shared::instance;
     initInfo.PhysicalDevice = device.getPhysicalDevice();
     initInfo.Device = device.device();
     initInfo.QueueFamily = device.findPhysicalQueueFamilies().graphicsFamily;

@@ -13,6 +13,7 @@ namespace graphics
 {
     namespace Shared
     {
+        extern VkInstance instance;
         extern Device *device;
         extern std::vector<Material> materials;
     }

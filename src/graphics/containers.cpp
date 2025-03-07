@@ -4,6 +4,7 @@ namespace graphics
 {
 namespace Shared
 {
+    VkInstance instance;
     Device *device;
     
     std::vector<Material> materials{};

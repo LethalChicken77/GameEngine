@@ -62,8 +62,6 @@ public:
         return currentFrameIndex; 
     }
 
-    VkInstance getVkInstance() { return instance; }
-
     static void windowRefreshCallback(GLFWwindow *window);
 
     glm::vec3 clearColor{0.04f, 0.08f, 0.2f};
@@ -74,7 +72,6 @@ private:
     void freeCommandBuffers();
     void recreateSwapChain();
 
-    VkInstance instance;
     VkApplicationInfo appInfo{};
 
     Window& window;
