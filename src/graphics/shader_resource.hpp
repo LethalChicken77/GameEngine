@@ -36,14 +36,14 @@ namespace graphics
                 this->descriptorSet = descriptorSet;
             }
 
-            void setValue(std::string name, Value value);
+            // void setValue(std::string name, Value value);
 
-            void createShaderInputBuffer();
+            // void createShaderInputBuffer();
 
             VkDescriptorSet getDescriptorSet() const { return descriptorSet; }
             Buffer *getBuffer() const { return buffer.get(); }
 
-        private:
+        protected:
             std::vector<Value> inputValues{};
             std::vector<uint8_t> data{};
             VkDescriptorSet descriptorSet;

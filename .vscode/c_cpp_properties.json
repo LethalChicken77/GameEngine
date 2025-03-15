@@ -5,10 +5,12 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/**/src",
+                "${workspaceFolder}/**/src/graphics",
+                "${workspaceFolder}/**/src/core",
                 "${workspaceFolder}/**/lib/tinyobjloader",
                 "${workspaceFolder}/**/lib/stbimage",
                 "${workspaceFolder}/**/lib/imgui-1.91.8",
-                "C:\\VulkanSDK\\1.4.304.0\\Include",
+                "C:\\VulkanSDK\\1.4.309.0\\Include",
                 "C:\\glfw-3.4.bin.WIN64\\include"
             ],
             "defines": [
@@ -18,7 +20,7 @@
             ],
             "cStandard": "c11",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe"
+            "compilerPath": "C:/msys64/ucrt64/bin/clang++.exe"
         }
     ],
     "version": 4

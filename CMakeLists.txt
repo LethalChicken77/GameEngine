@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(GameEngine LANGUAGES CXX C)
 
 # Set the compiler to MinGW
-set(CMAKE_C_COMPILER "C:/msys64/ucrt64/bin/gcc.exe")
-set(CMAKE_CXX_COMPILER "C:/msys64/ucrt64/bin/g++.exe")
+set(CMAKE_C_COMPILER "C:/msys64/ucrt64/bin/clang.exe")
+set(CMAKE_CXX_COMPILER "C:/msys64/ucrt64/bin/clang++.exe")
 
 message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
@@ -23,8 +23,10 @@ set(CMAKE_AUTORCC OFF)
 
 # Find Vulkan
 find_package(Vulkan REQUIRED)
+# set(Vulkan_INCLUDE_DIRS "C:/VulkanSDK/1.4.309.0/Include")
+# set(Vulkan_LIBRARIES "C:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib")
 
-# Set GLFW Include Directory
+# Set GLFW Include Directory\
 set(GLFW_INCLUDE_DIR "C:/glfw-3.4.bin.WIN64/include")
 include_directories(${GLFW_INCLUDE_DIR})
 
@@ -65,7 +67,7 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.9
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 
     C:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a  # Link GLFW
-    C:/VulkanSDK/1.4.304.1/Lib/vulkan-1.lib  # Link Vulkan
+    Vulkan::Vulkan                                   # Link Vulkan
     gdi32     # Windows libraries
     user32
     shell32

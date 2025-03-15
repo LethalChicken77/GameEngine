@@ -6,11 +6,11 @@
 #include "descriptors.hpp"
 #include "material.hpp"
 
-// Forward declaration of Material class
-class Material;
 
 namespace graphics
 {
+    // Forward declaration of Material class
+    class Material;
     namespace Shared
     {
         extern VkInstance instance;

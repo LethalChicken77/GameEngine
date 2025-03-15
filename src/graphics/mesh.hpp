@@ -28,16 +28,24 @@ namespace graphics
             static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
         };
 
+        struct Triangle
+        {
+            uint32_t v0;
+            uint32_t v1;
+            uint32_t v2;
+        };
+
         struct Builder
         {
             std::vector<Vertex> vertices;
-            std::vector<uint32_t> indices;
+            std::vector<Triangle> triangles;
 
             void loadModelFromObj(const std::string& filename);
         };
 
         Mesh(Device& _device, const Builder& builder);
         Mesh(Device& _device, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+        Mesh(Device& _device, const std::vector<Vertex>& vertices, const std::vector<Triangle>& indices);
         ~Mesh();
 
         Mesh(const Mesh&) = delete;
@@ -49,6 +57,8 @@ namespace graphics
 
         static std::shared_ptr<Mesh> createCube(Device& device, float edgeLength);
         static std::shared_ptr<Mesh> createSierpinskiPyramid(Device& device, float edgeLength, int depth);
+        static std::shared_ptr<Mesh> createGrid(Device& device, glm::ivec2 dimensions);
+        static std::shared_ptr<Mesh> createGrid(Device& device, int width, int length);
         static std::unique_ptr<Mesh> loadObj(Device& device, const std::string& filename);
 
     private:
@@ -61,5 +71,6 @@ namespace graphics
 
         void createVertexBuffer(const std::vector<Vertex>& vertices);
         void createIndexBuffer(const std::vector<uint32_t>& indices);
+        void createIndexBuffer(const std::vector<Triangle>& triangles);
     };
 }

@@ -1,4 +1,5 @@
 #include "material.hpp"
+#include "containers.hpp"
 
 namespace graphics
 {
@@ -39,20 +40,6 @@ namespace graphics
         const std::vector<ShaderInput> &inputs = shader->getInputs();
         inputValues.resize(inputs.size());
         
-    }
-
-    void Material::setValue(std::string name, Value value)
-    {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
-        for (size_t i = 0; i < shaderInputs.size(); ++i)
-        {
-            if (shaderInputs[i].name == name)
-            {
-                inputValues[i] = value;
-                return;
-            }
-        }
-        throw std::runtime_error("Shader input not found");
     }
 
     void Material::createShaderInputBuffer()
@@ -169,7 +156,21 @@ namespace graphics
                 .build(descriptorSet);
             initialized = true;
         }
-            
+        
         buffer->writeToBuffer(data.data());
+    }
+
+    void Material::setValue(std::string name, ShaderResource::Value value)
+    {
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            if (shaderInputs[i].name == name)
+            {
+                inputValues[i] = value;
+                return;
+            }
+        }
+        throw std::runtime_error("Shader input not found");
     }
 } // namespace graphics

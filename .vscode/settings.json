@@ -83,7 +83,7 @@
     "cmake.generator": "MinGW Makefiles",
     "cmake.configureOnOpen": true,
     "cmake.configureSettings": {
-        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/gcc.exe",
-        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/g++.exe"
+        "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "C:/msys64/ucrt64/bin/clang++.exe"
     }
 }
