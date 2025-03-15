@@ -6,14 +6,13 @@
 #include <variant>
 #include <memory>
 #include <stdexcept>
-
 #include "shader.hpp"
-// #include "containers.hpp"
 #include "shader_resource.hpp"
+// #include "containers.hpp"
 
 namespace graphics
 {
-    class Material : public graphics::ShaderResource
+    class Material : public ShaderResource
     {
         public:
             using id_t = uint64_t;

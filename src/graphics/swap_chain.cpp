@@ -98,8 +98,10 @@ VkResult SwapChain::submitCommandBuffers(
   VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
   VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
   submitInfo.waitSemaphoreCount = 1;
-  submitInfo.pWaitSemaphores = waitSemaphores;
+  submitInfo.pWaitSemaphores = &imageAvailableSemaphores[currentFrame];
   submitInfo.pWaitDstStageMask = waitStages;
+  submitInfo.signalSemaphoreCount = 1;
+  submitInfo.pSignalSemaphores = &imageAvailableSemaphores[currentFrame];
 
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = buffers;
@@ -119,6 +121,10 @@ VkResult SwapChain::submitCommandBuffers(
 
   presentInfo.waitSemaphoreCount = 1;
   presentInfo.pWaitSemaphores = signalSemaphores;
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains = &swapChain;
+  presentInfo.pImageIndices = imageIndex;
+  presentInfo.pResults = nullptr; // Optional
 
   VkSwapchainKHR swapChains[] = {swapChain};
   presentInfo.swapchainCount = 1;
@@ -137,7 +143,8 @@ void SwapChain::createSwapChain() {
   SwapChainSupportDetails swapChainSupport = device.getSwapChainSupport();
 
   VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-  VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+  // VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+  VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR; // Stops my graphics card from making weird noises
   VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
   uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;

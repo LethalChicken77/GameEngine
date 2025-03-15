@@ -48,7 +48,7 @@ namespace graphics
         assert(inputValues.size() == shader->getInputs().size() && "Input values size must match shader input size");
 
         size_t offset = 0;
-
+        size_t bufferSize = 0;
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
@@ -61,7 +61,23 @@ namespace graphics
             offset = alignTo(offset, typeInfo.alignment);
 
             // Resize the buffer to accommodate the new data
-            data.resize(offset + typeInfo.size);
+            bufferSize += typeInfo.size;
+        }
+        data.resize(bufferSize);
+        offset = 0;
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            const ShaderInput& input = shaderInputs[i];
+            const Value& value = inputValues[i];
+
+            // Get type info for alignment and size
+            TypeInfo typeInfo = getTypeInfo(input.type);
+
+            // Align the offset
+            offset = alignTo(offset, typeInfo.alignment);
+
+            // Resize the buffer to accommodate the new data
+            // data.resize(offset + typeInfo.size);
 
             // Write the value into the buffer
             std::visit([&](auto&& val) {

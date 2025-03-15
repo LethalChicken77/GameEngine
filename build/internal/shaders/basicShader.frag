@@ -83,7 +83,9 @@ void main()
     debugPrintfEXT("Hello from vertex shader\n");
     vec3 normal = normalize(fragNormal);
     vec3 position = (pushConstants.model * vec4(fragPosition, 1.0)).xyz;
+    vec3 camPos = cameraData.view[3].xyz;
     vec3 lightPos = vec3(3.0, 7.0, -1.0);
+    // lightPos = camPos;
     // vec3 lightDir = normalize(vec3(2.0, 3.0, -0.5));
     vec3 lightDir = normalize(lightPos - position);
     float lightDist = length(lightPos - position);
@@ -93,7 +95,7 @@ void main()
     // float lightStrength = 2;
     vec3 ambientColor = vec3(0.04f, 0.08f, 0.2f);
 
-    vec3 viewDir = normalize(cameraData.view[3].xyz - position);
+    vec3 viewDir = normalize(camPos - position);
     // float spec = pow(max(dot(reflDir, viewDir), 0.0), 32);
     // vec3 ior = vec3(0.27105, 0.67693, 1.31640); // Copper
     // vec3 ior = vec3(0.18299, 0.42108, 1.37340); // Gold

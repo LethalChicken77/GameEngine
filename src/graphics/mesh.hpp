@@ -13,7 +13,7 @@
 
 namespace graphics
 {
-    class Mesh
+    class Mesh // TODO: Store triangle and vertex vectors, takes more memory but allows easier mesh manipulation
     {
     public:
     
@@ -57,8 +57,7 @@ namespace graphics
 
         static std::shared_ptr<Mesh> createCube(Device& device, float edgeLength);
         static std::shared_ptr<Mesh> createSierpinskiPyramid(Device& device, float edgeLength, int depth);
-        static std::shared_ptr<Mesh> createGrid(Device& device, glm::ivec2 dimensions);
-        static std::shared_ptr<Mesh> createGrid(Device& device, int width, int length);
+        static std::shared_ptr<Mesh> createGrid(Device& device, int width, int length, glm::vec2 dimensions);
         static std::unique_ptr<Mesh> loadObj(Device& device, const std::string& filename);
 
     private:
