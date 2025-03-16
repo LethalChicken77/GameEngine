@@ -190,30 +190,30 @@ void Graphics::loadMaterials()
         .build();
 
     Material m1 = Material::instantiate(shaders[0].get());
-    m1.setValue("color", glm::vec3(1.0f, 0.0f, 0.0f));
+    m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m1.setValue("roughness", 0.7f);
+    m1.setValue("roughness", 0.6f);
     m1.setValue("metallic", 0.f);
     m1.createShaderInputBuffer();
     Shared::materials.emplace_back(std::move(m1));
 
-    Material m2 = Material::instantiate(shaders[0].get());
-    // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
-    m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
-    // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
-    m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
-    m2.setValue("roughness", 0.4f);
-    m2.setValue("metallic", 1.f);
-    m2.createShaderInputBuffer();
-    Shared::materials.emplace_back(std::move(m2));
+    // Material m2 = Material::instantiate(shaders[0].get());
+    // // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
+    // m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
+    // // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
+    // m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
+    // m2.setValue("roughness", 0.4f);
+    // m2.setValue("metallic", 1.f);
+    // m2.createShaderInputBuffer();
+    // Shared::materials.emplace_back(std::move(m2));
 
-    Material m3 = Material::instantiate(shaders[0].get());
-    m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
-    m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m3.setValue("roughness", 0.43f);
-    m3.setValue("metallic", 0.f);
-    m3.createShaderInputBuffer();
-    Shared::materials.emplace_back(std::move(m3));
+    // Material m3 = Material::instantiate(shaders[0].get());
+    // m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
+    // m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
+    // m3.setValue("roughness", 0.43f);
+    // m3.setValue("metallic", 0.f);
+    // m3.createShaderInputBuffer();
+    // Shared::materials.emplace_back(std::move(m3));
     
 
     Descriptors::materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);
@@ -253,11 +253,6 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         nullptr
     );
 
-    Shared::materials[0].setValue("color", 
-        glm::vec3((sin(glfwGetTime()) * 0.5f + 0.5f), 
-        (sin(glfwGetTime() + glm::pi<float>() * 4.0f * 0.333333f) * 0.5f + 0.5f), 
-        (sin(glfwGetTime() + glm::pi<float>() * 2.0f * 0.333333f) * 0.5f + 0.5f)));
-    Shared::materials[0].createShaderInputBuffer();
     for(core::GameObject& obj : gameObjects)
     {
         std::vector<VkDescriptorSet> localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };

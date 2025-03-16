@@ -123,6 +123,7 @@ void main()
     // outColor += spec * mix(vec3(1.0, 1.0, 1.0), materialInfo.color * color, materialInfo.metallic);
     outColor += spec;
     outColor += F0 * materialInfo.metallic * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor;
+    // outColor = vec3(uv, 0);
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);
     fragColor = vec4(outColor, 1.0);

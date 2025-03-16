@@ -199,17 +199,20 @@ void Engine::loadGameObjects()
     // };
 
     GameObject obj = GameObject::instantiate();
-    // GameObject obj2 = GameObject::instantiate();
+    GameObject obj2 = GameObject::instantiate();
     // GameObject obj3 = GameObject::instantiate();
-    obj.mesh = Mesh::createGrid(*graphics.getDevice(), 10, 10, {10.0f, 10.0f});
+    std::cout << "Creating Grid" << std::endl;
+    obj.mesh = Mesh::createGrid(100, 100, {10.0f, 10.0f});
     obj.materialID = 0;
-    // obj2.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_wireframe.obj");
-    // obj2.materialID = 1;
+    std::cout << "Loading Monkey" << std::endl;
+    obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj2.materialID = 0;
     // obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
     // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
-    // gameObjects.push_back(std::move(obj2));
+    gameObjects.push_back(std::move(obj2));
     // gameObjects.push_back(std::move(obj3));
+    std::cout << "Loaded game objects" << std::endl;
 }
 
 } // namespace core
