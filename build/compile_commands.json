@@ -115,6 +115,12 @@
 },
 {
   "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\texture.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\texture.cpp",
+  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/texture.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/texture.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\window.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\window.cpp",
   "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/window.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"

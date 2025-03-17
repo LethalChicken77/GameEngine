@@ -26,6 +26,7 @@ layout(set = 1, binding = 0) uniform MaterialInfo
 
 const float PI = 3.14159265359;
 const float INV_PI = 1.0 / PI;
+const float EPSILON = 0.0001;
 
 vec3 orenNayar(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 albedo) 
 {
@@ -33,13 +34,13 @@ vec3 orenNayar(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec3 a
     roughness = clamp(roughness, 0.0, 1.0);
 
     // Compute angles and vectors
-    float NdotL = max(dot(normal, lightDir), 0.0);
-    float NdotV = max(dot(normal, viewDir), 0.0);
-    float LdotV = max(dot(lightDir, viewDir), 0.0);
+    float NdotL = max(dot(normal, lightDir), EPSILON);
+    float NdotV = max(dot(normal, viewDir), EPSILON);
+    float LdotV = max(dot(lightDir, viewDir), EPSILON);
 
-    if (NdotL <= 0.0 || NdotV <= 0.0) {
-        return vec3(0.0);
-    }
+    // if (NdotL <= 0.0 || NdotV <= 0.0) {
+    //     return vec3(0.0);
+    // }
 
     // Roughness squared
     float sigma2 = roughness * roughness;
@@ -118,11 +119,14 @@ void main()
     // outColor = vec3(0);
     vec3 spec = cookTorrance(normal, lightDir, viewDir, materialInfo.roughness, ior) * lightAttenuation * lightStrength;
 
-    vec3 outColor = diffuse + (1 - materialInfo.metallic) * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor * materialInfo.color * color;// * vec3(0.4, 0.2, 0.1);
+    vec3 specularAmbient = (1 - materialInfo.metallic) * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor * materialInfo.color * color;
+    specularAmbient = max(specularAmbient, 0.0);
+    
+    vec3 outColor = diffuse + ambient;// * vec3(0.4, 0.2, 0.1);
     outColor *= (1 - materialInfo.metallic);
     // outColor += spec * mix(vec3(1.0, 1.0, 1.0), materialInfo.color * color, materialInfo.metallic);
-    outColor += spec;
-    outColor += F0 * materialInfo.metallic * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor;
+    outColor += spec + specularAmbient;
+    // outColor += F0 * materialInfo.metallic * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor;
     // outColor = vec3(uv, 0);
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);

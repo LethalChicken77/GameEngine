@@ -53,7 +53,7 @@ void Engine::update(double deltaTime)
     forward.y = 0;
     forward = glm::normalize(forward);
     glm::vec3 right = camera.transform.right();
-    float movementSpeed = 10.f;
+    float movementSpeed = 10.f * glm::sign(camera.transform.up().y);
     if(core::Input::getKey(GLFW_KEY_A))
     {
         camera.transform.position -= movementSpeed * (float)deltaTime * right;
