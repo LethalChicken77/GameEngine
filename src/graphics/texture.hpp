@@ -18,6 +18,7 @@ namespace graphics
         VkImageType imageType;
         VkImageViewType imageViewType;
         VkImageLayout finalLayout;
+        VkSampleCountFlagBits sampleCount;
         VkMemoryPropertyFlags memoryProperties;
 
         TextureProperties getDefaultProperties()
@@ -29,6 +30,7 @@ namespace graphics
                 VK_IMAGE_TYPE_2D,
                 VK_IMAGE_VIEW_TYPE_2D,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_SAMPLE_COUNT_1_BIT,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
             };
         }

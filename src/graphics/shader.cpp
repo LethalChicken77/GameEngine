@@ -14,8 +14,14 @@ namespace graphics
 
     Shader::~Shader()
     {
-        vkDestroyShaderModule(device.device(), vertShaderModule, nullptr);
-        vkDestroyShaderModule(device.device(), fragShaderModule, nullptr);
+        if (vertShaderModule != VK_NULL_HANDLE)
+        {
+            vkDestroyShaderModule(device.device(), vertShaderModule, nullptr);
+        }
+        if (fragShaderModule != VK_NULL_HANDLE)
+        {
+            vkDestroyShaderModule(device.device(), fragShaderModule, nullptr);
+        }
     }
 
     void Shader::initializeDefaultConfigInfo()

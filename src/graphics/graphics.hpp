@@ -74,6 +74,7 @@ private:
     PipelineConfigInfo configInfo;
 
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
+    std::vector<std::shared_ptr<Texture>> textures;
 
     std::vector<std::unique_ptr<Shader>> shaders;
 

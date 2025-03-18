@@ -78,7 +78,8 @@
         "semaphore": "cpp",
         "shared_mutex": "cpp",
         "stop_token": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "codecvt": "cpp"
     },
     "cmake.generator": "MinGW Makefiles",
     "cmake.configureOnOpen": true,

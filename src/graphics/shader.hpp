@@ -78,8 +78,10 @@ namespace graphics
             const std::vector<ShaderInput> inputs{};
             PipelineConfigInfo configInfo{};
 
-            VkShaderModule vertShaderModule;
-            VkShaderModule fragShaderModule;
+            VkShaderModule vertShaderModule{};
+            VkShaderModule fragShaderModule{};
+
+            // TODO: Include material set layouts
 
             void initializeDefaultConfigInfo();
 

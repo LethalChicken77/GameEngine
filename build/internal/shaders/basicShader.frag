@@ -112,8 +112,8 @@ void main()
     vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(halfDir, viewDir), 5.0);
 
     // Energy conservation term: (1.0 - F) * 
-    vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, materialInfo.roughness, color * materialInfo.color) * lightAttenuation * lightStrength;
-    vec3 ambient = color * materialInfo.color * ambientColor;
+    vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, materialInfo.roughness, color * materialInfo.color) * lightAttenuation * lightStrength * texture(heightMap, uv).rgb;
+    vec3 ambient = color * materialInfo.color * ambientColor * texture(heightMap, uv).rgb;
     // vec3 ambient = orenNayarAmbient(normal, materialInfo.roughness, color * materialInfo.color, 1.0, vec3(1.0)) +
     //     cookTorrance(normal, viewDir, viewDir, materialInfo.roughness, ior);
     // ambient *= 0.1;
@@ -127,12 +127,14 @@ void main()
     vec3 outColor = diffuse + ambient;// * vec3(0.4, 0.2, 0.1);
     outColor *= (1 - materialInfo.metallic);
     // outColor += spec * mix(vec3(1.0, 1.0, 1.0), materialInfo.color * color, materialInfo.metallic);
-    outColor += spec + specularAmbient;
+    // outColor += spec + specularAmbient;
+    outColor += spec;
     // outColor += F0 * materialInfo.metallic * (1 - orenNayar(normal, viewDir, viewDir, materialInfo.roughness, vec3(1.0))) * ambientColor;
     // outColor = vec3(uv, 0);
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);
-    float linearDepth = gl_FragCoord.z / gl_FragCoord.w;
-    outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
+    // float linearDepth = gl_FragCoord.z / gl_FragCoord.w;
+    // outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
+
     fragColor = vec4(outColor, 1.0);
 }

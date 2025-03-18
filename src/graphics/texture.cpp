@@ -1,6 +1,8 @@
 #include <iostream>
+// #include <filesystem>
 #include "texture.hpp"
 #include "containers.hpp"
+#include <unistd.h>
 
 namespace graphics
 {
@@ -19,6 +21,11 @@ namespace graphics
 
     std::shared_ptr<Texture> Texture::loadFromFile(const std::string& path)
     {
+        // if(!std::filesystem::exists(path))
+        if(access(path.c_str(), F_OK) != 0)
+        {
+            throw std::runtime_error("File not found: " + path);
+        }
         std::shared_ptr<Texture> texture = std::make_shared<Texture>();
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -28,7 +35,8 @@ namespace graphics
         }
         uint32_t pixelCount = texWidth * texHeight;
 
-        int numChannels = texChannels; // Actual image channels (from STB)
+        // int numChannels = texChannels; // Actual image channels (from STB)
+        int numChannels = sizeof(STBI_rgb_alpha); // Force 4 Channels
         texture->data.resize(pixelCount * numChannels);
         memcpy(texture->data.data(), pixels, pixelCount * numChannels * sizeof(stbi_uc));
 
@@ -91,6 +99,7 @@ namespace graphics
         imageInfo.tiling = properties.tiling;
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = properties.usage;
+        imageInfo.samples = properties.sampleCount;
 
         if(vkCreateImage(Shared::device->device(), &imageInfo, nullptr, &image) != VK_SUCCESS)
         {
@@ -191,8 +200,15 @@ namespace graphics
     void Texture::copyDataToImage() 
     {
         uint32_t pixelCount = width * height;
-        VkDeviceSize bufferSize = sizeof(data[0]) * pixelCount;
-        uint32_t pixelSize = sizeof(data[0]);
+        uint32_t pixelSize = sizeof(data[0]) * 4;
+        VkDeviceSize bufferSize = pixelSize * pixelCount;
+        // std::cout << "Buffer size: " << bufferSize << std::endl;
+        // std::cout << "Data size: " << data.size() << std::endl;
+        // std::cout << "Width: " << width << " Height: " << height << std::endl;
+        if(data.size() != bufferSize)
+        {
+            throw std::runtime_error("Texture data size does not match buffer size");
+        }
         
         Buffer stagingBuffer{
             *Shared::device,
@@ -203,8 +219,10 @@ namespace graphics
         };
         
         stagingBuffer.map();
+        // std::cout << (void *)data.data() << std::endl;
         stagingBuffer.writeToBuffer((void *)data.data());
         
+        // std::cout << "Copying to image" << std::endl;
         Shared::device->copyBufferToImage(stagingBuffer.getBuffer(), image, width, height, 1);
     }
 

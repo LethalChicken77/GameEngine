@@ -61,7 +61,7 @@ namespace graphics
             offset = alignTo(offset, typeInfo.alignment);
 
             // Resize the buffer to accommodate the new data
-            bufferSize += typeInfo.size;
+            bufferSize += typeInfo.alignment;
         }
         data.resize(bufferSize);
         offset = 0;
@@ -150,11 +150,11 @@ namespace graphics
             }, value);
 
             // Update the offset
-            offset += typeInfo.size;
+            offset += typeInfo.alignment;
         }
 
-        if(!initialized)
-        {
+        // if(!initialized)
+        // {
             // Initialize buffers
             buffer = std::make_unique<Buffer>(
                 *Shared::device,
@@ -165,9 +165,11 @@ namespace graphics
                 Shared::device->properties.limits.minUniformBufferOffsetAlignment
             );
             buffer->map();
-        }
+        // }
         
+        // updateDescriptorSet();
         buffer->writeToBuffer(data.data());
+        initialized = true;
     }
 
     void Material::setValue(std::string name, ShaderResource::Value value)
@@ -186,24 +188,28 @@ namespace graphics
 
     void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
     {
+        if(!initialized)
+        {
+            createShaderInputBuffer();
+        }
         if (binding >= textures.size()) 
         {
             textures.resize(binding + 1);
         }
         textures[binding] = texture;
+        // updateDescriptorSet();
     }
 
     void Material::updateDescriptorSet()
     {
         VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-        .writeBuffer(0, &bufferInfo);
+        DescriptorWriter writer = DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool);
+        writer.writeBuffer(0, &bufferInfo);
         for(int i = 0; i < textures.size(); i++)
         {
-            DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-            .writeImage(i, textures[i]->getDescriptorInfo());
+            std::cout << "Writing image to binding " << i + 1 << std::endl;
+            writer.writeImage(i + 1, textures[i]->getDescriptorInfo());
         }
-        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool).build(descriptorSet);
-        initialized = true;
+        writer.build(descriptorSet);
     }
 } // namespace graphics
