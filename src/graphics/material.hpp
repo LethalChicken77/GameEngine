@@ -31,8 +31,10 @@ namespace graphics
             }
             
             void setValue(std::string name, ShaderResource::Value value);
+            void setTexture(uint32_t binding, std::shared_ptr<graphics::Texture> texture);
 
             void createShaderInputBuffer();
+            void updateDescriptorSet();
 
             uint32_t getId() const { return id; }
 

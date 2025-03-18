@@ -24,6 +24,8 @@ layout(set = 1, binding = 0) uniform MaterialInfo
     float metallic;
 } materialInfo;
 
+layout(set = 1, binding = 1) uniform sampler2D heightMap;
+
 const float PI = 3.14159265359;
 const float INV_PI = 1.0 / PI;
 const float EPSILON = 0.0001;

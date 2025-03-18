@@ -7,9 +7,12 @@
 #include <memory>
 #include <stdexcept>
 #include "descriptors.hpp"
+#include "containers.hpp"
+#include "device.hpp"
 #include "buffer.hpp"
+#include "texture.hpp"
+// static_assert(sizeof(graphics::Texture) > 0, "Texture is not defined!");
 #include "shader.hpp"
-// #include "containers.hpp"
 
 namespace graphics
 {
@@ -49,6 +52,7 @@ namespace graphics
             std::vector<uint8_t> data{};
             VkDescriptorSet descriptorSet;
             std::unique_ptr<Buffer> buffer;
+            std::vector<std::shared_ptr<Texture>> textures;
 
             bool initialized = false;
     };

@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(GameEngine LANGUAGES CXX C)
 
 # Set the compiler to MinGW
-set(CMAKE_C_COMPILER "C:/msys64/ucrt64/bin/clang.exe")
-set(CMAKE_CXX_COMPILER "C:/msys64/ucrt64/bin/clang++.exe")
+set(CMAKE_C_COMPILER "C:/msys64/ucrt64/bin/Clang.exe")
+set(CMAKE_CXX_COMPILER "C:/msys64/ucrt64/bin/Clang++.exe")
 
 message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")

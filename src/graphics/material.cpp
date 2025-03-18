@@ -165,12 +165,6 @@ namespace graphics
                 Shared::device->properties.limits.minUniformBufferOffsetAlignment
             );
             buffer->map();
-            
-            VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-            DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-            .writeBuffer(0, &bufferInfo)
-                .build(descriptorSet);
-            initialized = true;
         }
         
         buffer->writeToBuffer(data.data());
@@ -188,5 +182,24 @@ namespace graphics
             }
         }
         throw std::runtime_error("Shader input not found");
+    }
+
+    void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
+    {
+        if (binding >= textures.size()) 
+        {
+            textures.resize(binding + 1);
+        }
+        textures[binding] = texture;
+    }
+
+    void Material::updateDescriptorSet()
+    {
+        VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
+        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
+        .writeBuffer(0, &bufferInfo)
+        .writeImage(1, (textures[0]->getDescriptorInfo()))
+            .build(descriptorSet);
+        initialized = true;
     }
 } // namespace graphics
