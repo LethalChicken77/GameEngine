@@ -2,7 +2,6 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <memory>
-#include "containers.hpp"
 #include "buffer.hpp"
 #include "descriptors.hpp"
 #include "utils.hpp"

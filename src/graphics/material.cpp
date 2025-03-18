@@ -197,9 +197,13 @@ namespace graphics
     {
         VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
         DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-        .writeBuffer(0, &bufferInfo)
-        .writeImage(1, (textures[0]->getDescriptorInfo()))
-            .build(descriptorSet);
+        .writeBuffer(0, &bufferInfo);
+        for(int i = 0; i < textures.size(); i++)
+        {
+            DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
+            .writeImage(i, textures[i]->getDescriptorInfo());
+        }
+        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool).build(descriptorSet);
         initialized = true;
     }
 } // namespace graphics

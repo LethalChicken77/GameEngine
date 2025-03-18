@@ -7,7 +7,6 @@
 #include <memory>
 #include <stdexcept>
 #include "descriptors.hpp"
-#include "containers.hpp"
 #include "device.hpp"
 #include "buffer.hpp"
 #include "texture.hpp"

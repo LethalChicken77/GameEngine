@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "buffer.hpp"
+#include "texture.hpp"
 #include "descriptors.hpp"
 #include "material.hpp"
 
