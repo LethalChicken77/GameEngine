@@ -2,25 +2,40 @@
 #include "../utils/file_util.hpp"
 
 #include <iostream>
+#include "containers.hpp"
 
 namespace graphics
 {
-    Shader::Shader(Device &_device, const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs) : 
-        device(_device), vertexPath(vPath), fragmentPath(fPath), inputs(inputs)
+    Shader::Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> _inputs, uint32_t textureCount) : 
+        ShaderBase(_inputs), vertexPath(vPath), fragmentPath(fPath)
     {
         initializeDefaultConfigInfo();
         reloadShader();
+
+
+        DescriptorPool::Builder poolBuilder = DescriptorPool::Builder(*Shared::device)
+            .setMaxSets(GR_MAX_MATERIAL_COUNT);
+        DescriptorSetLayout::Builder layoutBuilder = DescriptorSetLayout::Builder(*Shared::device)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        
+        for(int i = 0; i < textureCount; i++)
+        {
+            poolBuilder.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT);
+            layoutBuilder.addBinding(i + 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        }
+        descriptorPool = poolBuilder.build();
+        descriptorSetLayout = layoutBuilder.build();
     }
 
     Shader::~Shader()
     {
         if (vertShaderModule != VK_NULL_HANDLE)
         {
-            vkDestroyShaderModule(device.device(), vertShaderModule, nullptr);
+            vkDestroyShaderModule(Shared::device->device(), vertShaderModule, nullptr);
         }
         if (fragShaderModule != VK_NULL_HANDLE)
         {
-            vkDestroyShaderModule(device.device(), fragShaderModule, nullptr);
+            vkDestroyShaderModule(Shared::device->device(), fragShaderModule, nullptr);
         }
     }
 
@@ -98,32 +113,17 @@ namespace graphics
         if(vertShaderModule != VK_NULL_HANDLE)
         {
             dirty = true;
-            vkDestroyShaderModule(device.device(), vertShaderModule, nullptr);
+            vkDestroyShaderModule(Shared::device->device(), vertShaderModule, nullptr);
         }
         if(fragShaderModule != VK_NULL_HANDLE)
         {
             dirty = true;
-            vkDestroyShaderModule(device.device(), fragShaderModule, nullptr);
+            vkDestroyShaderModule(Shared::device->device(), fragShaderModule, nullptr);
         }
 
         std::vector<char> vertCode = file_util::readFileToCharVector(vertexPath);
         std::vector<char> fragCode = file_util::readFileToCharVector(fragmentPath);
         createShaderModule(vertCode, &vertShaderModule);
         createShaderModule(fragCode, &fragShaderModule);
-    }
-
-    void Shader::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule)
-    {
-        std::cout << "Creating shader module" << std::endl;
-        VkShaderModuleCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        assert(code.size() % 4 == 0 && "Shader code size must be a multiple of 4");
-        createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-
-        if(vkCreateShaderModule(device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create shader module!");
-        }
     }
 } // namespace graphics

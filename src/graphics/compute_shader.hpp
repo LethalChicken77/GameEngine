@@ -9,6 +9,7 @@
 
 #include "device.hpp"
 #include "shader.hpp"
+#include "shader_base.hpp"
 
 namespace graphics
 {
@@ -21,12 +22,12 @@ namespace graphics
     };
 
     // Container to abstract away shader logic
-    class ComputeShader
+    class ComputeShader : ShaderBase
     {
         public:
             std::string path;
 
-            ComputeShader(Device &_device, const std::string &_path, std::vector<ShaderInput> inputs);
+            ComputeShader(const std::string &_path, std::vector<ShaderInput> inputs);
             ~ComputeShader();
 
             // Disallow copying of shaders
@@ -37,20 +38,15 @@ namespace graphics
 
             ComputePipelineConfigInfo& getConfigInfo() { return configInfo; };
             VkShaderModule& getShaderModule() { return computeShaderModule; }
-            const std::vector<ShaderInput>& getInputs() const { return inputs; }
             void reloadShader(); // Rereads the shader files and recreates the shader modules
 
             bool dirty = false;
 
         private:
-            Device &device;
-            const std::vector<ShaderInput> inputs{};
             ComputePipelineConfigInfo configInfo{};
 
-            VkShaderModule computeShaderModule;
+            VkShaderModule computeShaderModule{};
 
             void initializeDefaultConfigInfo();
-
-            void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
     };
 } // namespace graphics

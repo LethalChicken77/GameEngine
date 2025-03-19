@@ -8,6 +8,8 @@
 #include <memory>
 
 #include "device.hpp"
+#include "descriptors.hpp"
+#include "shader_base.hpp"
 
 namespace graphics
 {
@@ -31,32 +33,15 @@ namespace graphics
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
     };
-    
-    struct ShaderInput
-    {
-        std::string name;
-        enum class DataType
-        {
-            FLOAT,
-            VEC2,
-            VEC3,
-            VEC4,
-            MAT2,
-            MAT3,
-            MAT4,
-            INT,
-            BOOL
-        } type;
-    };
 
     // Container to abstract away shader logic
-    class Shader
+    class Shader : public ShaderBase
     {
         public:
             std::string vertexPath;
             std::string fragmentPath;
 
-            Shader(Device &_device, const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs);
+            Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs, uint32_t textureCount);
             ~Shader();
 
             // Disallow copying of shaders
@@ -74,17 +59,15 @@ namespace graphics
             bool dirty = false;
 
         private:
-            Device &device;
-            const std::vector<ShaderInput> inputs{};
             PipelineConfigInfo configInfo{};
 
             VkShaderModule vertShaderModule{};
             VkShaderModule fragShaderModule{};
 
-            // TODO: Include material set layouts
+            // Descriptor Set pool and layout
+            // DescriptorPool descriptorPool;
+            // DescriptorSetLayout descriptorSetLayout;
 
             void initializeDefaultConfigInfo();
-
-            void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
     };
 } // namespace graphics

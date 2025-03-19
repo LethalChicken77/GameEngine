@@ -55,8 +55,8 @@ namespace graphics
     class Texture
     {
     public:
-        Texture();
-        Texture(TextureProperties properties, uint32_t _width, uint32_t _height);
+        Texture(uint32_t _width, uint32_t _height);
+        Texture(TextureProperties _properties, SamplerProperties _samplerProperties, uint32_t _width, uint32_t _height);
         Texture(const Texture &) = delete;
         Texture &operator=(const Texture &) = delete;
         Texture(Texture &&) = default;
@@ -68,6 +68,8 @@ namespace graphics
         VkImageView getImageView() const { return imageView; }
         VkSampler getSampler() const { return sampler; }
         
+        bool setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+        bool setPixel(uint32_t x, uint32_t y, float value);
         void createTexture();
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 

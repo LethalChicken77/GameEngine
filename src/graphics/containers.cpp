@@ -17,10 +17,6 @@ namespace Descriptors
 std::unique_ptr<DescriptorPool> globalPool;
 std::unique_ptr<DescriptorSetLayout> globalSetLayout;
 std::vector<VkDescriptorSet> globalDescriptorSets;
-// Material Descriptor Set
-std::unique_ptr<DescriptorPool> materialPool;
-std::unique_ptr<DescriptorSetLayout> materialSetLayout;
-std::vector<VkDescriptorSet> materialDescriptorSets{};
 // ImGui Sets
 std::unique_ptr<DescriptorPool> imguiPool;
 }

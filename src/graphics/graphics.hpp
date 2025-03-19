@@ -27,8 +27,6 @@
 namespace graphics
 {
 
-#define GR_MAX_MATERIAL_COUNT 128
-
 class Graphics
 {
 public:

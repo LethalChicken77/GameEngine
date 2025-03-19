@@ -6,12 +6,26 @@
 
 namespace graphics
 {
-    Texture::Texture()
+    Texture::Texture(uint32_t _width, uint32_t _height)
     {
         // if(data.size() == 0)
         // {
         //     throw std::runtime_error("Cannot initialize empty texture");
         // }
+        properties = TextureProperties().getDefaultProperties();
+        samplerProperties = SamplerProperties().getDefaultProperties();
+        width = _width;
+        height = _height;
+        data.resize(width * height * 4);
+    }
+
+    Texture::Texture(TextureProperties _properties, SamplerProperties _samplerProperties, uint32_t _width, uint32_t _height)
+    {
+        properties = _properties;
+        samplerProperties = _samplerProperties;
+        width = _width;
+        height = _height;
+        data.resize(width * height * 4);
     }
 
     Texture::~Texture()
@@ -26,7 +40,6 @@ namespace graphics
         {
             throw std::runtime_error("File not found: " + path);
         }
-        std::shared_ptr<Texture> texture = std::make_shared<Texture>();
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         if(!pixels)
@@ -34,10 +47,10 @@ namespace graphics
             throw std::runtime_error("Failed to load texture image");
         }
         uint32_t pixelCount = texWidth * texHeight;
-
+        
         // int numChannels = texChannels; // Actual image channels (from STB)
         int numChannels = sizeof(STBI_rgb_alpha); // Force 4 Channels
-        texture->data.resize(pixelCount * numChannels);
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(texWidth, texHeight);
         memcpy(texture->data.data(), pixels, pixelCount * numChannels * sizeof(stbi_uc));
 
         texture->width = texWidth;
@@ -50,7 +63,32 @@ namespace graphics
 
         return texture;
     }
-    
+
+    bool Texture::setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    {
+        if(properties.format != VK_FORMAT_R8G8B8A8_SRGB)
+        {
+            throw std::runtime_error("Cannot set pixel on non-RGBA texture");
+        }
+        int dataIndex = (y * width + x) * 4;
+        data[dataIndex] = r;
+        data[dataIndex + 1] = g;
+        data[dataIndex + 2] = b;
+        data[dataIndex + 3] = a;
+        return true;
+    }
+
+    bool Texture::setPixel(uint32_t x, uint32_t y, float value)
+    {
+        if(properties.format != VK_FORMAT_R32_SFLOAT)
+        {
+            throw std::runtime_error("Cannot set float pixel on non-float texture");
+        }
+        int dataIndex = (y * width + x) * 4;
+        memcpy(&data[dataIndex], &value, sizeof(float));
+        return true;
+    }
+
     void Texture::createTexture()
     {
         createImage();

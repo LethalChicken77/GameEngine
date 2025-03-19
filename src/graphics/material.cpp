@@ -203,7 +203,7 @@ namespace graphics
     void Material::updateDescriptorSet()
     {
         VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-        DescriptorWriter writer = DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool);
+        DescriptorWriter writer = DescriptorWriter(*(shader->getDescriptorSetLayout()), *(shader->getDescriptorPool()));
         writer.writeBuffer(0, &bufferInfo);
         for(int i = 0; i < textures.size(); i++)
         {

@@ -39,7 +39,7 @@ namespace graphics
         };
         // for(auto &m : Shared::materials)
         // {
-            descriptorSetLayouts.push_back(Descriptors::materialSetLayout->getDescriptorSetLayout());
+            descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
         // }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};

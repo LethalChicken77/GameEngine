@@ -32,13 +32,6 @@ Graphics::Graphics(const std::string& name, const std::string& engine_name)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
-    Descriptors::materialPool = DescriptorPool::Builder(device)
-        .setMaxSets(GR_MAX_MATERIAL_COUNT)
-        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT)
-        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
-        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
-        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
-        .build();
     
     init(name, engine_name);
 }
@@ -100,10 +93,7 @@ void Graphics::cleanup()
     
     cameraUboBuffers.clear();
     Descriptors::globalPool.reset();
-    Descriptors::materialPool.reset();
     Descriptors::globalSetLayout.reset();
-    Descriptors::materialSetLayout.reset();
-    Descriptors::materialDescriptorSets.clear();
     Descriptors::globalDescriptorSets.clear();
     Descriptors::imguiPool.reset();
     graphicsPipeline.reset();
@@ -172,7 +162,6 @@ void Graphics::loadShaders()
 {
     std::cout << "Loading shaders\n";
     shaders.push_back(std::make_unique<Shader>(
-        device,
         "internal/shaders/basicShader.vert.spv", 
         "internal/shaders/basicShader.frag.spv", 
         std::vector<ShaderInput>{
@@ -180,7 +169,8 @@ void Graphics::loadShaders()
             {"ior", ShaderInput::DataType::VEC3},
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
-        }
+        },
+        3
     ));
 }
 
@@ -188,12 +178,6 @@ void Graphics::loadMaterials()
 {
     std::cout << "Loading materials\n";
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
-    Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
-        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-        .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-        .addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-        .addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-        .build();
 
     Material m1 = Material::instantiate(shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
@@ -204,6 +188,12 @@ void Graphics::loadMaterials()
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
+
+    int heightmapResolution = 1024;
+    std::shared_ptr heightmapTexture = std::make_shared<Texture>(heightmapResolution, heightmapResolution);
+    
+    heightmapTexture->createTexture();
+
     m1.createShaderInputBuffer();
     m1.setTexture(0, textures[0]);
     m1.setTexture(1, textures[1]);
@@ -228,21 +218,6 @@ void Graphics::loadMaterials()
     // m3.setValue("metallic", 0.f);
     // m3.createShaderInputBuffer();
     // Shared::materials.emplace_back(std::move(m3));
-    
-
-    Descriptors::materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);
-    // Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
-    //     .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-    //     .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-    //     .build();
-    for(int i = 0; i < Shared::materials.size(); i++)
-    {
-        Material &m = Shared::materials[i];
-        VkDescriptorBufferInfo bufferInfo = m.getBuffer()->descriptorInfo();
-        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-            .writeBuffer(0, &bufferInfo)
-            .build(Descriptors::materialDescriptorSets[i]);
-    }
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)

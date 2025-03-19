@@ -10,6 +10,7 @@
 
 namespace graphics
 {
+    #define GR_MAX_MATERIAL_COUNT 128
     // Forward declaration of Material class
     class Material;
     namespace Shared
@@ -25,10 +26,6 @@ namespace graphics
         extern std::unique_ptr<DescriptorPool> globalPool;
         extern std::unique_ptr<DescriptorSetLayout> globalSetLayout;
         extern std::vector<VkDescriptorSet> globalDescriptorSets;
-        // Material Descriptor Set
-        extern std::unique_ptr<DescriptorPool> materialPool;
-        extern std::unique_ptr<DescriptorSetLayout> materialSetLayout;
-        extern std::vector<VkDescriptorSet> materialDescriptorSets;
         // ImGui Sets
         extern std::unique_ptr<DescriptorPool> imguiPool;
     }
