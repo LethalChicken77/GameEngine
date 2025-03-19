@@ -95,7 +95,7 @@ void main()
     // float lightAttenuation = 1.0 / (lightDist * lightDist);
     float lightAttenuation = 1.0;
     // float lightStrength = 60;
-    float lightStrength = 2;
+    float lightStrength = 5;
     vec3 ambientColor = vec3(0.04f, 0.08f, 0.2f);
 
     vec3 viewDir = normalize(camPos - position);
@@ -133,8 +133,8 @@ void main()
     // outColor = vec3(uv, 0);
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);
-    // float linearDepth = gl_FragCoord.z / gl_FragCoord.w;
-    // outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
+    float linearDepth = gl_FragCoord.z / gl_FragCoord.w;
+    outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
 
     fragColor = vec4(outColor, 1.0);
 }
