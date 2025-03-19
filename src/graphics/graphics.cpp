@@ -36,6 +36,8 @@ Graphics::Graphics(const std::string& name, const std::string& engine_name)
         .setMaxSets(GR_MAX_MATERIAL_COUNT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT)
         .build();
     
     init(name, engine_name);
@@ -189,17 +191,23 @@ void Graphics::loadMaterials()
     Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
         .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
         .addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+        .addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+        .addBinding(3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
         .build();
 
     Material m1 = Material::instantiate(shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", glm::vec3(1.f, 1.f, 1.f));
     m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m1.setValue("roughness", 0.8f);
+    m1.setValue("roughness", 0.95f);
     m1.setValue("metallic", 0.f);
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
     m1.createShaderInputBuffer();
     m1.setTexture(0, textures[0]);
+    m1.setTexture(1, textures[1]);
+    m1.setTexture(2, textures[2]);
     m1.updateDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
 

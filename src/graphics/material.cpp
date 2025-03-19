@@ -150,7 +150,7 @@ namespace graphics
             }, value);
 
             // Update the offset
-            offset += typeInfo.alignment;
+            offset += typeInfo.size;
         }
 
         // if(!initialized)
