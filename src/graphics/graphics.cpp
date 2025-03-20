@@ -10,6 +10,7 @@
 #include "mesh.hpp"
 #include "../core/input.hpp"
 #include "material.hpp"
+#include "../core/random.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -170,7 +171,7 @@ void Graphics::loadShaders()
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
         },
-        3
+        4
     ));
 }
 
@@ -190,14 +191,29 @@ void Graphics::loadMaterials()
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
 
     int heightmapResolution = 1024;
-    std::shared_ptr heightmapTexture = std::make_shared<Texture>(heightmapResolution, heightmapResolution);
+    TextureProperties properties = TextureProperties().getDefaultProperties();
+    SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
+    properties.format = VK_FORMAT_R32_SFLOAT;
+    samplerProperties.magFilter = VK_FILTER_LINEAR;
+    std::shared_ptr heightmapTexture = std::make_shared<Texture>(properties, samplerProperties, heightmapResolution, heightmapResolution);
+
+    for(int i = 0; i < heightmapResolution; i++)
+    {
+        for(int j = 0; j < heightmapResolution; j++)
+        {
+            float height = core::Random::getRandom01();
+            heightmapTexture->setPixel(i, j, height);
+        }
+    }
     
     heightmapTexture->createTexture();
+    textures.push_back(heightmapTexture);
 
     m1.createShaderInputBuffer();
     m1.setTexture(0, textures[0]);
     m1.setTexture(1, textures[1]);
     m1.setTexture(2, textures[2]);
+    m1.setTexture(3, textures[3]);
     m1.updateDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
 

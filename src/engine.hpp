@@ -10,6 +10,7 @@
 #include "graphics/camera.hpp"
 #include "core/game_object.hpp"
 #include "utils/debug.hpp"
+#include "core/random.hpp"
 
 namespace core
 {
