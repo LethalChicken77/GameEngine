@@ -13,6 +13,7 @@ layout(set = 0, binding = 0, std140) buffer DataBuffer
 {
     Particle data[];
 };
+layout(set = 0, binding = 1) uniform image2D heightMap;
 
 layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 void main()

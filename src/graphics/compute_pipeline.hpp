@@ -19,7 +19,7 @@ namespace graphics
         ComputePipeline& operator=(const ComputePipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
-        void dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+        void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait = false);
 
     private:
         void createComputePipeline();

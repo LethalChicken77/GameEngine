@@ -73,6 +73,9 @@ namespace graphics
         void createTexture();
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
+        // Need this public to swap between compute and graphics pipelines
+        void transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
+
     private:
         VkCommandPool commandPool;
         VkQueue queue;
@@ -98,7 +101,6 @@ namespace graphics
         void allocateMemory();
         void createImageView();
         void createSampler();
-        void transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
         void copyDataToImage();
         void createDescriptorInfo();
 

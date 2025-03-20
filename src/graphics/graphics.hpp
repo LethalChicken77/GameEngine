@@ -18,6 +18,7 @@
 #include "mesh.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
+#include "compute_shader.hpp"
 #include "shader_resource.hpp"
 #include "material.hpp"
 #include "../core/game_object.hpp"
@@ -55,6 +56,7 @@ public:
     void graphicsInitImgui();
 
 private:
+    void loadTextures();
     void loadShaders();
     void loadMaterials();
     void createPipeline();
@@ -75,6 +77,7 @@ private:
     std::vector<std::shared_ptr<Texture>> textures;
 
     std::vector<std::unique_ptr<Shader>> shaders;
+    std::vector<std::unique_ptr<ComputeShader>> computeShaders;
 
     Camera* camera;
 };

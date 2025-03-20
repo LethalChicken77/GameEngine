@@ -67,30 +67,20 @@ namespace graphics
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
     }
 
-    void ComputePipeline::dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+    void ComputePipeline::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait)
     {
-        // vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
-        // vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        VkCommandBuffer cmdBuffer = device.beginSingleTimeCommands();
         
-        // // Dispatch the compute shader
-        // vkCmdDispatch(cmdBuffer, x, y, z);
-        // VkBufferMemoryBarrier bufferBarrier{};
-        // bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-        // bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;  // Compute writes
-        // bufferBarrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;  // Graphics reads
-        // bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        // bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        // bufferBarrier.buffer = sharedBuffer;
-        // bufferBarrier.offset = 0;
-        // bufferBarrier.size = VK_WHOLE_SIZE;
+        // Bind the compute pipeline
+        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
 
-        // vkCmdPipelineBarrier(
-        //     commandBuffer,
-        //     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,   // Wait for compute shader
-        //     VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,     // Before vertex shader reads data
-        //     0,
-        //     0, nullptr, 1, &bufferBarrier, 0, nullptr
-        // );
+        // Dispatch compute work with the specified number of workgroups
+        vkCmdDispatch(cmdBuffer, groupCountX, groupCountY, groupCountZ);
 
+        // if(!wait)
+        // {
+            device.endSingleTimeCommands(cmdBuffer);
+        //     return;
+        // }
     }
 } // namespace graphics
