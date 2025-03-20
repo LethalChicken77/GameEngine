@@ -164,8 +164,8 @@ void main()
 
     // fragColor = vec4(1.0, 0.8, 0.2, 1.0);
     float linearDepth = gl_FragCoord.z / gl_FragCoord.w;
-    outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
-    outColor = vec3(texture(heightMap, uv).r);
+    // outColor = mix(outColor, ambientColor * 0.8, clamp(linearDepth / 100.0, 0.0, 1.0));
+    outColor = mix(outColor, ambientColor * 0.8, (1 - exp(-linearDepth * 0.02)));
+    // outColor = vec3(texture(heightMap, uv).r);
     fragColor = vec4(outColor, 1.0);
-    // fragColor = vec4(normal, 1.0);
 }

@@ -348,8 +348,8 @@ namespace graphics
                 float x0 = minX + x * xScale;
                 float z0 = minZ + z * zScale;
                 Vertex v = {
-                    {x0, glm::sin(x0) + glm::sin(z0), z0},
-                    // {x0, 0, z0},
+                    // {x0, glm::sin(x0) + glm::sin(z0), z0},
+                    {x0, 0, z0},
                     {0, 1, 0},
                     {1, 1, 1},
                     {x / (float)width, z / (float)length}

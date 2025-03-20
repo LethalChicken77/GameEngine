@@ -59,40 +59,40 @@ namespace core
             }
 
             // 2D Seed Function
-            static std::mt19937 SeedFrom2D(int x, int y, int baseSeed = 0)
+            static uint32_t SeedFrom2D(int x, int y, int baseSeed = 0)
             {
                 uint32_t hash = MurmurHash3(x) ^ MurmurHash3(y + 1) ^ MurmurHash3(baseSeed);
-                return std::mt19937(hash);
+                return hash;
             }
 
             // 3D Seed Function
-            static std::mt19937 SeedFrom3D(int x, int y, int z, int baseSeed = 0)
+            static uint32_t SeedFrom3D(int x, int y, int z, int baseSeed = 0)
             {
                 uint32_t hash = MurmurHash3(x) ^ MurmurHash3(y + 1) ^ MurmurHash3(z + 2) ^ MurmurHash3(baseSeed);
-                return std::mt19937(hash);
+                return hash;
             }
 
             // 4D Seed Function
-            static std::mt19937 SeedFrom4D(int x, int y, int z, int w, int baseSeed = 0)
+            static uint32_t SeedFrom4D(int x, int y, int z, int w, int baseSeed = 0)
             {
                 uint32_t hash = MurmurHash3(x) ^ MurmurHash3(y + 1) ^ MurmurHash3(z + 2) ^ MurmurHash3(w + 3) ^ MurmurHash3(baseSeed);
-                return std::mt19937(hash);
+                return hash;
             }
 
             // 2D Seed Function
-            static std::mt19937 SeedFrom2D(float x, float y, int baseSeed = 0)
+            static uint32_t SeedFrom2D(float x, float y, int baseSeed = 0)
             {
                 return SeedFrom2D(std::bit_cast<int>(x), std::bit_cast<int>(y), baseSeed);
             }
 
             // 3D Seed Function
-            static std::mt19937 SeedFrom3D(float x, float y, float z, int baseSeed = 0)
+            static uint32_t SeedFrom3D(float x, float y, float z, int baseSeed = 0)
             {
                 return SeedFrom3D(std::bit_cast<int>(x), std::bit_cast<int>(y), std::bit_cast<int>(z), baseSeed);
             }
 
             // 4D Seed Function
-            static std::mt19937 SeedFrom4D(float x, float y, float z, float w, int baseSeed = 0)
+            static uint32_t SeedFrom4D(float x, float y, float z, float w, int baseSeed = 0)
             {
                 return SeedFrom4D(std::bit_cast<int>(x), std::bit_cast<int>(y), std::bit_cast<int>(z), std::bit_cast<int>(w), baseSeed);
             }

@@ -11,6 +11,7 @@
 #include "../core/input.hpp"
 #include "material.hpp"
 #include "../core/random.hpp"
+#include "../procedural/noise.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -190,19 +191,25 @@ void Graphics::loadMaterials()
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
     textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
 
-    int heightmapResolution = 1024;
+    int heightmapResolution = 512;
     TextureProperties properties = TextureProperties().getDefaultProperties();
     SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
     properties.format = VK_FORMAT_R32_SFLOAT;
     samplerProperties.magFilter = VK_FILTER_LINEAR;
+    samplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     std::shared_ptr heightmapTexture = std::make_shared<Texture>(properties, samplerProperties, heightmapResolution, heightmapResolution);
 
     for(int i = 0; i < heightmapResolution; i++)
     {
         for(int j = 0; j < heightmapResolution; j++)
         {
-            float height = core::Random::getRandom01();
-            heightmapTexture->setPixel(i, j, height);
+            // float height = core::Random::getRandom01();
+            float height1 = procedural::simplex2D(i / (heightmapResolution * 0.5f), j / (heightmapResolution * 0.5f), 69);
+            float height2 = procedural::simplex2D(i / (heightmapResolution * 0.25f), j / (heightmapResolution * 0.25f), 21) * 0.5f;
+            float height3 = procedural::simplex2D(i / (heightmapResolution * 0.125f), j / (heightmapResolution * 0.125f), 420) * 0.25f;
+            float height4 = procedural::simplex2D(i / (heightmapResolution * 0.0625f), j / (heightmapResolution * 0.0625f), 1) * 0.125f;
+            float height5 = procedural::simplex2D(i / (heightmapResolution * 0.03125f), j / (heightmapResolution * 0.03125f), 2) * 0.0625f;
+            heightmapTexture->setPixel(i, j, (height1 + height2 + height3 + height4 + height5) * 30.f);
         }
     }
     

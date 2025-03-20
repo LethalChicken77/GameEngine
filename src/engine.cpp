@@ -138,7 +138,7 @@ void Engine::run()
 
 
     camera = Camera(
-        {0.01f, 100.0f, 90.0f},
+        {0.01f, 1000.0f, 90.0f},
         false
     );
     // camera = Camera(
@@ -206,7 +206,7 @@ void Engine::loadGameObjects()
     // GameObject obj2 = GameObject::instantiate();
     // GameObject obj3 = GameObject::instantiate();
     std::cout << "Creating Grid" << std::endl;
-    obj.mesh = Mesh::createGrid(200, 200, {50.0f, 50.0f});
+    obj.mesh = Mesh::createGrid(400, 400, {50.0f, 50.0f});
     obj.materialID = 0;
     // std::cout << "Loading Monkey" << std::endl;
     // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
