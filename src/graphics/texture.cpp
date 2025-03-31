@@ -64,7 +64,7 @@ namespace graphics
         return texture;
     }
 
-    bool Texture::setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+    void Texture::setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     {
         if(properties.format != VK_FORMAT_R8G8B8A8_SRGB)
         {
@@ -75,18 +75,50 @@ namespace graphics
         data[dataIndex + 1] = g;
         data[dataIndex + 2] = b;
         data[dataIndex + 3] = a;
-        return true;
+        // return true;
     }
 
-    bool Texture::setPixel(uint32_t x, uint32_t y, float value)
+    void Texture::setPixel(uint32_t x, uint32_t y, float value)
     {
         if(properties.format != VK_FORMAT_R32_SFLOAT)
         {
             throw std::runtime_error("Cannot set float pixel on non-float texture");
         }
-        int dataIndex = (y * width + x) * 4;
+        if(x >= width || y >= height)
+        {
+            std::cout << data.size() << std::endl;
+            std::cout << width << ", " << height << std::endl;
+            throw std::out_of_range("Pixel coordinates out of bounds " + std::to_string(x) + ", " + std::to_string(y));
+        }
+        int dataIndex = (y * width + x) * sizeof(float);
         memcpy(&data[dataIndex], &value, sizeof(float));
-        return true;
+        // return true;
+    }
+
+    float Texture::sampleBilinear(float x, float y)
+    {
+        x = glm::clamp(x, 0.0f, 1.0f);
+        y = glm::clamp(y, 0.0f, 1.0f);
+        float u = x * width;
+        float v = y * height;
+        int x0 = (int)u;
+        int y0 = (int)v;
+        int x1 = (x0 + 1) % width; // Wrap around
+        int y1 = (y0 + 1) % height;
+        float s = u - x0;
+        float t = v - y0;
+        float c00;
+        memcpy(&c00, &data[(y0 * width + x0) * 4], sizeof(float));
+        float c01;
+        memcpy(&c01, &data[(y1 * width + x0) * 4], sizeof(float));
+        float c10;
+        memcpy(&c10, &data[(y0 * width + x1) * 4], sizeof(float));
+        float c11;
+        memcpy(&c11, &data[(y1 * width + x1) * 4], sizeof(float));
+        // Perform bilinear interpolation
+        float c0 = c00 * (1 - s) + c01 * s;
+        float c1 = c10 * (1 - s) + c11 * s;
+        return c0 * (1 - t) + c1 * t;
     }
 
     void Texture::createTexture()
@@ -100,6 +132,13 @@ namespace graphics
         createImageView();
 
         createDescriptorInfo();
+    }
+
+    void Texture::updateOnGPU()
+    {
+        transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        copyDataToImage();
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, properties.finalLayout);
     }
 
     void Texture::allocateMemory()
@@ -238,7 +277,14 @@ namespace graphics
             barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
             sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Wait for fragment shader reads
             destinationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Before compute shader writes
-        } else {
+        } 
+        else if(oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;  // Ensure fragment shader finishes reading
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Wait for fragment shader reads
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT; // Before transfer writes
+        }
+        else {
             throw std::invalid_argument("Unsupported layout transition!");
         }
     

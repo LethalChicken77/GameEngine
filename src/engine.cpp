@@ -16,6 +16,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "utils/imgui_styles.hpp"
+#include "hydraulic_erosion.hpp"
 
 using namespace graphics;
 
@@ -30,6 +31,8 @@ namespace core
 Engine::Engine(graphics::Graphics& _graphics) : graphics(_graphics)
 {
     init();
+
+    hydraulicErosion = std::make_unique<game::HydraulicErosion>(512, game::HydraulicErosion::ErosionProperties());
 }
 
 Engine::~Engine()
@@ -52,8 +55,9 @@ void Engine::update(double deltaTime)
     glm::vec3 forward = camera.transform.forward();
     forward.y = 0;
     forward = glm::normalize(forward);
+    forward *= glm::sign(camera.transform.up().y);
     glm::vec3 right = camera.transform.right();
-    float movementSpeed = 10.f * glm::sign(camera.transform.up().y);
+    float movementSpeed = 10.f;
     if(core::Input::getKey(GLFW_KEY_A))
     {
         camera.transform.position -= movementSpeed * (float)deltaTime * right;
@@ -103,6 +107,8 @@ void Engine::update(double deltaTime)
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
     }
+
+    hydraulicErosion->runIterationsCPU(1, deltaTime);
 }
 
 void Engine::run()
@@ -164,7 +170,10 @@ void Engine::run()
         ImGui::NewFrame();
 
         ImGui::Begin("Hello ImGui!");
-        ImGui::Text("Test");
+        if(ImGui::Button("Reset Particles"))
+        {
+            hydraulicErosion->initializeParticles();
+        }
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);

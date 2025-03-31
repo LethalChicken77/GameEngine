@@ -7,6 +7,7 @@
 #include "utils.hpp"
 #include "stb_image.h"
 #include "device.hpp"
+#include "glm/glm.hpp"
 
 namespace graphics
 {
@@ -68,13 +69,34 @@ namespace graphics
         VkImageView getImageView() const { return imageView; }
         VkSampler getSampler() const { return sampler; }
         
-        bool setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-        bool setPixel(uint32_t x, uint32_t y, float value);
+        void setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+        void setPixel(uint32_t x, uint32_t y, float value);
+        float getPixelFloat(uint32_t x, uint32_t y) const
+        {
+            if(properties.format != VK_FORMAT_R32_SFLOAT)
+            {
+                throw std::runtime_error("Cannot get pixel on non-float texture");
+            }
+            int dataIndex = (y * width + x) * sizeof(float);
+            float result = 0.0f;
+            memcpy(&result, &data[dataIndex], sizeof(float));
+            return result;
+        }
         void createTexture();
+        void updateOnGPU();
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
         // Need this public to swap between compute and graphics pipelines
         void transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
+
+        uint32_t getWidth() const { return width; }
+        uint32_t getHeight() const { return height; }
+
+        float sampleBilinear(float x, float y);
+        float sampleBilinear(glm::vec3 pos)
+        {
+            return sampleBilinear(pos.x, pos.y);
+        }
 
     private:
         VkCommandPool commandPool;

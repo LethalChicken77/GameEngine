@@ -145,6 +145,12 @@
 },
 {
   "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\hydraulic_erosion.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\hydraulic_erosion.cpp",
+  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/hydraulic_erosion.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/hydraulic_erosion.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\main.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\main.cpp",
   "file": "C:/Users/dante/Desktop/Development/GameEngine/src/main.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/main.cpp.obj"

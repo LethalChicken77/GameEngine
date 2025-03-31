@@ -21,7 +21,7 @@ namespace graphics
         VkPipelineLayout pipelineLayout = nullptr;
     };
 
-    // Container to abstract away shader logic
+    // Container to abstract away compute shader logic
     class ComputeShader : ShaderBase
     {
         public:

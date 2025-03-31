@@ -163,38 +163,11 @@ void Graphics::createPipeline()
 void Graphics::loadTextures()
 {
     std::cout << "Loading textures" << std::endl;
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
     
-
-
-    int heightmapResolution = 512;
-    TextureProperties properties = TextureProperties().getDefaultProperties();
-    SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
-    properties.format = VK_FORMAT_R32_SFLOAT;
-    properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    properties.finalLayout = VK_IMAGE_LAYOUT_GENERAL; // Allow usage for reads and writes, no need for shader read
-    samplerProperties.magFilter = VK_FILTER_LINEAR;
-    samplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    std::shared_ptr heightmapTexture = std::make_shared<Texture>(properties, samplerProperties, heightmapResolution, heightmapResolution);
-    
-    for(int i = 0; i < heightmapResolution; i++)
-    {
-        for(int j = 0; j < heightmapResolution; j++)
-        {
-            // float height = core::Random::getRandom01();
-            float height1 = procedural::simplex2D(i / (heightmapResolution * 0.5f), j / (heightmapResolution * 0.5f), 69);
-            float height2 = procedural::simplex2D(i / (heightmapResolution * 0.25f), j / (heightmapResolution * 0.25f), 21) * 0.5f;
-            float height3 = procedural::simplex2D(i / (heightmapResolution * 0.125f), j / (heightmapResolution * 0.125f), 420) * 0.25f;
-            float height4 = procedural::simplex2D(i / (heightmapResolution * 0.0625f), j / (heightmapResolution * 0.0625f), 1) * 0.125f;
-            float height5 = procedural::simplex2D(i / (heightmapResolution * 0.03125f), j / (heightmapResolution * 0.03125f), 2) * 0.0625f;
-            heightmapTexture->setPixel(i, j, (height1 + height2 + height3 + height4 + height5) * 30.f);
-        }
-    }
-    
-    heightmapTexture->createTexture();
-    textures.push_back(heightmapTexture);
+    // textures.push_back(heightmapTexture);
 }
 
 void Graphics::loadShaders()
@@ -230,7 +203,6 @@ void Graphics::loadMaterials()
     m1.setTexture(0, textures[0]);
     m1.setTexture(1, textures[1]);
     m1.setTexture(2, textures[2]);
-    m1.setTexture(3, textures[3]);
     m1.updateDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
 
