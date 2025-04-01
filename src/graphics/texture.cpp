@@ -84,12 +84,14 @@ namespace graphics
         {
             throw std::runtime_error("Cannot set float pixel on non-float texture");
         }
-        if(x >= width || y >= height)
-        {
-            std::cout << data.size() << std::endl;
-            std::cout << width << ", " << height << std::endl;
-            throw std::out_of_range("Pixel coordinates out of bounds " + std::to_string(x) + ", " + std::to_string(y));
-        }
+        x = glm::clamp(x, 0u, width - 1);
+        y = glm::clamp(y, 0u, height - 1);
+        // if(x >= width || y >= height)
+        // {
+        //     // std::cout << data.size() << std::endl;
+        //     // std::cout << width << ", " << height << std::endl;
+        //     // std::cerr << ("Pixel coordinates out of bounds " + std::to_string(x) + ", " + std::to_string(y)) << std::endl;
+        // }
         int dataIndex = (y * width + x) * sizeof(float);
         memcpy(&data[dataIndex], &value, sizeof(float));
         // return true;

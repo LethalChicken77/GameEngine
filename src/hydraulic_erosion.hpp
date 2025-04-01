@@ -26,34 +26,21 @@ namespace game
 
         struct ErosionProperties // Pass as push constants
         {
-            uint32_t numParticles = 50000;
-            float friction;
-            // float sedimentPickupRate;
-            // float sedimentDepositRate;
-            // float minSlope;
-            float erosionRate;
-            float evaporationRate;
-            float gravity;
-            float depositThreshold;
+            int maxLifetime = 500;
+            float friction = 0.01f;
 
-            ErosionProperties()
-            {
-                friction = 0.95f;
-                // sedimentPickupRate = 0.1f;
-                // sedimentDepositRate = 0.1f;
-                // minSlope = 0.1f;
-                erosionRate = 0.01f;
-                evaporationRate = 0.001f;
-                gravity = -0.1f;
-                depositThreshold = 5.f;
-            }
+            float sedimentCapacity = 1.0f;
+            float erosionRate = 0.01f;
+            float depositionRate = 0.01f;
+            float gravity = -0.1f;
+            float deltaTime = 1.f;
         };
             HydraulicErosion(uint32_t resolution, ErosionProperties erosionProps);
             ~HydraulicErosion();
 
             void initializeParticles();
 
-            void runIterationsCPU(uint32_t iterations, float dt);
+            void runIterationsCPU(uint32_t iterations);
             void drawImgui();
             // void render();
 
