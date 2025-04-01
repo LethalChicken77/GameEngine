@@ -2,6 +2,7 @@
 #include "procedural/noise.hpp"
 #include "graphics/containers.hpp"
 #include "graphics/material.hpp"
+#include "imgui.h"
 
 namespace game
 {
@@ -32,6 +33,18 @@ namespace game
     HydraulicErosion::~HydraulicErosion()
     {
         // Cleanup resources if necessary
+    }
+
+    void HydraulicErosion::drawImgui()
+    {
+        ImGui::Text("Erosion Properties:");
+        ImGui::SliderFloat("Erosion Rate", &erosionProperties.erosionRate, 0.0f, 0.1f);
+        erosionProperties.erosionRate = glm::clamp(erosionProperties.erosionRate, 0.0f, 1.0f);
+        // ImGui::SliderFloat("Evaporation Rate", &erosionProperties.evaporationRate, 0.0f, 1.0f);
+        ImGui::SliderFloat("Gravity", &erosionProperties.gravity, -1.0f, 1.0f);
+        ImGui::SliderFloat("Deposit Threshold", &erosionProperties.depositThreshold, 0.0f, 20.0f);
+        ImGui::SliderFloat("Friction", &erosionProperties.friction, 0.0f, 1.0f);
+        erosionProperties.friction = glm::clamp(erosionProperties.friction, 0.0f, 1.0f);
     }
 
     void HydraulicErosion::initializeParticles()
@@ -77,22 +90,64 @@ namespace game
     
     void HydraulicErosion::runIterationsCPU(uint32_t iterations, float dt)
     {
-        float ds = 0.1f;
+        float ds = 0.0001f;
+        dt = 0.01f;
         for(Particle &particle : cpuParticles)
         {
             particle.position = glm::clamp(particle.position, glm::vec2(0.0f), glm::vec2(heightMap->getWidth() - 1.0f));
             
             glm::vec2 texturePos = particle.position / (float)heightMap->getWidth();
-            float height = heightMap->sampleBilinear(texturePos.x, texturePos.y);
-            float heightDX = heightMap->sampleBilinear(texturePos.x + ds, texturePos.y);
-            float heightDY = heightMap->sampleBilinear(texturePos.x, texturePos.y + ds);
-            glm::vec2 gradient = glm::vec2(heightDX - height, heightDY - height);
+            float height = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y);
+            float heightX = heightMap->getPixelFloat((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y);
+            float heightY = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y + 1);
+            float heightNX = heightMap->getPixelFloat((uint32_t)particle.position.x - 1, (uint32_t)particle.position.y);
+            float heightNY = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y - 1);
+            glm::vec2 gradient = glm::vec2(heightX - height, heightY - height) / ds;
             
-            float pixelHeight = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y);
-            heightMap->setPixel((uint32_t)particle.position.x, (uint32_t)particle.position.y, pixelHeight - 0.01f * dt);
-            heightMap->setPixel(0, 0, pixelHeight - 0.01f * dt);
-            // particle.position += -gradient * dt;
+            float lowestNeighbor = std::min(std::min(heightX, heightY), std::min(heightNX, heightNY));
+
+            float newHeight = height;
+            float velocityLength = glm::length(particle.velocity);
+            float pickupRate = ((velocityLength / erosionProperties.depositThreshold) - 1.0f) * erosionProperties.erosionRate * dt;
+            if(glm::dot(particle.velocity, gradient) < 0.0f || true)
+            {
+                if(&particle == &cpuParticles[0])
+                {
+                    std::cout << velocityLength << std::endl;
+                    std::cout << pickupRate << std::endl;
+                }
+                if(pickupRate > 0.0f) // erosion
+                {
+                    newHeight = glm::max(newHeight - pickupRate, lowestNeighbor);
+                    particle.sediment += pickupRate;
+                }
+                else // deposition
+                {
+                    float depositAmount = glm::min(particle.sediment, -pickupRate);
+                    newHeight += depositAmount;
+                    particle.sediment -= depositAmount;
+                }
+            }
+            else if(particle.sediment > 0.0f)
+            {
+                float newSediment = glm::max(particle.sediment - erosionProperties.erosionRate * dt * (1 - glm::length(particle.velocity)), 0.0f);
+                float sedimentDelta = newSediment - particle.sediment;
+                newHeight += sedimentDelta;
+            }
+            
+            // particle.sediment += newHeight - height;
+            heightMap->setPixel((uint32_t)particle.position.x, (uint32_t)particle.position.y, newHeight);
+            // heightMap->setPixel(0, 0, pixelHeight - 0.01f * dt);
+            particle.velocity += gradient * dt * erosionProperties.gravity;
+            particle.velocity *= erosionProperties.friction * (1.0f - dt);
+            if(glm::length(particle.velocity) * dt > 1)
+            {
+                particle.velocity = glm::normalize(particle.velocity) / dt;
+            }
+            particle.position += particle.velocity * dt;
         }
+        // float pixelHeight = heightMap->getPixelFloat(0, 0);
+        // heightMap->setPixel(0, 0, pixelHeight - 0.1f * dt);
         heightMap->updateOnGPU();
     }
 }

@@ -77,6 +77,9 @@ namespace graphics
             {
                 throw std::runtime_error("Cannot get pixel on non-float texture");
             }
+            x = glm::clamp(x, 0u, width - 1);
+            y = glm::clamp(y, 0u, height - 1);
+            
             int dataIndex = (y * width + x) * sizeof(float);
             float result = 0.0f;
             memcpy(&result, &data[dataIndex], sizeof(float));
