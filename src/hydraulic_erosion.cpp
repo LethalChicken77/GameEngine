@@ -47,6 +47,8 @@ namespace game
         erosionProperties.depositionRate = glm::clamp(erosionProperties.depositionRate, 0.0f, 1.0f);
         ImGui::SliderFloat("Sediment Capacity", &erosionProperties.sedimentCapacity, 0.0f, 5.f, "%.9f");
         erosionProperties.sedimentCapacity = glm::max(erosionProperties.sedimentCapacity, 0.0f);
+        ImGui::SliderFloat("Base Capacity", &erosionProperties.baseCapacity, 0.0f, 1.f, "%.9f");
+        erosionProperties.baseCapacity = glm::max(erosionProperties.baseCapacity, 0.0f);
         
         ImGui::SliderFloat("Gravity", &erosionProperties.gravity, -10.0f, 0.0f);
         erosionProperties.gravity = glm::min(erosionProperties.gravity, 0.0f);
@@ -107,9 +109,13 @@ namespace game
             particle.position = glm::vec2(core::Random::getRandom01(), core::Random::getRandom01()) * (float)heightMap->getWidth();
             particle.velocity = glm::vec2(0.0f, 0.0f);
             particle.sediment = 0.0f;
+            bool endErosion = false;
             for(int i = 0; i < erosionProperties.maxLifetime; i++)
             {
-                particle.position = glm::clamp(particle.position, glm::vec2(0.0f), glm::vec2(heightMap->getWidth() - 1.0f));
+                if(particle.position.x < 0.0f || particle.position.y < 0.0f || particle.position.x >= heightMap->getWidth() || particle.position.y >= heightMap->getHeight())
+                {
+                    break;
+                }
                 
                 float xFrac = particle.position.x - (uint32_t)particle.position.x;
                 float yFrac = particle.position.y - (uint32_t)particle.position.y;
@@ -139,25 +145,28 @@ namespace game
                 float speed = glm::length(particle.velocity);
 
                 float newHeight = 0;
-                if(i == erosionProperties.maxLifetime - 1)
+                if(i == erosionProperties.maxLifetime - 1 || (speed < 0.001f && i > 5))
                 {
-                    newHeight += particle.sediment;
+                    newHeight += particle.sediment * erosionProperties.depositionRate;
+                    endErosion = true;
                 }
                 else
                 {
-                    float effectiveCapacity = erosionProperties.sedimentCapacity * speed * dt;
+                    float effectiveCapacity = erosionProperties.sedimentCapacity * (speed + erosionProperties.baseCapacity) * dt;
                     if(particle.sediment > effectiveCapacity || glm::dot(particle.velocity, gradient) > 0.0f)
                     {
-                        newHeight += erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
-                        particle.sediment -= erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
+                        float depositionAmount = erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
+                        depositionAmount = glm::min(depositionAmount, particle.sediment);
+                        newHeight += depositionAmount;
+                        // particle.sediment -= depositionAmount;
                     }
                     else if(particle.sediment < effectiveCapacity)
                     {
                         float erosionAmount = erosionProperties.erosionRate * (effectiveCapacity - particle.sediment);
+                        erosionAmount = glm::min(erosionAmount, height - lowestNeighbor);
                         newHeight -= erosionAmount;
-                        particle.sediment += erosionAmount;
+                        // particle.sediment += erosionAmount;
                     }
-                    particle.sediment = glm::max(particle.sediment, 0.0f);
                 }
                 
                 // particle.sediment += newHeight - height;
@@ -171,6 +180,12 @@ namespace game
                 float newHeight10 = glm::max(height10 + newHeight * w10, lowestNeighbor);
                 float newHeight01 = glm::max(height01 + newHeight * w01, lowestNeighbor);
                 float newHeight11 = glm::max(height11 + newHeight * w11, lowestNeighbor);
+                float actualChange = newHeight00 + newHeight10 + newHeight01 + newHeight11 
+                                    - height00 - height10 - height01 - height11;
+                particle.sediment -= actualChange;
+                particle.sediment = glm::max(particle.sediment, 0.0f);
+                if(particle.sediment < 0.001f)
+                    break;
                 
                 heightMap->setPixel((uint32_t)particle.position.x, (uint32_t)particle.position.y, newHeight00);
                 heightMap->setPixel((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y, newHeight10);
@@ -178,8 +193,8 @@ namespace game
                 heightMap->setPixel((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y + 1, newHeight11);
 
                 // heightMap->setPixel(0, 0, pixelHeight - 0.01f * dt);
+                particle.velocity *= (1.0f - erosionProperties.friction * dt); // Apply friction before updating velocity
                 particle.velocity += gradient * dt * erosionProperties.gravity;
-                particle.velocity *= (1.0f - erosionProperties.friction * dt);
                 if(glm::length(particle.velocity) * dt > 1)
                 {
                     particle.velocity = glm::normalize(particle.velocity) / dt;

@@ -26,13 +26,14 @@ namespace game
 
         struct ErosionProperties // Pass as push constants
         {
-            int maxLifetime = 500;
-            float friction = 0.01f;
+            int maxLifetime = 4000;
+            float friction = 0.8f;
 
-            float sedimentCapacity = 1.0f;
+            float sedimentCapacity = 8.0f;
+            float baseCapacity = 0.1f;
             float erosionRate = 0.01f;
             float depositionRate = 0.01f;
-            float gravity = -0.1f;
+            float gravity = -10.f;
             float deltaTime = 1.f;
         };
             HydraulicErosion(uint32_t resolution, ErosionProperties erosionProps);

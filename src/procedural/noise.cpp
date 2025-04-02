@@ -6,7 +6,7 @@ namespace procedural
 static constexpr float F2 = 0.366025403f; // (sqrt(3) - 1) / 2
 static constexpr float G2 = 0.211324865f; // (3 - sqrt(3)) / 6
 
-float calculateCornerContribution(float x, float y, int gridX, int gridY, int seed) 
+inline float calculateCornerContribution(float x, float y, int gridX, int gridY, int seed) 
 {
     float t = 0.5f - x*x - y*y;
     if (t < 0) {

@@ -108,7 +108,7 @@ void Engine::update(double deltaTime)
         counter++;
     }
 
-    hydraulicErosion->runIterationsCPU(50);
+    hydraulicErosion->runIterationsCPU(10);
 }
 
 void Engine::run()
