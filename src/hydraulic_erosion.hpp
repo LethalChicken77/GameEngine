@@ -30,9 +30,10 @@ namespace game
             float friction = 0.8f;
 
             float sedimentCapacity = 8.0f;
+            float sedimentScale = 0.1f;
             float baseCapacity = 0.1f;
-            float erosionRate = 0.01f;
-            float depositionRate = 0.01f;
+            float erosionRate = 0.1f;
+            float depositionRate = 0.1f;
             float gravity = -10.f;
             float deltaTime = 1.f;
         };

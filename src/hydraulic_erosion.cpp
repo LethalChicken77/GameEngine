@@ -41,6 +41,8 @@ namespace game
         ImGui::SliderInt("Max Lifetime", &erosionProperties.maxLifetime, 0, 1000);
         erosionProperties.maxLifetime = glm::max(erosionProperties.maxLifetime, 0);
 
+        ImGui::SliderFloat("Sediment per Height", &erosionProperties.sedimentScale, 0.0f, 0.1f, "%.9f");
+        erosionProperties.sedimentScale = glm::clamp(erosionProperties.sedimentScale, 0.0f, 1.0f);
         ImGui::SliderFloat("Erosion Rate", &erosionProperties.erosionRate, 0.0f, 0.1f, "%.9f");
         erosionProperties.erosionRate = glm::clamp(erosionProperties.erosionRate, 0.0f, 1.0f);
         ImGui::SliderFloat("Deposition Rate", &erosionProperties.depositionRate, 0.0f, 0.1f, "%.9f");
@@ -170,7 +172,8 @@ namespace game
                 }
                 
                 // particle.sediment += newHeight - height;
-                
+                newHeight *= erosionProperties.sedimentScale;
+
                 float w00 = (1.0f - xFrac) * (1.0f - yFrac);
                 float w10 = xFrac * (1.0f - yFrac);
                 float w01 = (1.0f - xFrac) * yFrac;
@@ -182,8 +185,10 @@ namespace game
                 float newHeight11 = glm::max(height11 + newHeight * w11, lowestNeighbor);
                 float actualChange = newHeight00 + newHeight10 + newHeight01 + newHeight11 
                                     - height00 - height10 - height01 - height11;
-                particle.sediment -= actualChange;
+
+                particle.sediment -= actualChange / erosionProperties.sedimentScale;
                 particle.sediment = glm::max(particle.sediment, 0.0f);
+                
                 if(particle.sediment < 0.001f)
                     break;
                 
