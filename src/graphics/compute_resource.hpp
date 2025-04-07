@@ -4,17 +4,38 @@
 
 namespace graphics
 {
-    class ComputeResources : public ShaderResource
+    class ComputeResource : public ShaderResource
     {
         public:
-            static ComputeResources instantiate(const ComputeShader *_shader)
+            using id_t = uint64_t;
+
+            ComputeResource() = delete;
+            ComputeResource(const ComputeResource&) = delete;
+            ComputeResource& operator=(const ComputeResource&) = delete;
+            ComputeResource(ComputeResource&&) = default;
+            ComputeResource& operator=(ComputeResource&&) = default;
+
+            static ComputeResource instantiate(const ComputeShader *_shader)
             {
                 static id_t next_id = 0;
 
-                return ComputeResources(next_id++, _shader);
+                return ComputeResource(next_id++, _shader);
             }
+            
+            void setValue(std::string name, ShaderResource::Value value);
+            void setTexture(uint32_t binding, std::shared_ptr<graphics::Texture> texture);
+
+            void createShaderInputBuffer();
+            void updateDescriptorSet();
+
+            uint32_t getId() const { return id; }
+            
         private:
-            ComputeResources(id_t mat_id, const ComputeShader *_shader);
+            ComputeResource(id_t mat_id, const ComputeShader *_shader);
+
+            uint32_t id;
             const ComputeShader *shader;
+
+            bool initialized = false;
     };
 } // namespace graphics

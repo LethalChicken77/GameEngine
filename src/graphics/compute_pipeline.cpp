@@ -12,15 +12,46 @@ using namespace std;
 
 namespace graphics
 {
-    ComputePipeline::ComputePipeline(Device &_device, ComputeShader &_shader) : device(_device), shader(_shader)
+    ComputePipeline::ComputePipeline(ComputeShader &_shader) : shader(_shader)
     {
+        createPipelineLayout();
         createComputePipeline();
     }
 
     ComputePipeline::~ComputePipeline()
     {
-        vkDestroyPipeline(device.device(), m_computePipeline, nullptr);
-        vkDestroyPipelineCache(device.device(), pipelineCache, nullptr);
+        vkDestroyPipeline(Shared::device->device(), m_computePipeline, nullptr);
+        vkDestroyPipelineCache(Shared::device->device(), pipelineCache, nullptr);
+        vkDestroyPipelineLayout(Shared::device->device(), pipelineLayout, nullptr);
+    }
+
+    void ComputePipeline::createPipelineLayout()
+    {
+        std::cout << "Creating compute pipeline layout" << std::endl;
+
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(ErosionPushConstants);
+
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+            // Descriptors::globalSetLayout->getDescriptorSetLayout()
+        };
+        // for(auto &m : Shared::materials)
+        // {
+            descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
+        // }
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+        if(vkCreatePipelineLayout(Shared::device->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create compute pipeline layout");
+        }
     }
 
     void ComputePipeline::createComputePipeline()
@@ -28,7 +59,7 @@ namespace graphics
         // TODO: Implement hot reloading of shaders
         ComputePipelineConfigInfo &configInfo = shader.getConfigInfo();
         
-        assert(configInfo.pipelineLayout != nullptr && "Cannot create compute pipeline:: layout is null");
+        assert(pipelineLayout != nullptr && "Cannot create compute pipeline:: layout is null");
 
         VkPipelineShaderStageCreateInfo shaderStages[1]{};
         shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -42,7 +73,7 @@ namespace graphics
         VkComputePipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         pipelineInfo.stage = shaderStages[0];
-        pipelineInfo.layout = configInfo.pipelineLayout;
+        pipelineInfo.layout = pipelineLayout;
         
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -50,12 +81,12 @@ namespace graphics
         VkPipelineCacheCreateInfo cacheCreateInfo{};
         cacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 
-        if(vkCreatePipelineCache(device.device(), &cacheCreateInfo, nullptr, &pipelineCache) != VK_SUCCESS)
+        if(vkCreatePipelineCache(Shared::device->device(), &cacheCreateInfo, nullptr, &pipelineCache) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create compute pipeline cache!");
         }
         cout << "Creating Compute Pipeline" << endl;
-        if(vkCreateComputePipelines(device.device(), pipelineCache, 1, &pipelineInfo, nullptr, &m_computePipeline) != VK_SUCCESS)
+        if(vkCreateComputePipelines(Shared::device->device(), pipelineCache, 1, &pipelineInfo, nullptr, &m_computePipeline) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create compute pipeline! (Skill issue)");
         }
@@ -67,9 +98,9 @@ namespace graphics
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
     }
 
-    void ComputePipeline::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait)
+    void ComputePipeline::dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait)
     {
-        VkCommandBuffer cmdBuffer = device.beginSingleTimeCommands();
+        // VkCommandBuffer cmdBuffer = Shared::device->beginSingleTimeCommands();
         
         // Bind the compute pipeline
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
@@ -79,7 +110,7 @@ namespace graphics
 
         // if(!wait)
         // {
-            device.endSingleTimeCommands(cmdBuffer);
+            // Shared::device->endSingleTimeCommands(cmdBuffer);
         //     return;
         // }
     }

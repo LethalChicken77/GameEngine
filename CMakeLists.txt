@@ -84,18 +84,22 @@ target_link_libraries(GameEngine PRIVATE
 
 
 
-# Specify your shader source files.
-set(SHADER_SOURCES
-    ${CMAKE_SOURCE_DIR}/build/internal/shaders/basicShader.vert
-    ${CMAKE_SOURCE_DIR}/build/internal/shaders/basicShader.frag
+# Collect shaders
+file(GLOB SHADER_SOURCES
+    ${CMAKE_SOURCE_DIR}/build/internal/shaders/*.vert
+    ${CMAKE_SOURCE_DIR}/build/internal/shaders/*.frag
 )
 
-# Specify output directory for SPIR-V files.
-set(SHADER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/internal/shaders)
+file(GLOB COMPUTE_SHADER_SOURCES
+    ${CMAKE_SOURCE_DIR}/build/internal/compute_shaders/*.comp
+)
 
-# Compile each shader file to SPIR-V.
+# Output directories
+set(SHADER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/internal/shaders)
+set(COMPUTE_SHADER_OUTPUT_DIR ${CMAKE_SOURCE_DIR}/build/internal/compute_shaders)
+
+# Compile graphics shaders
 foreach(SHADER ${SHADER_SOURCES})
-    # Get the file name without extension (e.g., basicShader.vert -> basicShader.vert.spv).
     get_filename_component(SHADER_NAME ${SHADER} NAME)
     add_custom_command(
         OUTPUT ${SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv
@@ -106,5 +110,17 @@ foreach(SHADER ${SHADER_SOURCES})
     list(APPEND SPIRV_OUTPUTS ${SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv)
 endforeach()
 
-# Add a custom target to compile all shaders.
+# Compile compute shaders
+foreach(COMPUTE_SHADER ${COMPUTE_SHADER_SOURCES})
+    get_filename_component(SHADER_NAME ${COMPUTE_SHADER} NAME)
+    add_custom_command(
+        OUTPUT ${COMPUTE_SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv
+        COMMAND glslc ${COMPUTE_SHADER} -o ${COMPUTE_SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv
+        DEPENDS ${COMPUTE_SHADER}
+        COMMENT "Compiling ${COMPUTE_SHADER} to SPIR-V"
+    )
+    list(APPEND SPIRV_OUTPUTS ${COMPUTE_SHADER_OUTPUT_DIR}/${SHADER_NAME}.spv)
+endforeach()
+
+# Add compile target
 add_custom_target(compile_shaders ALL DEPENDS ${SPIRV_OUTPUTS})

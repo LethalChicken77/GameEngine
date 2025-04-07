@@ -17,17 +17,15 @@ namespace graphics
         ComputePipelineConfigInfo() = default;
         ComputePipelineConfigInfo(const ComputePipelineConfigInfo&) = delete;
         ComputePipelineConfigInfo& operator=(const ComputePipelineConfigInfo&) = delete;
-
-        VkPipelineLayout pipelineLayout = nullptr;
     };
 
     // Container to abstract away compute shader logic
-    class ComputeShader : ShaderBase
+    class ComputeShader : public ShaderBase
     {
         public:
             std::string path;
 
-            ComputeShader(const std::string &_path, std::vector<ShaderInput> inputs);
+            ComputeShader(const std::string &_path, std::vector<ShaderInput> inputs, uint32_t textureCount);
             ~ComputeShader();
 
             // Disallow copying of shaders
@@ -38,6 +36,7 @@ namespace graphics
 
             ComputePipelineConfigInfo& getConfigInfo() { return configInfo; };
             VkShaderModule& getShaderModule() { return computeShaderModule; }
+            const std::vector<ShaderInput>& getInputs() const { return inputs; }
             void reloadShader(); // Rereads the shader files and recreates the shader modules
 
             bool dirty = false;

@@ -108,7 +108,8 @@ void Engine::update(double deltaTime)
         counter++;
     }
 
-    hydraulicErosion->runIterationsCPU(100);
+    // hydraulicErosion->runIterationsCPU(100);
+    hydraulicErosion->runIterationsGPU(1000);
 }
 
 void Engine::run()
@@ -169,11 +170,7 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Hello ImGui!");
-        if(ImGui::Button("Reset Particles"))
-        {
-            hydraulicErosion->initializeParticles();
-        }
+        ImGui::Begin("Simulation Settings");
 
         hydraulicErosion->drawImgui();
         ImGui::End();

@@ -11,22 +11,34 @@ namespace graphics
     class ComputePipeline
     {
     public:
-        ComputePipeline(Device &_device, ComputeShader& _shader);
-        ComputePipeline(Device &_device, const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo);
+        struct ErosionPushConstants
+        {
+            // uint32_t numParticles;
+
+            int maxLifetime;
+            float sedimentScale;
+            float sedimentCapacity;
+            float baseCapacity;
+            float gravity;
+            float friction;
+        };
+        
+        ComputePipeline(ComputeShader& _shader);
+        ComputePipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo);
         ~ComputePipeline();
 
         ComputePipeline(const ComputePipeline&) = delete;
         ComputePipeline& operator=(const ComputePipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
-        void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait = false);
+        void dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait = false);
+        VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
     private:
         void createComputePipeline();
         void createComputePipeline(const std::string& path, const ComputePipelineConfigInfo& configInfo);
         void createPipelineLayout();
 
-        Device &device;
         VkPipeline m_computePipeline;
         ComputeShader &shader;
         VkPipelineCache pipelineCache;

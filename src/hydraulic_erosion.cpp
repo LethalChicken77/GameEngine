@@ -16,18 +16,24 @@ namespace game
         // Initialize heightMap, computeShader, and particleBuffer here
         // For example:
         // heightMap = std::make_shared<Texture>(width, height);
-        // computeShader = std::make_shared<ComputeShader>("path/to/shader.spv");
         // particleBuffer = std::make_shared<Buffer>(sizeof(Particle) * numParticles, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
-
-
+        
+        
         // computeShader = std::make_unique<ComputeShader>("shaders/hydraulic_erosion.comp", std::vector<ShaderInput>{
         //     // {"color", ShaderInput::DataType::VEC3},
         // });
+        computeShader = std::make_unique<ComputeShader>("internal/compute_shaders/erosion.comp.spv", std::vector<ShaderInput>{}, 1);
+        computePipeline = std::make_unique<graphics::ComputePipeline>(*computeShader);
+
         initializeTexture(resolution);
+
+        computeResource = std::make_unique<ComputeResource>(ComputeResource::instantiate(computeShader.get()));
+        computeResource->setTexture(0, heightMap);
+        computeResource->setTexture(1, heightMap);
+        // computeResource->setTextureImage(1, heightMap);
+        computeResource->updateDescriptorSet();
         // heightMapResource = std::make_unique<ShaderResource>(heightMap, 0, 0, 0, 0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE);
-        
-        
-        initializeParticles();
+            
     }
 
     HydraulicErosion::~HydraulicErosion()
@@ -43,10 +49,10 @@ namespace game
 
         ImGui::SliderFloat("Sediment per Height", &erosionProperties.sedimentScale, 0.0f, 0.1f, "%.9f");
         erosionProperties.sedimentScale = glm::clamp(erosionProperties.sedimentScale, 0.0f, 1.0f);
-        ImGui::SliderFloat("Erosion Rate", &erosionProperties.erosionRate, 0.0f, 0.1f, "%.9f");
-        erosionProperties.erosionRate = glm::clamp(erosionProperties.erosionRate, 0.0f, 1.0f);
-        ImGui::SliderFloat("Deposition Rate", &erosionProperties.depositionRate, 0.0f, 0.1f, "%.9f");
-        erosionProperties.depositionRate = glm::clamp(erosionProperties.depositionRate, 0.0f, 1.0f);
+        // ImGui::SliderFloat("Erosion Rate", &erosionProperties.erosionRate, 0.0f, 0.1f, "%.9f");
+        // erosionProperties.erosionRate = glm::clamp(erosionProperties.erosionRate, 0.0f, 1.0f);
+        // ImGui::SliderFloat("Deposition Rate", &erosionProperties.depositionRate, 0.0f, 0.1f, "%.9f");
+        // erosionProperties.depositionRate = glm::clamp(erosionProperties.depositionRate, 0.0f, 1.0f);
         ImGui::SliderFloat("Sediment Capacity", &erosionProperties.sedimentCapacity, 0.0f, 5.f, "%.9f");
         erosionProperties.sedimentCapacity = glm::max(erosionProperties.sedimentCapacity, 0.0f);
         ImGui::SliderFloat("Base Capacity", &erosionProperties.baseCapacity, 0.0f, 1.f, "%.9f");
@@ -56,19 +62,8 @@ namespace game
         erosionProperties.gravity = glm::min(erosionProperties.gravity, 0.0f);
         ImGui::SliderFloat("Friction", &erosionProperties.friction, 0.0f, 1.0f);
         erosionProperties.friction = glm::clamp(erosionProperties.friction, 0.0f, 1.0f);
-        ImGui::SliderFloat("Delta Time", &erosionProperties.deltaTime, 0.0f, 0.1f);
-        erosionProperties.deltaTime = glm::max(erosionProperties.deltaTime, 0.0f);
-    }
-
-    void HydraulicErosion::initializeParticles()
-    {
-        // cpuParticles.resize(erosionProperties.numParticles);
-        // for(uint32_t i = 0; i < erosionProperties.numParticles; i++)
-        // {
-        //     cpuParticles[i].position = glm::vec2(core::Random::getRandom01(), core::Random::getRandom01()) * (float)heightMap->getWidth();
-        //     cpuParticles[i].velocity = glm::vec2(0.0f, 0.0f);
-        //     cpuParticles[i].sediment = 0.0f;
-        // }
+        // ImGui::SliderFloat("Delta Time", &erosionProperties.deltaTime, 0.0f, 0.1f);
+        // erosionProperties.deltaTime = glm::max(erosionProperties.deltaTime, 0.0f);
     }
 
     void HydraulicErosion::initializeTexture(size_t resolution)
@@ -78,7 +73,7 @@ namespace game
         SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
         properties.format = VK_FORMAT_R32_SFLOAT;
         properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        properties.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; // Allow usage for reads and writes, no need for shader read
+        properties.finalLayout = VK_IMAGE_LAYOUT_GENERAL; // Allow usage for reads and writes, no need for shader read
         samplerProperties.magFilter = VK_FILTER_LINEAR;
         samplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         heightMap = std::make_shared<Texture>(properties, samplerProperties, resolution, resolution);
@@ -104,7 +99,6 @@ namespace game
     void HydraulicErosion::runIterationsCPU(uint32_t iterations)
     {
         float ds = 0.0001f;
-        float dt = erosionProperties.deltaTime;
         for(uint32_t i = 0; i < iterations; i++)
         {
             Particle particle{};
@@ -149,22 +143,24 @@ namespace game
                 float newHeight = 0;
                 if(i == erosionProperties.maxLifetime - 1 || (speed < 0.001f && i > 5))
                 {
-                    newHeight += particle.sediment * erosionProperties.depositionRate;
+                    newHeight += particle.sediment;
                     endErosion = true;
                 }
                 else
                 {
-                    float effectiveCapacity = erosionProperties.sedimentCapacity * (speed + erosionProperties.baseCapacity) * dt;
+                    float effectiveCapacity = erosionProperties.sedimentCapacity * (speed + erosionProperties.baseCapacity);
                     if(particle.sediment > effectiveCapacity || glm::dot(particle.velocity, gradient) > 0.0f)
                     {
-                        float depositionAmount = erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
+                        // float depositionAmount = erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
+                        float depositionAmount = particle.sediment - effectiveCapacity;
                         depositionAmount = glm::min(depositionAmount, particle.sediment);
                         newHeight += depositionAmount;
                         // particle.sediment -= depositionAmount;
                     }
                     else if(particle.sediment < effectiveCapacity)
                     {
-                        float erosionAmount = erosionProperties.erosionRate * (effectiveCapacity - particle.sediment);
+                        float erosionAmount = effectiveCapacity - particle.sediment;
+                        // float erosionAmount = erosionProperties.erosionRate * (effectiveCapacity - particle.sediment);
                         erosionAmount = glm::min(erosionAmount, height - lowestNeighbor);
                         newHeight -= erosionAmount;
                         // particle.sediment += erosionAmount;
@@ -188,7 +184,7 @@ namespace game
 
                 particle.sediment -= actualChange / erosionProperties.sedimentScale;
                 particle.sediment = glm::max(particle.sediment, 0.0f);
-                
+
                 if(particle.sediment < 0.001f)
                     break;
                 
@@ -198,11 +194,11 @@ namespace game
                 heightMap->setPixel((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y + 1, newHeight11);
 
                 // heightMap->setPixel(0, 0, pixelHeight - 0.01f * dt);
-                particle.velocity *= (1.0f - erosionProperties.friction * dt); // Apply friction before updating velocity
-                particle.velocity += gradient * dt * erosionProperties.gravity;
-                if(glm::length(particle.velocity) * dt > 1)
+                particle.velocity *= (1.0f - erosionProperties.friction); // Apply friction before updating velocity
+                particle.velocity += gradient * erosionProperties.gravity;
+                if(glm::length(particle.velocity) > 1)
                 {
-                    particle.velocity = glm::normalize(particle.velocity) / dt;
+                    particle.velocity = glm::normalize(particle.velocity);
                 }
                 particle.position += particle.velocity;
             }
@@ -210,5 +206,47 @@ namespace game
         // float pixelHeight = heightMap->getPixelFloat(0, 0);
         // heightMap->setPixel(0, 0, pixelHeight - 0.1f * dt);
         heightMap->updateOnGPU();
+    }
+
+    void HydraulicErosion::runIterationsGPU(uint32_t iterations)
+    {
+        // heightMap->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
+        computeResource->updateDescriptorSet();
+        
+        VkCommandBuffer commandBuffer = graphics::Shared::device->beginSingleTimeCommands();
+
+        computePipeline->bind(commandBuffer);
+
+        std::vector<VkDescriptorSet> descriptorSets = { computeResource->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_COMPUTE, 
+            computePipeline->getPipelineLayout(), 
+            0,
+            static_cast<uint32_t>(descriptorSets.size()),
+            descriptorSets.data(), 
+            0,
+            nullptr
+        );
+
+        graphics::ComputePipeline::ErosionPushConstants push{};
+        memcpy(&push, &erosionProperties, sizeof(erosionProperties));
+        vkCmdPushConstants(
+            commandBuffer, 
+            computePipeline->getPipelineLayout(),
+            VK_SHADER_STAGE_COMPUTE_BIT, 
+            0, 
+            sizeof(graphics::ComputePipeline::ErosionPushConstants), 
+            &push
+        );
+        
+        uint32_t groupsX = (iterations + 1024 - 1) / 1024;
+        
+        // Run the compute shader for the specified number of iterations
+        computePipeline->dispatch(commandBuffer, groupsX, 1, 1);
+        
+        graphics::Shared::device->endSingleTimeCommands(commandBuffer);
+
+        // heightMap->transitionImageLayout(VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
 }

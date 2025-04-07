@@ -84,7 +84,6 @@ vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec
     return max(specular, 0.0);
 }
 
-
 void main()
 {
     debugPrintfEXT("Hello from vertex shader\n");
