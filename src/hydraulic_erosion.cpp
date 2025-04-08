@@ -75,6 +75,7 @@ namespace game
         properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         properties.finalLayout = VK_IMAGE_LAYOUT_GENERAL; // Allow usage for reads and writes, no need for shader read
         samplerProperties.magFilter = VK_FILTER_LINEAR;
+        samplerProperties.minFilter = VK_FILTER_LINEAR;
         samplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         heightMap = std::make_shared<Texture>(properties, samplerProperties, resolution, resolution);
         
@@ -129,15 +130,6 @@ namespace game
                 glm::vec2 gradient = glm::vec2(dx, dy);
                 float lowestNeighbor = std::min(std::min(height00, height10), std::min(height01, height11));
 
-                // glm::vec2 texturePos = particle.position / (float)heightMap->getWidth();
-                // float iheight = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y);
-                // float iheightX = heightMap->getPixelFloat((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y);
-                // float iheightY = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y + 1);
-                // float iheightNX = heightMap->getPixelFloat((uint32_t)particle.position.x - 1, (uint32_t)particle.position.y);
-                // float iheightNY = heightMap->getPixelFloat((uint32_t)particle.position.x, (uint32_t)particle.position.y - 1);
-                // glm::vec2 gradient = glm::vec2(heightX - heightNX, heightY - heightNY) / ds;
-                
-                // float lowestNeighbor = std::min(std::min(heightX, heightY), std::min(iheightNX, iheightNY));
                 float speed = glm::length(particle.velocity);
 
                 float newHeight = 0;
@@ -151,23 +143,18 @@ namespace game
                     float effectiveCapacity = erosionProperties.sedimentCapacity * (speed + erosionProperties.baseCapacity);
                     if(particle.sediment > effectiveCapacity || glm::dot(particle.velocity, gradient) > 0.0f)
                     {
-                        // float depositionAmount = erosionProperties.depositionRate * (particle.sediment - effectiveCapacity);
                         float depositionAmount = particle.sediment - effectiveCapacity;
                         depositionAmount = glm::min(depositionAmount, particle.sediment);
                         newHeight += depositionAmount;
-                        // particle.sediment -= depositionAmount;
                     }
                     else if(particle.sediment < effectiveCapacity)
                     {
                         float erosionAmount = effectiveCapacity - particle.sediment;
-                        // float erosionAmount = erosionProperties.erosionRate * (effectiveCapacity - particle.sediment);
                         erosionAmount = glm::min(erosionAmount, height - lowestNeighbor);
                         newHeight -= erosionAmount;
-                        // particle.sediment += erosionAmount;
                     }
                 }
                 
-                // particle.sediment += newHeight - height;
                 newHeight *= erosionProperties.sedimentScale;
 
                 float w00 = (1.0f - xFrac) * (1.0f - yFrac);
@@ -193,7 +180,6 @@ namespace game
                 heightMap->setPixel((uint32_t)particle.position.x, (uint32_t)particle.position.y + 1, newHeight01);
                 heightMap->setPixel((uint32_t)particle.position.x + 1, (uint32_t)particle.position.y + 1, newHeight11);
 
-                // heightMap->setPixel(0, 0, pixelHeight - 0.01f * dt);
                 particle.velocity *= (1.0f - erosionProperties.friction); // Apply friction before updating velocity
                 particle.velocity += gradient * erosionProperties.gravity;
                 if(glm::length(particle.velocity) > 1)
@@ -203,15 +189,13 @@ namespace game
                 particle.position += particle.velocity;
             }
         }
-        // float pixelHeight = heightMap->getPixelFloat(0, 0);
-        // heightMap->setPixel(0, 0, pixelHeight - 0.1f * dt);
         heightMap->updateOnGPU();
     }
 
     void HydraulicErosion::runIterationsGPU(uint32_t iterations)
     {
         // heightMap->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_GENERAL);
-        computeResource->updateDescriptorSet();
+        // computeResource->updateDescriptorSet();
         
         VkCommandBuffer commandBuffer = graphics::Shared::device->beginSingleTimeCommands();
 
@@ -230,7 +214,14 @@ namespace game
         );
 
         graphics::ComputePipeline::ErosionPushConstants push{};
-        memcpy(&push, &erosionProperties, sizeof(erosionProperties));
+        push.numParticles = iterations;
+        push.seed = core::Random::getRandomInt(INT32_MIN, INT32_MAX);
+        push.maxLifetime = erosionProperties.maxLifetime;
+        push.sedimentScale = erosionProperties.sedimentScale;
+        push.sedimentCapacity = erosionProperties.sedimentCapacity;
+        push.baseCapacity = erosionProperties.baseCapacity;
+        push.gravity = erosionProperties.gravity;
+        push.friction = erosionProperties.friction;
         vkCmdPushConstants(
             commandBuffer, 
             computePipeline->getPipelineLayout(),

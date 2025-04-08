@@ -13,7 +13,8 @@ namespace graphics
     public:
         struct ErosionPushConstants
         {
-            // uint32_t numParticles;
+            uint32_t numParticles;
+            uint32_t seed;
 
             int maxLifetime;
             float sedimentScale;
@@ -21,6 +22,16 @@ namespace graphics
             float baseCapacity;
             float gravity;
             float friction;
+
+            // uint numParticles;
+            // uint seed;
+        
+            // int maxLifetime;
+            // float sedimentScale;
+            // float sedimentCapacity;
+            // float baseCapacity;
+            // float gravity;
+            // float friction;
         };
         
         ComputePipeline(ComputeShader& _shader);

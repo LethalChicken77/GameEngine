@@ -50,6 +50,9 @@ void Engine::close()
     // graphics->cleanup();
 }
 
+int cpuNumParticles = 20;
+int gpuNumParticles = 30000;
+
 void Engine::update(double deltaTime)
 {
     glm::vec3 forward = camera.transform.forward();
@@ -108,9 +111,11 @@ void Engine::update(double deltaTime)
         counter++;
     }
 
-    // hydraulicErosion->runIterationsCPU(100);
-    hydraulicErosion->runIterationsGPU(1000);
+    // hydraulicErosion->runIterationsCPU(cpuNumParticles);
+    hydraulicErosion->runIterationsGPU(gpuNumParticles);
 }
+
+
 
 void Engine::run()
 {
@@ -171,6 +176,8 @@ void Engine::run()
         ImGui::NewFrame();
 
         ImGui::Begin("Simulation Settings");
+        ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
+        ImGui::SliderInt("GPU Particles", &gpuNumParticles, 0, 100000);
 
         hydraulicErosion->drawImgui();
         ImGui::End();

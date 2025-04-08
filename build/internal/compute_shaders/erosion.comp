@@ -15,7 +15,8 @@ layout(local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
 layout(push_constant) uniform PushConstants
 {
     // uint textureSize;
-    // uint numParticles;
+    uint numParticles;
+    uint seed;
 
     int maxLifetime;
     float sedimentScale;
@@ -41,6 +42,9 @@ float random(uint seed)
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
+    uint seed = pushConstants.seed * pushConstants.numParticles + index;
+    if(index >= pushConstants.numParticles)
+        return;
     uint iterations = 1;
     ivec2 texSize = imageSize(heightMap);
 
@@ -48,7 +52,7 @@ void main()
     float dt = 0.1;
 
     Particle particle;
-    particle.position = vec2(random(index), random(index + 100)) * float(texSize.x);
+    particle.position = vec2(random(seed), random(seed + 100)) * float(texSize.x);
     particle.velocity = vec2(0.0, 0.0);
     particle.sediment = 0.0;
     bool endErosion = false;
@@ -59,30 +63,33 @@ void main()
             break;
         }
         
-        float xFrac = particle.position.x - uint(particle.position.x);
-        float yFrac = particle.position.y - uint(particle.position.y);
+        float xFrac = particle.position.x - floor(particle.position.x);
+        float yFrac = particle.position.y - floor(particle.position.y);
         
         vec2 texturePos = particle.position / float(texSize.x);
         vec2 texturePos00 = floor(particle.position) / float(texSize.x);
-        vec2 texturePos10 = floor(particle.position + vec2(1, 0)) / float(texSize.x);
-        vec2 texturePos01 = floor(particle.position + vec2(0, 1)) / float(texSize.x);
-        vec2 texturePos11 = floor(particle.position + vec2(1, 1)) / float(texSize.x);
+        vec2 texturePos10 = (floor(particle.position) + vec2(1, 0)) / float(texSize.x);
+        vec2 texturePos01 = (floor(particle.position) + vec2(0, 1)) / float(texSize.x);
+        vec2 texturePos11 = (floor(particle.position) + vec2(1, 1)) / float(texSize.x);
         float height = texture(heightMapSampler, texturePos).r;
-        float height00 = texture(heightMapSampler, texturePos00).r;
-        float height10 = texture(heightMapSampler, texturePos00).r;
-        float height01 = texture(heightMapSampler, texturePos00).r;
-        float height11 = texture(heightMapSampler, texturePos00).r;
+        float height00 = imageLoad(heightMap, ivec2(texturePos00 * texSize.x)).r;
+        float height10 = imageLoad(heightMap, ivec2(texturePos10 * texSize.x)).r;
+        float height01 = imageLoad(heightMap, ivec2(texturePos01 * texSize.x)).r;
+        float height11 = imageLoad(heightMap, ivec2(texturePos11 * texSize.x)).r;
 
         float dx = (height10 - height00) * (1.0 - yFrac) + (height11 - height01) * yFrac;
         float dy = (height01 - height00) * (1.0 - xFrac) + (height11 - height10) * xFrac;
+        // float dx = (height10 - height00) * (1.0 - yFrac) + (height11 - height01) * yFrac;
+        // float dy = (height01 - height00) * (1.0 - xFrac) + (height11 - height10) * xFrac;
 
         vec2 gradient = vec2(dx, dy);
         float lowestNeighbor = min(min(height00, height10), min(height01, height11));
 
         float speed = length(particle.velocity);
+        
 
         float newHeight = 0;
-        if(i == pushConstants.maxLifetime - 1 || (speed < 0.001f && i > 5))
+        if(i == pushConstants.maxLifetime - 1)// || (speed < 0.001f && i > 5))
         {
             newHeight += particle.sediment;
             endErosion = true;
@@ -92,23 +99,18 @@ void main()
             float effectiveCapacity = pushConstants.sedimentCapacity * (speed + pushConstants.baseCapacity);
             if(particle.sediment > effectiveCapacity || dot(particle.velocity, gradient) > 0.0)
             {
-                // float depositionAmount = pushConstants.depositionRate * (particle.sediment - effectiveCapacity);
                 float depositionAmount = particle.sediment - effectiveCapacity;
                 depositionAmount = min(depositionAmount, particle.sediment);
                 newHeight += depositionAmount;
-                // particle.sediment -= depositionAmount;
             }
             else if(particle.sediment < effectiveCapacity)
             {
                 float erosionAmount = effectiveCapacity - particle.sediment;
-                // float erosionAmount = pushConstants.erosionRate * (effectiveCapacity - particle.sediment);
                 erosionAmount = min(erosionAmount, height - lowestNeighbor);
                 newHeight -= erosionAmount;
-                // particle.sediment += erosionAmount;
             }
         }
         
-        // particle.sediment += newHeight - height;
         newHeight *= pushConstants.sedimentScale;
 
         float w00 = (1.0 - xFrac) * (1.0 - yFrac);
@@ -123,16 +125,16 @@ void main()
         float actualChange = newHeight00 + newHeight10 + newHeight01 + newHeight11 
                             - height00 - height10 - height01 - height11;
 
+        imageStore(heightMap, ivec2(texturePos00 * texSize.x), vec4(newHeight00, 0.0, 0.0, 0.0));
+        imageStore(heightMap, ivec2(texturePos10 * texSize.x), vec4(newHeight10, 0.0, 0.0, 0.0));
+        imageStore(heightMap, ivec2(texturePos01 * texSize.x), vec4(newHeight01, 0.0, 0.0, 0.0));
+        imageStore(heightMap, ivec2(texturePos11 * texSize.x), vec4(newHeight11, 0.0, 0.0, 0.0));
+
         particle.sediment -= actualChange / pushConstants.sedimentScale;
         particle.sediment = max(particle.sediment, 0.0);
 
-        if(particle.sediment < 0.001f)
+        if(particle.sediment < 0.0001f)
             break;
-        
-        imageStore(heightMap, ivec2(texturePos00), vec4(newHeight00, 0.0, 0.0, 1.0));
-        imageStore(heightMap, ivec2(texturePos10), vec4(newHeight10, 0.0, 0.0, 1.0));
-        imageStore(heightMap, ivec2(texturePos01), vec4(newHeight01, 0.0, 0.0, 1.0));
-        imageStore(heightMap, ivec2(texturePos11), vec4(newHeight11, 0.0, 0.0, 1.0));
 
         particle.velocity *= (1.0 - pushConstants.friction); // Apply friction before updating velocity
         particle.velocity += gradient * pushConstants.gravity;
@@ -140,6 +142,6 @@ void main()
         {
             particle.velocity = normalize(particle.velocity);
         }
-        particle.position += particle.velocity;
+        particle.position += particle.velocity * dt;
     }
 }

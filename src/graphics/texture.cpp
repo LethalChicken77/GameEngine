@@ -138,7 +138,7 @@ namespace graphics
 
     void Texture::updateOnGPU()
     {
-        transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         copyDataToImage();
         transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, properties.finalLayout);
     }

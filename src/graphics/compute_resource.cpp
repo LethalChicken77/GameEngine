@@ -172,18 +172,18 @@ namespace graphics
     {
         int bindings = 0;
         DescriptorWriter writer = DescriptorWriter(*(shader->getDescriptorSetLayout()), *(shader->getDescriptorPool()));
-        if(data.size() > 0)
-        {
-            VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-            writer.writeBuffer(bindings++, &bufferInfo);
-        }
+        // if(data.size() > 0)
+        // {
+        //     VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
+        //     writer.writeBuffer(bindings++, &bufferInfo);
+        // }
         // for(int i = 0; i < textures.size(); i++)
         // {
         //     // std::cout << "Writing sampler to binding " << bindings << std::endl;
         // }
         writer.writeImage(0, textures[0]->getDescriptorInfo());
         writer.writeImage(1, textures[0]->getDescriptorInfo());
-        writer.build(descriptorSet);
+        // writer.build(descriptorSet);
         if(!writer.build(descriptorSet))
         {
             throw std::runtime_error("Failed to update descriptor set");
