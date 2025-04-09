@@ -19,9 +19,10 @@ namespace graphics
             int maxLifetime;
             float sedimentScale;
             float sedimentCapacity;
-            float baseCapacity;
             float gravity;
             float friction;
+            float deltaTime;
+            float evaporationRate;
 
             // uint numParticles;
             // uint seed;

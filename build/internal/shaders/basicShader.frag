@@ -24,10 +24,13 @@ layout(set = 1, binding = 0) uniform MaterialInfo
     float metallic;
 } materialInfo;
 
-layout(set = 1, binding = 1) uniform sampler2D albedo;
-layout(set = 1, binding = 2) uniform sampler2D roughness;
-layout(set = 1, binding = 3) uniform sampler2D normalMap;
-layout(set = 1, binding = 4) uniform sampler2D heightMap;
+layout(set = 1, binding = 1) uniform sampler2D grassAlbedo;
+layout(set = 1, binding = 2) uniform sampler2D grassRoughness;
+layout(set = 1, binding = 3) uniform sampler2D grassNormalMap;
+layout(set = 1, binding = 4) uniform sampler2D rockAlbedo;
+layout(set = 1, binding = 5) uniform sampler2D rockRoughness;
+layout(set = 1, binding = 6) uniform sampler2D rockNormalMap;
+layout(set = 1, binding = 7) uniform sampler2D heightMap;
 // layout(set = 1, binding = 3) uniform sampler2D heightMap;
 
 const float PI = 3.14159265359;
@@ -84,6 +87,13 @@ vec3 cookTorrance(vec3 normal, vec3 lightDir, vec3 viewDir, float roughness, vec
     return max(specular, 0.0);
 }
 
+float smoothstep2(float a, float b, float t, float center, float width)
+{
+    float x = (t - center) / width + 0.5;
+    x = clamp(x, 0.0, 1.0);
+    return mix(a, b, x * x * (3.0 - 2.0 * x));
+}
+
 void main()
 {
     debugPrintfEXT("Hello from vertex shader\n");
@@ -95,6 +105,27 @@ void main()
     vec2 dUVdx = dFdx(uv);
     vec2 dUVdy = dFdy(uv);
 
+
+    // Compute the normal map and roughness map
+    vec3 texColor = vec3(0.0);
+    float roughness = 0.0;
+    vec3 normalMapSample = vec3(0.0);
+
+    float blend = smoothstep2(1, 0, dot(_normal, vec3(0,1,0)), 0.65, 0.2);
+
+    texColor = texture(grassAlbedo, uv).rgb;
+    roughness = texture(grassRoughness, uv).r;
+    normalMapSample = texture(grassNormalMap, uv).xyz;
+
+    texColor = mix(texColor, texture(rockAlbedo, uv).rgb, blend);
+    roughness = mix(roughness, texture(rockRoughness, uv).r, blend);
+    normalMapSample = mix(normalMapSample, texture(rockNormalMap, uv).xyz, blend);
+
+
+    normalMapSample = pow(normalMapSample, vec3(0.45454545454)) * 2.0 - 1.0;
+    normalMapSample = normalize(normalMapSample);
+    roughness = pow(roughness, 0.45454545454) * 2.0 - 1.0;
+
     // Compute tangent and bitangent
     float det = dUVdx.x * dUVdy.y - dUVdx.y * dUVdy.x;
     float invDet = 1.0 / det;
@@ -103,7 +134,6 @@ void main()
     vec3 bitangent = -normalize((dPosdy * dUVdx.x - dPosdx * dUVdy.x) * invDet);
 
     mat3 TBN = mat3(tangent, bitangent, _normal);
-    vec3 normalMapSample = pow(texture(normalMap, uv).xyz, vec3(0.45454545454)) * 2.0 - 1.0;
     vec3 normal = normalize(TBN * normalMapSample);
     float normalStrength = 0.3;
     normal = normalize(_normal + normal * normalStrength);
@@ -137,11 +167,11 @@ void main()
     vec3 F0 = (ior - 1.0) * (ior - 1.0) / ((ior + 1.0) * (ior + 1.0));
     vec3 F = F0 + (1.0 - F0) * pow(1.0 - dot(halfDir, viewDir), 5.0);
 
-    float roughness = texture(roughness, uv).r;
+
     // roughness = roughness * roughness * roughness;
     // Energy conservation term: (1.0 - F) * 
-    vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, roughness, color * materialInfo.color) * lightAttenuation * lightStrength * texture(albedo, uv).rgb;
-    vec3 ambient = color * materialInfo.color * ambientColor * texture(albedo, uv).rgb;
+    vec3 diffuse = (1.0 - F) * orenNayar(normal, lightDir, viewDir, roughness, color * materialInfo.color) * lightAttenuation * lightStrength * texColor;
+    vec3 ambient = color * materialInfo.color * ambientColor * texColor;
     // vec3 ambient = orenNayarAmbient(normal, materialInfo.roughness, color * materialInfo.color, 1.0, vec3(1.0)) +
     //     cookTorrance(normal, viewDir, viewDir, materialInfo.roughness, ior);
     // ambient *= 0.1;

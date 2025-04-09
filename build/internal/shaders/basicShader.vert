@@ -30,7 +30,7 @@ layout(set = 1, binding = 0) uniform MaterialInfo
     float metallic;
 } materialInfo;
 
-layout(set = 1, binding = 4) uniform sampler2D heightMap;
+layout(set = 1, binding = 7) uniform sampler2D heightMap;
 
 void main()
 {

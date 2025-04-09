@@ -286,6 +286,12 @@ namespace graphics
             sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Wait for fragment shader reads
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT; // Before transfer writes
         }
+        else if(oldLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;  // Ensure compute shader writes are finished
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Wait for compute shader writes
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT; // Before transfer writes
+        }
         else {
             throw std::invalid_argument("Unsupported layout transition!");
         }

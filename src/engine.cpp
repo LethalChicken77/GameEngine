@@ -51,7 +51,14 @@ void Engine::close()
 }
 
 int cpuNumParticles = 20;
-int gpuNumParticles = 30000;
+int gpuNumParticles = 10000;
+enum SimulationMode
+{
+    None,
+    CPU,
+    GPU
+};
+SimulationMode simulationMode = SimulationMode::None;
 
 void Engine::update(double deltaTime)
 {
@@ -111,8 +118,14 @@ void Engine::update(double deltaTime)
         counter++;
     }
 
-    // hydraulicErosion->runIterationsCPU(cpuNumParticles);
-    hydraulicErosion->runIterationsGPU(gpuNumParticles);
+    if(simulationMode == SimulationMode::CPU)
+    {
+        hydraulicErosion->runIterationsCPU(cpuNumParticles);
+    }
+    else if(simulationMode == SimulationMode::GPU)
+    {
+        hydraulicErosion->runIterationsGPU(gpuNumParticles);
+    }
 }
 
 
@@ -178,8 +191,27 @@ void Engine::run()
         ImGui::Begin("Simulation Settings");
         ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
         ImGui::SliderInt("GPU Particles", &gpuNumParticles, 0, 100000);
-
+        
         hydraulicErosion->drawImgui();
+        if(simulationMode == SimulationMode::None)
+        {
+            if(ImGui::Button("Run CPU"))
+            {
+                simulationMode = SimulationMode::CPU;
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Run GPU"))
+            {
+                simulationMode = SimulationMode::GPU;
+            }
+        }
+        else
+        {
+            if(ImGui::Button("Stop"))
+            {
+                simulationMode = SimulationMode::None;
+            }
+        }
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);

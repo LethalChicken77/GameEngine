@@ -156,6 +156,12 @@ void Device::createLogicalDevice() {
     queueCreateInfos.push_back(queueCreateInfo);
   }
 
+  // Enable the feature for image float32 atomics
+  VkPhysicalDeviceShaderAtomicFloatFeaturesEXT atomicFloatFeatures = {};
+  atomicFloatFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
+  atomicFloatFeatures.shaderImageFloat32Atomics = VK_TRUE; // Enable float32 atomics on images
+  atomicFloatFeatures.shaderImageFloat32AtomicAdd = VK_TRUE; // Enable float32 atomics on images
+
   VkPhysicalDeviceFeatures deviceFeatures = {};
   deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -168,6 +174,7 @@ void Device::createLogicalDevice() {
   createInfo.pEnabledFeatures = &deviceFeatures;
   createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
   createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+  createInfo.pNext = &atomicFloatFeatures; // Add the atomic float features to the device create info
 
   // might not really be necessary anymore because device specific validation layers
   // have been deprecated

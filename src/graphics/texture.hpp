@@ -101,6 +101,8 @@ namespace graphics
             return sampleBilinear(pos.x, pos.y);
         }
 
+        std::vector<uint8_t> *getData() { return &data; }
+
     private:
         VkCommandPool commandPool;
         VkQueue queue;
