@@ -51,7 +51,7 @@ void Engine::close()
 }
 
 int cpuNumParticles = 20;
-int gpuNumParticles = 10000;
+int gpuNumParticles = 5000;
 enum SimulationMode
 {
     None,
