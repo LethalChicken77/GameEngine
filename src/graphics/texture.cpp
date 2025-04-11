@@ -1,8 +1,10 @@
 #include <iostream>
+#include <unistd.h>
 // #include <filesystem>
 #include "texture.hpp"
 #include "containers.hpp"
-#include <unistd.h>
+#define TINYEXR_IMPLEMENTATION
+#include "tinyexr.h"
 
 namespace graphics
 {
@@ -63,6 +65,112 @@ namespace graphics
 
         return texture;
     }
+
+    std::shared_ptr<Texture> Texture::loadFromFileEXR(const std::string& path, TextureProperties properties, SamplerProperties samplerProperties)
+    {
+        if (access(path.c_str(), F_OK) != 0)
+        {
+            throw std::runtime_error("File not found: " + path);
+        }
+
+        float* exrImage = nullptr;
+        int texWidth, texHeight;
+        const char* err = nullptr;
+
+        int ret = LoadEXR(&exrImage, &texWidth, &texHeight, path.c_str(), &err);
+        if (ret != TINYEXR_SUCCESS)
+        {
+            std::string errorMsg = err ? std::string(err) : "Unknown EXR error";
+            FreeEXRErrorMessage(err);
+            throw std::runtime_error("Failed to load EXR image: " + errorMsg);
+        }
+
+        const uint32_t pixelCount = texWidth * texHeight;
+        const int numChannels = 4; // LoadEXR always gives RGBA
+
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(texWidth, texHeight);
+
+        // Allocate for single-channel float data
+        texture->data.resize(pixelCount * sizeof(float));
+
+        // Copy only the red channel (first float per pixel)
+        for (uint32_t i = 0; i < pixelCount; ++i)
+        {
+            float r = exrImage[i * numChannels];
+            memcpy(&texture->data[i * sizeof(float)], &r, sizeof(float));
+        }
+
+        free(exrImage);
+
+        texture->width = texWidth;
+        texture->height = texHeight;
+        texture->properties = properties;
+        texture->samplerProperties = samplerProperties;
+
+        texture->properties.format = VK_FORMAT_R32_SFLOAT;
+
+        texture->createTexture();
+
+        return texture;
+    }
+
+
+    void Texture::saveToFileEXR(const std::string& path)
+    {
+        int pixelCount = width * height;
+        int floatSize = sizeof(float);
+        int expectedSize = pixelCount * floatSize;
+
+        if (data.size() != expectedSize)
+        {
+            throw std::runtime_error("Data size doesn't match expected float pixel layout for EXR output.");
+        }
+
+        // Reinterpret the byte vector as float data
+        const float* floatPixels = reinterpret_cast<const float*>(data.data());
+
+        float* images[1];
+        images[0] = const_cast<float*>(floatPixels); // TinyEXR is not const-correct
+
+        EXRImage image;
+        InitEXRImage(&image);
+        image.num_channels = 1;
+        image.images = reinterpret_cast<unsigned char**>(images);
+        image.width = width;
+        image.height = height;
+
+        EXRHeader header;
+        InitEXRHeader(&header);
+        header.num_channels = 1;
+
+        header.channels = (EXRChannelInfo*)malloc(sizeof(EXRChannelInfo));
+        strcpy(header.channels[0].name, "Y"); // Luminance (grayscale)
+
+        header.pixel_types = (int*)malloc(sizeof(int));
+        header.requested_pixel_types = (int*)malloc(sizeof(int));
+        header.pixel_types[0] = TINYEXR_PIXELTYPE_FLOAT;
+        header.requested_pixel_types[0] = TINYEXR_PIXELTYPE_FLOAT;
+
+        const char* err = nullptr;
+        int result = SaveEXRImageToFile(&image, &header, path.c_str(), &err);
+
+        // Cleanup regardless of result
+        free(header.channels);
+        free(header.pixel_types);
+        free(header.requested_pixel_types);
+
+        if (result != TINYEXR_SUCCESS)
+        {
+            std::string msg = "Failed to save EXR: ";
+            if (err)
+            {
+                msg += err;
+                FreeEXRErrorMessage(err);
+            }
+            throw std::runtime_error(msg);
+        }
+    }
+
 
     void Texture::setPixel(uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
     {
@@ -141,6 +249,13 @@ namespace graphics
         transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         copyDataToImage();
         transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, properties.finalLayout);
+    }
+
+    void Texture::updateOnCPU()
+    {
+        transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        copyDataFromImage();
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, properties.finalLayout);
     }
 
     void Texture::allocateMemory()
@@ -250,50 +365,58 @@ namespace graphics
         VkPipelineStageFlags sourceStage;
         VkPipelineStageFlags destinationStage;
     
-        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-            barrier.srcAccessMask = 0;
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        // Handle oldLayout
+        switch (oldLayout)
+        {
+            case VK_IMAGE_LAYOUT_UNDEFINED:
+                barrier.srcAccessMask = 0;
+                sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_GENERAL:
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+                break;
+            default:
+                throw std::invalid_argument("Unsupported old layout transition!");
         }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        } 
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL) {
-            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;  // Ensure transfer writes are finished
-            barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-            destinationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Ready for compute shader use
-        } 
-        else if (oldLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-            barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;  // Ensure compute shader writes are finished
-            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Ensure compute shader completes
-            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Before fragment shader reads
-        } 
-        else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL) {
-            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;  // Ensure fragment shader finishes reading
-            barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Wait for fragment shader reads
-            destinationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Before compute shader writes
-        } 
-        else if(oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;  // Ensure fragment shader finishes reading
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; // Wait for fragment shader reads
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT; // Before transfer writes
-        }
-        else if(oldLayout == VK_IMAGE_LAYOUT_GENERAL && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-            barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;  // Ensure compute shader writes are finished
-            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; // Wait for compute shader writes
-            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT; // Before transfer writes
-        }
-        else {
-            throw std::invalid_argument("Unsupported layout transition!");
+
+        // Handle newLayout
+        switch (newLayout)
+        {
+            case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+                destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_GENERAL:
+                barrier.dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+                destinationStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_UNDEFINED:
+                barrier.dstAccessMask = 0;
+                destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                break;
+            default:
+                throw std::invalid_argument("Unsupported new layout transition!");
         }
     
         vkCmdPipelineBarrier(
@@ -335,6 +458,36 @@ namespace graphics
         
         // std::cout << "Copying to image" << std::endl;
         Shared::device->copyBufferToImage(stagingBuffer.getBuffer(), image, width, height, 1);
+    }
+
+    void Texture::copyDataFromImage()
+    {
+        uint32_t pixelCount = width * height;
+        uint32_t pixelSize = sizeof(data[0]) * 4;
+        VkDeviceSize bufferSize = pixelSize * pixelCount;
+        // std::cout << "Buffer size: " << bufferSize << std::endl;
+        // std::cout << "Data size: " << data.size() << std::endl;
+        // std::cout << "Width: " << width << " Height: " << height << std::endl;
+        if(data.size() != bufferSize)
+        {
+            throw std::runtime_error("Texture data size does not match buffer size");
+        }
+        
+        Buffer stagingBuffer{
+            *Shared::device,
+            pixelSize,
+            pixelCount,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        };
+        
+        stagingBuffer.map();
+        // std::cout << (void *)data.data() << std::endl;
+        
+        // std::cout << "Copying to image" << std::endl;
+        Shared::device->copyImageToBuffer(image, stagingBuffer.getBuffer(), width, height, 1);
+        
+        stagingBuffer.readFromBuffer((void *)data.data());
     }
 
     void Texture::createDescriptorInfo()

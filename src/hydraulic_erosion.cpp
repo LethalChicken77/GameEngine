@@ -3,6 +3,7 @@
 #include "graphics/containers.hpp"
 #include "graphics/material.hpp"
 #include "imgui.h"
+#include "nfd.h"
 
 namespace game
 {
@@ -25,7 +26,8 @@ namespace game
         computeShader = std::make_unique<ComputeShader>("internal/compute_shaders/erosion.comp.spv", std::vector<ShaderInput>{}, 1);
         computePipeline = std::make_unique<graphics::ComputePipeline>(*computeShader);
 
-        initializeTexture(resolution);
+        // initializeTexture(resolution);
+        loadHeightmap("./heightmaps/heightmap_default.exr");
 
         computeResource = std::make_unique<ComputeResource>(ComputeResource::instantiate(computeShader.get()));
         computeResource->setTexture(0, heightMap);
@@ -63,6 +65,75 @@ namespace game
         {
             resetHeightmap();
         }
+
+        if(ImGui::Button("Save Heightmap"))
+        {
+            heightMap->updateOnCPU();
+            char* path = nullptr;
+            nfdresult_t result = NFD_SaveDialog("exr", nullptr, &path);
+            if(result == NFD_OKAY)
+            {
+                std::cout << "Saving Heightmap to: " << path << std::endl;
+                heightMap->saveToFileEXR(path);
+                free(path);
+            }
+            else if(result == NFD_CANCEL)
+            {
+                std::cout << "User canceled" << std::endl;
+            }
+            else
+            {
+                std::cout << "Error: " << NFD_GetError() << std::endl;
+            }
+        }
+        if(ImGui::Button("Load Heightmap"))
+        {
+            char* path = nullptr;
+            nfdresult_t result = NFD_OpenDialog("exr", nullptr, &path);
+            if(result == NFD_OKAY)
+            {
+                std::cout << "Loading Heightmap from: " << path << std::endl;
+                loadHeightmap(path);
+                computeResource->setTexture(0, heightMap);
+                computeResource->setTexture(1, heightMap);
+                computeResource->updateDescriptorSet();
+                heightMap->updateOnGPU();
+                free(path);
+            }
+            else if(result == NFD_CANCEL)
+            {
+                std::cout << "User canceled" << std::endl;
+            }
+            else
+            {
+                std::cout << "Error: " << NFD_GetError() << std::endl;
+            }
+        }
+    }
+
+    void HydraulicErosion::loadHeightmap(const std::string &path)
+    {
+        std::cout << "Generating Heightmap" << std::endl;
+        TextureProperties properties = TextureProperties().getDefaultProperties();
+        SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
+        properties.format = VK_FORMAT_R32_SFLOAT;
+        properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | 
+                            VK_IMAGE_USAGE_STORAGE_BIT | 
+                            VK_IMAGE_USAGE_SAMPLED_BIT;
+        properties.finalLayout = VK_IMAGE_LAYOUT_GENERAL; // Allow usage for reads and writes, no need for shader read
+        samplerProperties.magFilter = VK_FILTER_LINEAR;
+        samplerProperties.minFilter = VK_FILTER_LINEAR;
+        samplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        heightMap = Texture::loadFromFileEXR(path, properties, samplerProperties);
+        
+        graphics::Shared::materials[0].setTexture(6, heightMap);
+        graphics::Shared::materials[0].createDescriptorSet();
+
+        uint32_t resolution = heightMap->getWidth();
+
+        originalHeightMap.resize(resolution * resolution);
+        memcpy(originalHeightMap.data(), heightMap->getData()->data(), heightMap->getData()->size() * sizeof(uint8_t));
     }
 
     void HydraulicErosion::initializeTexture(size_t resolution)
@@ -71,7 +142,10 @@ namespace game
         TextureProperties properties = TextureProperties().getDefaultProperties();
         SamplerProperties samplerProperties = SamplerProperties().getDefaultProperties();
         properties.format = VK_FORMAT_R32_SFLOAT;
-        properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        properties.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
+                            VK_IMAGE_USAGE_TRANSFER_SRC_BIT | 
+                            VK_IMAGE_USAGE_STORAGE_BIT | 
+                            VK_IMAGE_USAGE_SAMPLED_BIT;
         properties.finalLayout = VK_IMAGE_LAYOUT_GENERAL; // Allow usage for reads and writes, no need for shader read
         samplerProperties.magFilter = VK_FILTER_LINEAR;
         samplerProperties.minFilter = VK_FILTER_LINEAR;
@@ -84,6 +158,8 @@ namespace game
             for(int j = 0; j < resolution; j++)
             {
                 // float height = core::Random::getRandom01();
+                // float height1 = procedural::simplex2D(i * (invResolution * 2 ), j * (invResolution * 2 ), 69);
+                // heightMap->setPixel(i, j, (height1) * 40.f);
                 float height1 = procedural::simplex2D(i * (invResolution * 2 ), j * (invResolution * 2 ), 69);
                 float height2 = procedural::simplex2D(i * (invResolution * 4 ), j * (invResolution * 4 ), 21) * 0.5f;
                 float height3 = procedural::simplex2D(i * (invResolution * 8 ), j * (invResolution * 8 ), 420) * 0.25f;
@@ -92,11 +168,12 @@ namespace game
                 heightMap->setPixel(i, j, (height1 + height2 + height3 + height4 + height5) * 40.f);
                 // heightMap->setPixel(i, j, (height1 + height2 + height3) * 30.f);
                 // heightMap->setPixel(i, j, (j - resolution * 0.5f) / 16.0f);
+                // heightMap->setPixel(i, j, 0);
             }
         }
         heightMap->createTexture();
         graphics::Shared::materials[0].setTexture(6, heightMap);
-        graphics::Shared::materials[0].updateDescriptorSet();
+        graphics::Shared::materials[0].createDescriptorSet();
 
         originalHeightMap.resize(resolution * resolution);
         memcpy(originalHeightMap.data(), heightMap->getData()->data(), heightMap->getData()->size() * sizeof(uint8_t));
@@ -109,8 +186,13 @@ namespace game
         heightMap->updateOnGPU();
     }
     
+    bool prevGPU = false;
     void HydraulicErosion::runIterationsCPU(uint32_t iterations)
-    {
+    {   
+        if(prevGPU)
+        {
+            heightMap->updateOnCPU();
+        }
         float ds = 0.0001f;
         for(uint32_t i = 0; i < iterations; i++)
         {
@@ -202,6 +284,7 @@ namespace game
             }
         }
         heightMap->updateOnGPU();
+        prevGPU = false;
     }
 
     void HydraulicErosion::runIterationsGPU(uint32_t iterations)
@@ -258,5 +341,6 @@ namespace game
         graphics::Shared::device->endSingleTimeCommands(commandBuffer);
 
         // heightMap->transitionImageLayout(VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        prevGPU = true;
     }
 }

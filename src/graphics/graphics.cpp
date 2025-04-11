@@ -163,16 +163,19 @@ void Graphics::createPipeline()
 void Graphics::loadTextures()
 {
     std::cout << "Loading textures" << std::endl;
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
 
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
     
     // textures.push_back(heightmapTexture);
 }
@@ -215,7 +218,7 @@ void Graphics::loadMaterials()
     m1.setTexture(3, textures[3]);
     m1.setTexture(4, textures[4]);
     m1.setTexture(5, textures[5]);
-    m1.updateDescriptorSet();
+    m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
 
     // Material m2 = Material::instantiate(shaders[0].get());

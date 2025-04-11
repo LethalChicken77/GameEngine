@@ -52,7 +52,7 @@ namespace graphics
         protected:
             std::vector<Value> inputValues{};
             std::vector<uint8_t> data{};
-            VkDescriptorSet descriptorSet;
+            VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
             std::unique_ptr<Buffer> buffer;
             std::vector<std::shared_ptr<Texture>> textures;
             // std::vector<std::shared_ptr<Texture>> images;

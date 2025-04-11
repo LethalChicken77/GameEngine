@@ -15,6 +15,7 @@ namespace graphics
 
         DescriptorPool::Builder poolBuilder = DescriptorPool::Builder(*Shared::device)
             .setMaxSets(GR_MAX_MATERIAL_COUNT)
+            .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT)
             .addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, GR_MAX_MATERIAL_COUNT)
             .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT);
         DescriptorSetLayout::Builder layoutBuilder = DescriptorSetLayout::Builder(*Shared::device)

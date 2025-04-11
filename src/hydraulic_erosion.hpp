@@ -46,6 +46,7 @@ namespace game
             void drawImgui();
             // void render();
 
+            void loadHeightmap(const std::string &path);
             void resetHeightmap();
 
         private:

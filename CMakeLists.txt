@@ -42,8 +42,11 @@ include_directories(${Vulkan_INCLUDE_DIRS})
 # Include directories for your project
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
+include_directories("${CMAKE_SOURCE_DIR}/lib/miniz-3.0.2")
+include_directories("${CMAKE_SOURCE_DIR}/lib/tinyexr-1.0.12")
 include_directories("${CMAKE_SOURCE_DIR}/lib/stbimage")
 include_directories("${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
+include_directories("${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
 
 # Add ImGui source files
 set(IMGUI_SOURCES
@@ -56,6 +59,14 @@ set(IMGUI_SOURCES
     ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_impl_vulkan.cpp
 )
 
+set(LIB_SOURCES
+    ${CMAKE_SOURCE_DIR}/lib/miniz-3.0.2/miniz.c
+    ${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/nfd_common.c
+    # ${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/nfd_gtk.c
+    ${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/nfd_win.cpp
+    # ${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/nfd_zenity.c
+)
+
 # Add all source files from ./src
 file(GLOB_RECURSE SOURCES 
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
@@ -65,10 +76,13 @@ file(GLOB_RECURSE SOURCES
 )
 
 # Add executable
-add_executable(GameEngine ${SOURCES} ${IMGUI_SOURCES} app.rc)
+add_executable(GameEngine ${SOURCES} ${IMGUI_SOURCES} ${LIB_SOURCES} app.rc)
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
+target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/miniz-3.0.2")
+target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyexr-1.0.12")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/stbimage")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
+target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
 
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 

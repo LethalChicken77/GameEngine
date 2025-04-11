@@ -65,6 +65,12 @@ namespace graphics
         ~Texture();
 
         static std::shared_ptr<Texture> loadFromFile(const std::string &filename); // Use stb_image to load image
+        static std::shared_ptr<Texture> loadFromFileEXR(const std::string& path, TextureProperties properties, SamplerProperties samplerProperties); // Use tinyexr to load image
+        static std::shared_ptr<Texture> loadFromFileEXR(const std::string &filename)
+        {
+            return loadFromFileEXR(filename, TextureProperties().getDefaultProperties(), SamplerProperties().getDefaultProperties());
+        }
+        void saveToFileEXR(const std::string &filename);
 
         VkImageView getImageView() const { return imageView; }
         VkSampler getSampler() const { return sampler; }
@@ -87,6 +93,7 @@ namespace graphics
         }
         void createTexture();
         void updateOnGPU();
+        void updateOnCPU();
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
         // Need this public to swap between compute and graphics pipelines
@@ -131,6 +138,8 @@ namespace graphics
         void copyDataToImage();
         void createDescriptorInfo();
 
+        void copyDataFromImage();
+        
         void cleanup();
     };
 } // namespace graphics

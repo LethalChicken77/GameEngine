@@ -167,9 +167,16 @@ namespace graphics
         // updateDescriptorSet();
     }
 
-    void Material::updateDescriptorSet()
+    void Material::createDescriptorSet()
     {
+        std::vector<VkDescriptorSet> descriptorSets = {descriptorSet};
+        if (descriptorSet != VK_NULL_HANDLE)
+        {
+            shader->getDescriptorPool()->freeDescriptors(descriptorSets);
+            descriptorSet = VK_NULL_HANDLE;
+        }
         VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
+
         DescriptorWriter writer = DescriptorWriter(*(shader->getDescriptorSetLayout()), *(shader->getDescriptorPool()));
         writer.writeBuffer(0, &bufferInfo);
         for(int i = 0; i < textures.size(); i++)

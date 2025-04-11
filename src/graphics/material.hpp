@@ -34,6 +34,7 @@ namespace graphics
             void setTexture(uint32_t binding, std::shared_ptr<graphics::Texture> texture);
 
             void createShaderInputBuffer();
+            void createDescriptorSet();
             void updateDescriptorSet();
 
             uint32_t getId() const { return id; }

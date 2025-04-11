@@ -170,6 +170,14 @@ namespace graphics
 
     void ComputeResource::updateDescriptorSet()
     {
+        
+        std::vector<VkDescriptorSet> descriptorSets = {descriptorSet};
+        if (descriptorSet != VK_NULL_HANDLE)
+        {
+            shader->getDescriptorPool()->freeDescriptors(descriptorSets);
+            descriptorSet = VK_NULL_HANDLE;
+        }
+        
         int bindings = 0;
         DescriptorWriter writer = DescriptorWriter(*(shader->getDescriptorSetLayout()), *(shader->getDescriptorPool()));
         // if(data.size() > 0)
