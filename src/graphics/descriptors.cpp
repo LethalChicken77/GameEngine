@@ -93,8 +93,10 @@ DescriptorPool::DescriptorPool(
   descriptorPoolInfo.maxSets = maxSets;
   descriptorPoolInfo.flags = poolFlags;
 
-  if (vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
+  VkResult result = VK_SUCCESS;
+  if ((result = vkCreateDescriptorPool(device.device(), &descriptorPoolInfo, nullptr, &descriptorPool)) !=
       VK_SUCCESS) {
+    std::cout << "Error " << result << std::endl;
     throw std::runtime_error("failed to create descriptor pool!");
   }
 }
@@ -112,7 +114,9 @@ bool DescriptorPool::allocateDescriptor(
   allocInfo.descriptorSetCount = 1;
   // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
   // a new pool whenever an old pool fills up. But this is beyond our current scope
-  if (vkAllocateDescriptorSets(device.device(), &allocInfo, &descriptor) != VK_SUCCESS) {
+  VkResult result = VK_SUCCESS;
+  if ((result = vkAllocateDescriptorSets(device.device(), &allocInfo, &descriptor)) != VK_SUCCESS) {
+    std::cout << "Error " << result << std::endl;
     return false;
   }
   return true;

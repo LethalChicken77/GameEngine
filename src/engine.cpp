@@ -16,6 +16,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "utils/imgui_styles.hpp"
+#include "hydraulic_erosion.hpp"
 
 using namespace graphics;
 
@@ -30,6 +31,8 @@ namespace core
 Engine::Engine(graphics::Graphics& _graphics) : graphics(_graphics)
 {
     init();
+
+    hydraulicErosion = std::make_unique<game::HydraulicErosion>(512, game::HydraulicErosion::ErosionProperties());
 }
 
 Engine::~Engine()
@@ -47,11 +50,22 @@ void Engine::close()
     // graphics->cleanup();
 }
 
+int cpuNumParticles = 20;
+int gpuNumParticles = 5000;
+enum SimulationMode
+{
+    None,
+    CPU,
+    GPU
+};
+SimulationMode simulationMode = SimulationMode::None;
+
 void Engine::update(double deltaTime)
 {
     glm::vec3 forward = camera.transform.forward();
     forward.y = 0;
     forward = glm::normalize(forward);
+    forward *= glm::sign(camera.transform.up().y);
     glm::vec3 right = camera.transform.right();
     float movementSpeed = 10.f;
     if(core::Input::getKey(GLFW_KEY_A))
@@ -91,7 +105,11 @@ void Engine::update(double deltaTime)
     int counter = 0;
     for(GameObject &obj : gameObjects)
     {
-        if(obj.get_id() == 2) break;
+        // if(obj.get_id() == 2) break;
+        // if(obj.get_id() == 0)
+        // {
+        //     obj.transform.rotation.y += 0.5f * deltaTime;
+        // }
         // obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
         // obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
@@ -99,7 +117,18 @@ void Engine::update(double deltaTime)
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
     }
+
+    if(simulationMode == SimulationMode::CPU)
+    {
+        hydraulicErosion->runIterationsCPU(cpuNumParticles);
+    }
+    else if(simulationMode == SimulationMode::GPU)
+    {
+        hydraulicErosion->runIterationsGPU(gpuNumParticles);
+    }
 }
+
+
 
 void Engine::run()
 {
@@ -134,7 +163,7 @@ void Engine::run()
 
 
     camera = Camera(
-        {0.01f, 100.0f, 90.0f},
+        {0.01f, 1000.0f, 90.0f},
         false
     );
     // camera = Camera(
@@ -159,8 +188,30 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Hello ImGui!");
-        ImGui::Text("Test");
+        ImGui::Begin("Simulation Settings");
+        ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
+        ImGui::SliderInt("GPU Particles", &gpuNumParticles, 0, 100000);
+        
+        hydraulicErosion->drawImgui();
+        if(simulationMode == SimulationMode::None)
+        {
+            if(ImGui::Button("Run CPU"))
+            {
+                simulationMode = SimulationMode::CPU;
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Run GPU"))
+            {
+                simulationMode = SimulationMode::GPU;
+            }
+        }
+        else
+        {
+            if(ImGui::Button("Stop"))
+            {
+                simulationMode = SimulationMode::None;
+            }
+        }
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
@@ -199,17 +250,20 @@ void Engine::loadGameObjects()
     // };
 
     GameObject obj = GameObject::instantiate();
-    GameObject obj2 = GameObject::instantiate();
-    GameObject obj3 = GameObject::instantiate();
-    obj.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_high_res.obj");
+    // GameObject obj2 = GameObject::instantiate();
+    // GameObject obj3 = GameObject::instantiate();
+    std::cout << "Creating Grid" << std::endl;
+    obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     obj.materialID = 0;
-    obj2.mesh = Mesh::loadObj(*graphics.getDevice(), "internal/models/monkey_wireframe.obj");
-    obj2.materialID = 1;
-    obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
-    obj3.materialID = 2;
+    // std::cout << "Loading Monkey" << std::endl;
+    // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    // obj2.materialID = 0;
+    // obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
+    // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
-    gameObjects.push_back(std::move(obj2));
-    gameObjects.push_back(std::move(obj3));
+    // gameObjects.push_back(std::move(obj2));
+    // gameObjects.push_back(std::move(obj3));
+    std::cout << "Loaded game objects" << std::endl;
 }
 
 } // namespace core

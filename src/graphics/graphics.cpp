@@ -10,6 +10,8 @@
 #include "mesh.hpp"
 #include "../core/input.hpp"
 #include "material.hpp"
+#include "../core/random.hpp"
+#include "../procedural/noise.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -31,10 +33,6 @@ Graphics::Graphics(const std::string& name, const std::string& engine_name)
     Descriptors::globalPool = DescriptorPool::Builder(device)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
-        .build();
-    Descriptors::materialPool = DescriptorPool::Builder(device)
-        .setMaxSets(GR_MAX_MATERIAL_COUNT)
-        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT)
         .build();
     
     init(name, engine_name);
@@ -81,9 +79,9 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
             .build(Descriptors::globalDescriptorSets[i]);
     }
 
+    loadTextures();
     loadShaders();
     loadMaterials();
-    // TODO: Different pipeline for each pair of shaders
     createPipeline();
 
     std::cout << "Successfully initialized graphics" << std::endl;
@@ -97,10 +95,7 @@ void Graphics::cleanup()
     
     cameraUboBuffers.clear();
     Descriptors::globalPool.reset();
-    Descriptors::materialPool.reset();
     Descriptors::globalSetLayout.reset();
-    Descriptors::materialSetLayout.reset();
-    Descriptors::materialDescriptorSets.clear();
     Descriptors::globalDescriptorSets.clear();
     Descriptors::imguiPool.reset();
     graphicsPipeline.reset();
@@ -165,11 +160,30 @@ void Graphics::createPipeline()
     );
 }
 
+void Graphics::loadTextures()
+{
+    std::cout << "Loading textures" << std::endl;
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
+
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
+    
+    // textures.push_back(heightmapTexture);
+}
+
 void Graphics::loadShaders()
 {
     std::cout << "Loading shaders\n";
     shaders.push_back(std::make_unique<Shader>(
-        device,
         "internal/shaders/basicShader.vert.spv", 
         "internal/shaders/basicShader.frag.spv", 
         std::vector<ShaderInput>{
@@ -177,7 +191,8 @@ void Graphics::loadShaders()
             {"ior", ShaderInput::DataType::VEC3},
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
-        }
+        },
+        7
     ));
 }
 
@@ -185,49 +200,44 @@ void Graphics::loadMaterials()
 {
     std::cout << "Loading materials\n";
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
-    Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
-        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-        .build();
 
     Material m1 = Material::instantiate(shaders[0].get());
-    m1.setValue("color", glm::vec3(1.0f, 0.0f, 0.0f));
+    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    m1.setValue("color", glm::vec3(1.f, 1.f, 1.f));
     m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m1.setValue("roughness", 0.7f);
+    m1.setValue("roughness", 0.95f);
     m1.setValue("metallic", 0.f);
+
+
     m1.createShaderInputBuffer();
+    // Grass
+    m1.setTexture(0, textures[0]);
+    m1.setTexture(1, textures[1]);
+    m1.setTexture(2, textures[2]);
+    // Stone
+    m1.setTexture(3, textures[3]);
+    m1.setTexture(4, textures[4]);
+    m1.setTexture(5, textures[5]);
+    m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
 
-    Material m2 = Material::instantiate(shaders[0].get());
-    // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
-    m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
-    // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
-    m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
-    m2.setValue("roughness", 0.4f);
-    m2.setValue("metallic", 1.f);
-    m2.createShaderInputBuffer();
-    Shared::materials.emplace_back(std::move(m2));
+    // Material m2 = Material::instantiate(shaders[0].get());
+    // // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
+    // m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
+    // // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
+    // m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
+    // m2.setValue("roughness", 0.4f);
+    // m2.setValue("metallic", 1.f);
+    // m2.createShaderInputBuffer();
+    // Shared::materials.emplace_back(std::move(m2));
 
-    Material m3 = Material::instantiate(shaders[0].get());
-    m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
-    m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m3.setValue("roughness", 0.43f);
-    m3.setValue("metallic", 0.f);
-    m3.createShaderInputBuffer();
-    Shared::materials.emplace_back(std::move(m3));
-    
-
-    Descriptors::materialDescriptorSets = std::vector<VkDescriptorSet>(GR_MAX_MATERIAL_COUNT);
-    Descriptors::materialSetLayout = DescriptorSetLayout::Builder(device)
-        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-        .build();
-    for(int i = 0; i < Shared::materials.size(); i++)
-    {
-        Material &m = Shared::materials[i];
-        VkDescriptorBufferInfo bufferInfo = m.getBuffer()->descriptorInfo();
-        DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-            .writeBuffer(0, &bufferInfo)
-            .build(Descriptors::materialDescriptorSets[i]);
-    }
+    // Material m3 = Material::instantiate(shaders[0].get());
+    // m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
+    // m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
+    // m3.setValue("roughness", 0.43f);
+    // m3.setValue("metallic", 0.f);
+    // m3.createShaderInputBuffer();
+    // Shared::materials.emplace_back(std::move(m3));
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
@@ -253,11 +263,6 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         nullptr
     );
 
-    Shared::materials[0].setValue("color", 
-        glm::vec3((sin(glfwGetTime()) * 0.5f + 0.5f), 
-        (sin(glfwGetTime() + glm::pi<float>() * 4.0f * 0.333333f) * 0.5f + 0.5f), 
-        (sin(glfwGetTime() + glm::pi<float>() * 2.0f * 0.333333f) * 0.5f + 0.5f)));
-    Shared::materials[0].createShaderInputBuffer();
     for(core::GameObject& obj : gameObjects)
     {
         std::vector<VkDescriptorSet> localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };

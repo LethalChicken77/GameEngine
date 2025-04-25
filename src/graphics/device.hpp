@@ -65,6 +65,8 @@ class Device {
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
   void copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+  void copyImageToBuffer(
+    VkImage image, VkBuffer buffer, uint32_t width, uint32_t height, uint32_t layerCount);
 
   void createImageWithInfo(
       const VkImageCreateInfo &imageInfo,
@@ -103,7 +105,7 @@ class Device {
   VkQueue presentQueue_;
 
   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
-  const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME};
+  const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME }; //, VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME };
 };
 
 }  // namespace graphics

@@ -8,17 +8,36 @@
 
 namespace graphics
 {
-    Mesh::Mesh(Device& _device, const Builder& builder) : device(_device)
-    {
-        createVertexBuffer(builder.vertices);
-        createIndexBuffer(builder.indices);
-    }
+    // Mesh::Mesh(Device& _device, const Builder& builder) : device(_device)
+    // {
+    //     createVertexBuffer(builder.vertices);
+    //     createIndexBuffer(builder.triangles);
+    // }
     
-    Mesh::Mesh(Device& _device, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices) : device(_device)
+    Mesh::Mesh()
     {
-        createVertexBuffer(vertices);
-        if(useIndexBuffer)
-            createIndexBuffer(indices);
+        // createBuffers();
+    }
+
+    Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices)
+    {
+        vertices = _vertices;
+        for(uint32_t i = 0; i < _indices.size(); i += 3)
+        {
+            triangles.push_back({_indices[i], _indices[i + 1], _indices[i + 2]});
+        }
+        // createVertexBuffer();
+        // if(useIndexBuffer)
+        //     createIndexBuffer();
+    }
+
+    Mesh::Mesh(const std::vector<Vertex>& _vertices, const std::vector<Triangle>& _triangles)
+    {
+        vertices = _vertices;
+        triangles = _triangles;
+        // createVertexBuffer();
+        // if(useIndexBuffer)
+        //     createIndexBuffer();
     }
 
     Mesh::~Mesh(){}
@@ -49,7 +68,7 @@ namespace graphics
             vkCmdDraw(commandBuffer, vertexCount, instanceCount, 0, 0);
     }
 
-    void Mesh::createVertexBuffer(const std::vector<Vertex>& vertices)
+    void Mesh::createVertexBuffer()
     {
         vertexCount = static_cast<uint32_t>(vertices.size());
         assert(vertexCount >= 3 && "Vertex count must be at least 3");
@@ -57,7 +76,7 @@ namespace graphics
         uint32_t vertexSize = sizeof(vertices[0]);
 
         Buffer stagingBuffer{
-            device,
+            *Shared::device,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -68,30 +87,30 @@ namespace graphics
         stagingBuffer.writeToBuffer((void *)vertices.data());
 
         vertexBuffer = std::make_unique<Buffer>(
-            device,
+            *Shared::device,
             vertexSize,
             vertexCount,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-        device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+        Shared::device->copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
     }
 
-    void Mesh::createIndexBuffer(const std::vector<uint32_t>& indices)
+    void Mesh::createIndexBuffer()
     {
-        indexCount = static_cast<uint32_t>(indices.size());
+        indexCount = static_cast<uint32_t>(triangles.size()) * 3;
         useIndexBuffer = indexCount > 0;
 
         if(!useIndexBuffer)
             return;
 
-        VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+        VkDeviceSize bufferSize = sizeof(triangles[0].v0) * indexCount;
         
-        uint32_t indexSize = sizeof(indices[0]);
+        uint32_t indexSize = sizeof(triangles[0].v0);
 
         Buffer stagingBuffer{
-            device,
+            *Shared::device,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -99,17 +118,23 @@ namespace graphics
         };
 
         stagingBuffer.map();
-        stagingBuffer.writeToBuffer((void *)indices.data());
+        stagingBuffer.writeToBuffer((void *)triangles.data());
 
         indexBuffer = std::make_unique<Buffer>(
-            device,
+            *Shared::device,
             indexSize,
             indexCount,
             VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
         );
 
-        device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+        Shared::device->copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+    }
+
+    void Mesh::createBuffers()
+    {
+        createVertexBuffer();
+        createIndexBuffer();
     }
 
     std::vector<VkVertexInputBindingDescription> Mesh::Vertex::getBindingDescriptions()
@@ -147,72 +172,48 @@ namespace graphics
         return attributeDescriptions;
     }
 
+    float angleBetween(glm::vec3 v1, glm::vec3 v2)
+    {
+        return glm::acos(glm::dot(v1, v2) / (glm::length(v1) * glm::length(v2)));
+    }
+
+    void Mesh::generateNormals()
+    {
+        if(triangles.size() == 0)
+        {
+            return;
+        }
+
+        for(Vertex& vertex : vertices)
+        {
+            vertex.normal = glm::vec3(0.0f);
+        }
+        for(Triangle& triangle : triangles)
+        {
+            Vertex& v0 = vertices[triangle.v0];
+            Vertex& v1 = vertices[triangle.v1];
+            Vertex& v2 = vertices[triangle.v2];
+
+            glm::vec3 edge1 = v1.position - v0.position;
+            glm::vec3 edge2 = v2.position - v0.position;
+            glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+            float angle0 = angleBetween(v1.position - v0.position, v2.position - v0.position);
+            float angle1 = angleBetween(v0.position - v1.position, v2.position - v1.position);
+            float angle2 = angleBetween(v0.position - v2.position, v1.position - v2.position);
+
+            v0.normal += normal * angle0;
+            v1.normal += normal * angle1;
+            v2.normal += normal * angle2;
+        }
+        for(Vertex& vertex : vertices)
+        {
+            vertex.normal = glm::normalize(vertex.normal);
+        }
+    }
     
-    std::shared_ptr<Mesh> Mesh::createCube(Device& device, float edgeLength)
+    std::shared_ptr<Mesh> Mesh::createCube(float edgeLength)
     {
         edgeLength *= 0.5f;
-
-        // std::vector<Mesh::Vertex> vertices {
-        //     // Front and back
-        //     {{-edgeLength, -edgeLength, -edgeLength}, {0.0f, 0.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {0.0f, 1.0f}},
-        //     {{edgeLength, -edgeLength, -edgeLength}, {1.0f, 0.0f}},
-            
-        //     {{edgeLength, edgeLength, -edgeLength}, {1.0f, 1.0f}},
-        //     {{edgeLength, -edgeLength, -edgeLength}, {1.0f, 0.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {0.0f, 1.0f}},
-
-            
-        //     {{edgeLength, -edgeLength, edgeLength}, {0.0f, 0.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {0.0f, 1.0f}},
-        //     {{-edgeLength, -edgeLength, edgeLength}, {1.0f, 0.0f}},
-            
-        //     {{-edgeLength, edgeLength, edgeLength}, {1.0f, 1.0f}},
-        //     {{-edgeLength, -edgeLength, edgeLength}, {1.0f, 0.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {0.0f, 1.0f}},
-
-
-        //     // Left and right
-        //     {{-edgeLength, -edgeLength, -edgeLength}, {1.0f, 0.0f}},
-        //     {{-edgeLength, -edgeLength, edgeLength}, {0.0f, 0.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {1.0f, 1.0f}},
-            
-        //     {{-edgeLength, edgeLength, edgeLength}, {0.0f, 1.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {1.0f, 1.0f}},
-        //     {{-edgeLength, -edgeLength, edgeLength}, {0.0f, 0.0f}},
-
-            
-        //     {{edgeLength, -edgeLength, edgeLength}, {1.0f, 0.0f}},
-        //     {{edgeLength, -edgeLength, -edgeLength}, {0.0f, 0.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {1.0f, 1.0f}},
-            
-        //     {{edgeLength, edgeLength, -edgeLength}, {0.0f, 1.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {1.0f, 1.0f}},
-        //     {{edgeLength, -edgeLength, -edgeLength}, {0.0f, 0.0f}},
-
-
-
-
-        //     // Top and bottom
-        //     {{-edgeLength, edgeLength, edgeLength}, {0.0f, 1.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {1.0f, 1.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {0.0f, 0.0f}},
-            
-        //     {{edgeLength, edgeLength, -edgeLength}, {1.0f, 0.0f}},
-        //     {{-edgeLength, edgeLength, -edgeLength}, {0.0f, 0.0f}},
-        //     {{edgeLength, edgeLength, edgeLength}, {1.0f, 1.0f}},
-
-            
-        //     {{-edgeLength, -edgeLength, edgeLength}, {1.0f, 1.0f}},
-        //     {{-edgeLength, -edgeLength, -edgeLength}, {1.0f, 0.0f}},
-        //     {{edgeLength, -edgeLength, edgeLength}, {0.0f, 1.0f}},
-            
-        //     {{edgeLength, -edgeLength, -edgeLength}, {0.0f, 0.0f}},
-        //     {{edgeLength, -edgeLength, edgeLength}, {0.0f, 1.0f}},
-        //     {{-edgeLength, -edgeLength, -edgeLength}, {1.0f, 0.0f}},
-        // };
-        // std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(device, vertices, std::vector<uint32_t>());
-
         float inverseSqrt3 = 1.0f / glm::sqrt(3.0f);
 
         std::vector<Mesh::Vertex> vertices {
@@ -241,7 +242,7 @@ namespace graphics
             6, 7, 3,
         };
 
-        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(device, vertices, indices);
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, indices);
         return mesh;
     }
 
@@ -321,84 +322,169 @@ namespace graphics
         }
     }
 
-    std::shared_ptr<Mesh> Mesh::createSierpinskiPyramid(Device& device, float edgeLength, int depth)
+    std::shared_ptr<Mesh> Mesh::createSierpinskiPyramid(float edgeLength, int depth)
     {
         std::vector<Vertex> vertices = generateSierpinski(edgeLength, depth);
         
-        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(device, vertices, std::vector<uint32_t>());
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, std::vector<uint32_t>());
         return mesh;
     }
 
-    std::unique_ptr<Mesh> Mesh::loadObj(Device& device, const std::string& filename)
+    std::shared_ptr<Mesh> Mesh::createGrid(int width, int length, glm::vec2 dimensions)
     {
-        Builder builder{};
-        builder.loadModelFromObj(filename);
+        width = std::max(1, width);
+        length = std::max(1, length);
+        std::vector<Vertex> vertices{};
+        std::vector<Triangle> triangles{};
+        float xScale = dimensions.x / (float)width;
+        float zScale = dimensions.y / (float)length;
+        float minX = -dimensions.x / 2.0f;
+        float minZ = -dimensions.y / 2.0f;
 
-        std::cout << "Vertex Count: " << builder.vertices.size() << std::endl;
+        for(int x = 0; x <= width; x++)
+        {
+            for(int z = 0; z <= length; z++)
+            {
+                float x0 = minX + x * xScale;
+                float z0 = minZ + z * zScale;
+                Vertex v = {
+                    // {x0, glm::sin(x0) + glm::sin(z0), z0},
+                    {x0, 0, z0},
+                    {0, 1, 0},
+                    {1, 1, 1},
+                    {x / (float)width, z / (float)length}
+                };
+                vertices.push_back(v);
 
-        return std::make_unique<Mesh>(device, builder);
+                if(x > 0 && z > 0)
+                {
+                    uint32_t i0 = (x - 1) * (length + 1) + z - 1;
+                    uint32_t i1 = (x - 1) * (length + 1) + z;
+                    uint32_t i2 = x * (length + 1) + z;
+                    uint32_t i3 = x * (length + 1) + z - 1;
+                    triangles.push_back({i0, i1, i2});
+                    triangles.push_back({i0, i2, i3});
+                }
+            }
+        }
+        
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, triangles);
+        mesh->generateNormals();
+        mesh->createBuffers();
+        return mesh;
     }
 
-    void Mesh::Builder::loadModelFromObj(const std::string& filename)
+    std::unique_ptr<Mesh> Mesh::loadObj(const std::string& filename)
+    {
+        std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+        mesh->loadModelFromObj(filename);
+
+        return mesh;
+    }
+
+    void Mesh::loadModelFromObj(const std::string& filename)
     {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        if(!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str()))
+        if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str()))
         {
             throw std::runtime_error(warn + err);
         }
 
         vertices.clear();
-        indices.clear();
+        triangles.clear();
 
-        for(const tinyobj::shape_t &shape : shapes)
-        {
-            for(const tinyobj::index_t &index : shape.mesh.indices)
-            {
-                Vertex vertex{};
+        // Define a key to identify unique vertex combinations
+        struct VertexKey {
+            int posIdx;
+            int normIdx;
+            int texIdx;
+            bool operator==(const VertexKey& other) const {
+                return posIdx == other.posIdx && normIdx == other.normIdx && texIdx == other.texIdx;
+            }
+        };
 
-                if(index.vertex_index >= 0)
-                {
-                    vertex.position = {
-                        attrib.vertices[3 * index.vertex_index + 0],
-                        attrib.vertices[3 * index.vertex_index + 1],
-                        attrib.vertices[3 * index.vertex_index + 2]
-                    };
+        // Hash function for VertexKey
+        struct VertexKeyHash {
+            size_t operator()(const VertexKey& k) const {
+                size_t h1 = std::hash<int>{}(k.posIdx);
+                size_t h2 = std::hash<int>{}(k.normIdx);
+                size_t h3 = std::hash<int>{}(k.texIdx);
+                return h1 ^ (h2 << 1) ^ (h3 << 2);
+            }
+        };
 
-                    uint32_t colorIndex = 3 * index.vertex_index + 3;
-                    if(colorIndex < attrib.colors.size())
-                    {
-                        vertex.color = {
-                            attrib.colors[colorIndex + 0],
-                            attrib.colors[colorIndex + 1],
-                            attrib.colors[colorIndex + 2]
+        // Map from VertexKey to index in vertices vector
+        std::unordered_map<VertexKey, uint32_t, VertexKeyHash> vertexMap;
+
+        // Process each shape
+        for (const auto& shape : shapes) {
+            // Iterate over indices in steps of 3 (triangles)
+            for (size_t i = 0; i < shape.mesh.indices.size(); i += 3) {
+                std::array<uint32_t, 3> triIndices;
+
+                // Process each vertex of the triangle
+                for (int k = 0; k < 3; k++) {
+                    tinyobj::index_t idx = shape.mesh.indices[i + k];
+                    VertexKey key{idx.vertex_index, idx.normal_index, idx.texcoord_index};
+
+                    // Check if this vertex combination exists
+                    auto it = vertexMap.find(key);
+                    if (it != vertexMap.end()) {
+                        triIndices[k] = it->second;
+                    } else {
+                        // Create a new Vertex
+                        Vertex v;
+                        int posIdx = idx.vertex_index;
+                        v.position = {
+                            attrib.vertices[3 * posIdx],
+                            attrib.vertices[3 * posIdx + 1],
+                            attrib.vertices[3 * posIdx + 2]
                         };
+
+                        int normIdx = idx.normal_index;
+                        if (normIdx >= 0) {
+                            v.normal = {
+                                attrib.normals[3 * normIdx],
+                                attrib.normals[3 * normIdx + 1],
+                                attrib.normals[3 * normIdx + 2]
+                            };
+                        }
+
+                        int texIdx = idx.texcoord_index;
+                        if (texIdx >= 0) {
+                            v.texCoord = {
+                                attrib.texcoords[2 * texIdx],
+                                attrib.texcoords[2 * texIdx + 1]
+                            };
+                        }
+
+                        if (3 * posIdx + 2 < attrib.colors.size()) {
+                            v.color = {
+                                attrib.colors[3 * posIdx],
+                                attrib.colors[3 * posIdx + 1],
+                                attrib.colors[3 * posIdx + 2]
+                            };
+                        }
+
+                        // Add to vertices and update map
+                        vertices.push_back(v);
+                        uint32_t newIndex = static_cast<uint32_t>(vertices.size() - 1);
+                        vertexMap[key] = newIndex;
+                        triIndices[k] = newIndex;
                     }
-                    else
-                    {
-                        vertex.color = {1.0f, 1.0f, 1.0f};
-                    }
                 }
-                if(index.normal_index >= 0)
-                {
-                    vertex.normal = {
-                        attrib.normals[3 * index.normal_index + 0],
-                        attrib.normals[3 * index.normal_index + 1],
-                        attrib.normals[3 * index.normal_index + 2]
-                    };
-                }
-                if(index.texcoord_index >= 0)
-                {
-                    vertex.texCoord = {
-                        attrib.texcoords[3 * index.texcoord_index + 0],
-                        attrib.texcoords[3 * index.texcoord_index + 1]
-                    };
-                }
-                vertices.push_back(vertex);
+
+                // Add the triangle
+                triangles.push_back({triIndices[0], triIndices[1], triIndices[2]});
             }
         }
+
+        std::cout << "Loaded " << vertices.size() << " vertices and " << triangles.size() << " triangles\n";
+
+        createBuffers();
     }
-}
+} // namespace graphics
