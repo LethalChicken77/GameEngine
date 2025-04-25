@@ -1,176 +1,242 @@
 [
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\core\\game_object.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\core\\game_object.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/core/game_object.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\core\\game_object.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\core\\game_object.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/core/game_object.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/core/game_object.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\core\\input.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\core\\input.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/core/input.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\core\\input.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\core\\input.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/core/input.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/core/input.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\engine.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\engine.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/engine.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\core\\random.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\core\\random.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/core/random.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/core/random.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\engine.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\engine.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/engine.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/engine.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\buffer.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\buffer.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffer.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\buffer.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\buffer.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/buffer.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/buffer.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\camera.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\camera.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/camera.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\camera.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\camera.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/camera.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\color.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\color.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/color.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\color.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\color.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/color.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/color.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_pipeline.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\compute_pipeline.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute_pipeline.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_pipeline.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\compute_pipeline.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/compute_pipeline.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/compute_pipeline.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_shader.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\compute_shader.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute_shader.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_resource.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\compute_resource.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/compute_resource.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/compute_resource.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\compute_shader.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\compute_shader.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/compute_shader.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/compute_shader.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\containers.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\containers.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/containers.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\containers.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\containers.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/containers.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/containers.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\descriptors.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\descriptors.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/descriptors.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\descriptors.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\descriptors.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/descriptors.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/descriptors.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\device.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\device.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/device.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\device.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\device.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/device.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/device.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\graphics.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\graphics.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/graphics.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\graphics.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\graphics.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/graphics.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\graphics_pipeline.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\graphics_pipeline.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/graphics_pipeline.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\graphics_pipeline.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\graphics_pipeline.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/graphics_pipeline.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\material.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\material.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/material.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\material.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\material.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/material.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/material.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\mesh.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\mesh.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/mesh.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\mesh.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\mesh.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/mesh.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/mesh.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\renderer.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\renderer.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/renderer.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\renderer.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\renderer.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/renderer.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\shader.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\shader.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/shader.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\shader.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\shader.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/shader.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\swap_chain.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\swap_chain.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/swap_chain.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\shader_base.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\shader_base.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/shader_base.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/shader_base.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\shader_resource.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\shader_resource.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/shader_resource.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/shader_resource.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\swap_chain.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\swap_chain.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/swap_chain.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\window.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\graphics\\window.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/graphics/window.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\texture.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\texture.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/texture.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/texture.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\utils.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\utils.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/utils.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/utils.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\window.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\window.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/window.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\main.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\main.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/main.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\hydraulic_erosion.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\hydraulic_erosion.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/hydraulic_erosion.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/hydraulic_erosion.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\main.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\main.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/main.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/main.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\utils\\debug.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\utils\\debug.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/utils/debug.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\procedural\\noise.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\procedural\\noise.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/procedural/noise.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/procedural/noise.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\utils\\debug.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\utils\\debug.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/utils/debug.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\src\\utils\\file_util.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\src\\utils\\file_util.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/src/utils/file_util.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\utils\\file_util.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\utils\\file_util.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/utils/file_util.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_demo.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_demo.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_demo.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_demo.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_demo.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_demo.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_demo.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_draw.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_draw.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_draw.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_draw.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_draw.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_draw.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_draw.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_tables.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_tables.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_tables.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_tables.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_tables.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_tables.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_tables.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_widgets.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_widgets.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_widgets.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_widgets.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_widgets.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_widgets.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_widgets.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_impl_glfw.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_impl_glfw.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_impl_glfw.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_impl_glfw.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_impl_glfw.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_impl_glfw.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_glfw.cpp.obj"
 },
 {
-  "directory": "C:/Users/dante/Desktop/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++17 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_impl_vulkan.cpp.obj -c C:\\Users\\dante\\Desktop\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_impl_vulkan.cpp",
-  "file": "C:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8/imgui_impl_vulkan.cpp",
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\imgui-1.91.8\\imgui_impl_vulkan.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\imgui-1.91.8\\imgui_impl_vulkan.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/imgui-1.91.8/imgui_impl_vulkan.cpp",
   "output": "CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_vulkan.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang.exe  @CMakeFiles/GameEngine.dir/includes_C.rsp -g -o CMakeFiles\\GameEngine.dir\\lib\\miniz-3.0.2\\miniz.c.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\miniz-3.0.2\\miniz.c",
+  "file": "C:/Users/dante/Development/GameEngine/lib/miniz-3.0.2/miniz.c",
+  "output": "CMakeFiles/GameEngine.dir/lib/miniz-3.0.2/miniz.c.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang.exe  @CMakeFiles/GameEngine.dir/includes_C.rsp -g -o CMakeFiles\\GameEngine.dir\\lib\\nativefiledialog-release_116\\src\\nfd_common.c.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\nativefiledialog-release_116\\src\\nfd_common.c",
+  "file": "C:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/nfd_common.c",
+  "output": "CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_common.c.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\lib\\nativefiledialog-release_116\\src\\nfd_win.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\lib\\nativefiledialog-release_116\\src\\nfd_win.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/nfd_win.cpp",
+  "output": "CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_win.cpp.obj"
 }
 ]

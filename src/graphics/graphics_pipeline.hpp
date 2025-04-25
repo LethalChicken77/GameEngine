@@ -28,7 +28,7 @@ namespace graphics
         void bind(VkCommandBuffer commandBuffer);
         VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
-    private:
+    protected:
         void createGraphicsPipeline();
         void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo);
         void createPipelineLayout();

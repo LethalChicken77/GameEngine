@@ -1,58 +1,13 @@
 #include "material.hpp"
+#include "containers.hpp"
 
 namespace graphics
 {
-    // Align a given offset to the specified alignment
-    size_t alignTo(size_t offset, size_t alignment)
-    {
-        // std::cout << "Offset: " <<  offset << std::endl;
-        // std::cout << "Alignment: " <<  alignment << std::endl;
-        return (offset + alignment - 1) & ~(alignment - 1);
-    }
-
-    // Determine the size and alignment for a given ShaderInput::DataType
-    struct TypeInfo
-    {
-        size_t size;
-        size_t alignment;
-    };
-
-    TypeInfo getTypeInfo(ShaderInput::DataType type)
-    {
-        switch (type)
-        {
-        case ShaderInput::DataType::FLOAT: return {sizeof(float), 4};
-        case ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), 8};
-        case ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), 16}; // Vec3 uses Vec4 alignment
-        case ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), 16};
-        case ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), 16}; // Matrices align to vec4
-        case ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16}; // Matrices align to vec4
-        case ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), 16};
-        case ShaderInput::DataType::INT:   return {sizeof(int), 4};
-        case ShaderInput::DataType::BOOL:  return {sizeof(int), 4}; // bools are treated as 4 bytes in std140
-        default: throw std::runtime_error("Unknown ShaderInput::DataType");
-        }
-    }
-
     Material::Material(id_t mat_id, const Shader *_shader) : id(mat_id), shader(_shader)
     {
         const std::vector<ShaderInput> &inputs = shader->getInputs();
         inputValues.resize(inputs.size());
         
-    }
-
-    void Material::setValue(std::string name, Value value)
-    {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
-        for (size_t i = 0; i < shaderInputs.size(); ++i)
-        {
-            if (shaderInputs[i].name == name)
-            {
-                inputValues[i] = value;
-                return;
-            }
-        }
-        throw std::runtime_error("Shader input not found");
     }
 
     void Material::createShaderInputBuffer()
@@ -61,7 +16,7 @@ namespace graphics
         assert(inputValues.size() == shader->getInputs().size() && "Input values size must match shader input size");
 
         size_t offset = 0;
-
+        size_t bufferSize = 0;
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
@@ -74,7 +29,23 @@ namespace graphics
             offset = alignTo(offset, typeInfo.alignment);
 
             // Resize the buffer to accommodate the new data
-            data.resize(offset + typeInfo.size);
+            bufferSize += typeInfo.alignment;
+        }
+        data.resize(bufferSize);
+        offset = 0;
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            const ShaderInput& input = shaderInputs[i];
+            const Value& value = inputValues[i];
+
+            // Get type info for alignment and size
+            TypeInfo typeInfo = getTypeInfo(input.type);
+
+            // Align the offset
+            offset = alignTo(offset, typeInfo.alignment);
+
+            // Resize the buffer to accommodate the new data
+            // data.resize(offset + typeInfo.size);
 
             // Write the value into the buffer
             std::visit([&](auto&& val) {
@@ -149,9 +120,8 @@ namespace graphics
             // Update the offset
             offset += typeInfo.size;
         }
-
-        if(!initialized)
-        {
+        // if(!initialized)
+        // {
             // Initialize buffers
             buffer = std::make_unique<Buffer>(
                 *Shared::device,
@@ -162,14 +132,58 @@ namespace graphics
                 Shared::device->properties.limits.minUniformBufferOffsetAlignment
             );
             buffer->map();
-            
-            VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
-            DescriptorWriter(*Descriptors::materialSetLayout, *Descriptors::materialPool)
-            .writeBuffer(0, &bufferInfo)
-                .build(descriptorSet);
-            initialized = true;
-        }
-            
+        // }
+        
+        // updateDescriptorSet();
         buffer->writeToBuffer(data.data());
+        initialized = true;
+    }
+
+    void Material::setValue(std::string name, ShaderResource::Value value)
+    {
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            if (shaderInputs[i].name == name)
+            {
+                inputValues[i] = value;
+                return;
+            }
+        }
+        throw std::runtime_error("Shader input not found");
+    }
+
+    void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
+    {
+        if(!initialized)
+        {
+            createShaderInputBuffer();
+        }
+        if (binding >= textures.size()) 
+        {
+            textures.resize(binding + 1);
+        }
+        textures[binding] = texture;
+        // updateDescriptorSet();
+    }
+
+    void Material::createDescriptorSet()
+    {
+        std::vector<VkDescriptorSet> descriptorSets = {descriptorSet};
+        if (descriptorSet != VK_NULL_HANDLE)
+        {
+            shader->getDescriptorPool()->freeDescriptors(descriptorSets);
+            descriptorSet = VK_NULL_HANDLE;
+        }
+        VkDescriptorBufferInfo bufferInfo = buffer->descriptorInfo();
+
+        DescriptorWriter writer = DescriptorWriter(*(shader->getDescriptorSetLayout()), *(shader->getDescriptorPool()));
+        writer.writeBuffer(0, &bufferInfo);
+        for(int i = 0; i < textures.size(); i++)
+        {
+            std::cout << "Writing image to binding " << i + 1 << std::endl;
+            writer.writeImage(i + 1, textures[i]->getDescriptorInfo());
+        }
+        writer.build(descriptorSet);
     }
 } // namespace graphics

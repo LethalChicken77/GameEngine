@@ -11,12 +11,15 @@
 #include "renderer.hpp"
 #include "device.hpp"
 #include "buffer.hpp"
+#include "texture.hpp"
 #include "descriptors.hpp"
 #include "frame_info.hpp"
 
 #include "mesh.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
+#include "compute_shader.hpp"
+#include "shader_resource.hpp"
 #include "material.hpp"
 #include "../core/game_object.hpp"
 #include "containers.hpp"
@@ -24,8 +27,6 @@
 
 namespace graphics
 {
-
-#define GR_MAX_MATERIAL_COUNT 128
 
 class Graphics
 {
@@ -55,6 +56,7 @@ public:
     void graphicsInitImgui();
 
 private:
+    void loadTextures();
     void loadShaders();
     void loadMaterials();
     void createPipeline();
@@ -72,8 +74,10 @@ private:
     PipelineConfigInfo configInfo;
 
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
+    std::vector<std::shared_ptr<Texture>> textures;
 
     std::vector<std::unique_ptr<Shader>> shaders;
+    std::vector<std::unique_ptr<ComputeShader>> computeShaders;
 
     Camera* camera;
 };

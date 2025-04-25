@@ -12,15 +12,46 @@ using namespace std;
 
 namespace graphics
 {
-    ComputePipeline::ComputePipeline(Device &_device, ComputeShader &_shader) : device(_device), shader(_shader)
+    ComputePipeline::ComputePipeline(ComputeShader &_shader) : shader(_shader)
     {
+        createPipelineLayout();
         createComputePipeline();
     }
 
     ComputePipeline::~ComputePipeline()
     {
-        vkDestroyPipeline(device.device(), m_computePipeline, nullptr);
-        vkDestroyPipelineCache(device.device(), pipelineCache, nullptr);
+        vkDestroyPipeline(Shared::device->device(), m_computePipeline, nullptr);
+        vkDestroyPipelineCache(Shared::device->device(), pipelineCache, nullptr);
+        vkDestroyPipelineLayout(Shared::device->device(), pipelineLayout, nullptr);
+    }
+
+    void ComputePipeline::createPipelineLayout()
+    {
+        std::cout << "Creating compute pipeline layout" << std::endl;
+
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(ErosionPushConstants);
+
+        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+            // Descriptors::globalSetLayout->getDescriptorSetLayout()
+        };
+        // for(auto &m : Shared::materials)
+        // {
+            descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
+        // }
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+        if(vkCreatePipelineLayout(Shared::device->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to create compute pipeline layout");
+        }
     }
 
     void ComputePipeline::createComputePipeline()
@@ -28,7 +59,7 @@ namespace graphics
         // TODO: Implement hot reloading of shaders
         ComputePipelineConfigInfo &configInfo = shader.getConfigInfo();
         
-        assert(configInfo.pipelineLayout != nullptr && "Cannot create compute pipeline:: layout is null");
+        assert(pipelineLayout != nullptr && "Cannot create compute pipeline:: layout is null");
 
         VkPipelineShaderStageCreateInfo shaderStages[1]{};
         shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -42,7 +73,7 @@ namespace graphics
         VkComputePipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
         pipelineInfo.stage = shaderStages[0];
-        pipelineInfo.layout = configInfo.pipelineLayout;
+        pipelineInfo.layout = pipelineLayout;
         
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -50,12 +81,12 @@ namespace graphics
         VkPipelineCacheCreateInfo cacheCreateInfo{};
         cacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 
-        if(vkCreatePipelineCache(device.device(), &cacheCreateInfo, nullptr, &pipelineCache) != VK_SUCCESS)
+        if(vkCreatePipelineCache(Shared::device->device(), &cacheCreateInfo, nullptr, &pipelineCache) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create compute pipeline cache!");
         }
         cout << "Creating Compute Pipeline" << endl;
-        if(vkCreateComputePipelines(device.device(), pipelineCache, 1, &pipelineInfo, nullptr, &m_computePipeline) != VK_SUCCESS)
+        if(vkCreateComputePipelines(Shared::device->device(), pipelineCache, 1, &pipelineInfo, nullptr, &m_computePipeline) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create compute pipeline! (Skill issue)");
         }
@@ -67,30 +98,20 @@ namespace graphics
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
     }
 
-    void ComputePipeline::dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+    void ComputePipeline::dispatch(VkCommandBuffer cmdBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ, bool wait)
     {
-        // vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
-        // vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+        // VkCommandBuffer cmdBuffer = Shared::device->beginSingleTimeCommands();
         
-        // // Dispatch the compute shader
-        // vkCmdDispatch(cmdBuffer, x, y, z);
-        // VkBufferMemoryBarrier bufferBarrier{};
-        // bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-        // bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;  // Compute writes
-        // bufferBarrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;  // Graphics reads
-        // bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        // bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        // bufferBarrier.buffer = sharedBuffer;
-        // bufferBarrier.offset = 0;
-        // bufferBarrier.size = VK_WHOLE_SIZE;
+        // Bind the compute pipeline
+        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_computePipeline);
 
-        // vkCmdPipelineBarrier(
-        //     commandBuffer,
-        //     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,   // Wait for compute shader
-        //     VK_PIPELINE_STAGE_VERTEX_INPUT_BIT,     // Before vertex shader reads data
-        //     0,
-        //     0, nullptr, 1, &bufferBarrier, 0, nullptr
-        // );
+        // Dispatch compute work with the specified number of workgroups
+        vkCmdDispatch(cmdBuffer, groupCountX, groupCountY, groupCountZ);
 
+        // if(!wait)
+        // {
+            // Shared::device->endSingleTimeCommands(cmdBuffer);
+        //     return;
+        // }
     }
 } // namespace graphics

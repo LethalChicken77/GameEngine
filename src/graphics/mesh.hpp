@@ -11,9 +11,11 @@
 #include <string>
 #include <iostream>
 
+#include "containers.hpp"
+
 namespace graphics
 {
-    class Mesh
+    class Mesh // TODO: Store triangle and vertex vectors, takes more memory but allows easier mesh manipulation
     {
     public:
     
@@ -28,16 +30,24 @@ namespace graphics
             static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
         };
 
-        struct Builder
+        struct Triangle
         {
-            std::vector<Vertex> vertices;
-            std::vector<uint32_t> indices;
-
-            void loadModelFromObj(const std::string& filename);
+            uint32_t v0;
+            uint32_t v1;
+            uint32_t v2;
         };
 
-        Mesh(Device& _device, const Builder& builder);
-        Mesh(Device& _device, const std::vector<Vertex>& vertices, const std::vector<uint32_t>& indices);
+        // struct Builder
+        // {
+        //     std::vector<Vertex> vertices;
+        //     std::vector<Triangle> triangles;
+
+        //     void loadModelFromObj(const std::string& filename);
+        // };
+
+        Mesh();
+        Mesh(const std::vector<Vertex>& _vertices, const std::vector<uint32_t>& _indices);
+        Mesh(const std::vector<Vertex>& _vertices, const std::vector<Triangle>& _indices);
         ~Mesh();
 
         Mesh(const Mesh&) = delete;
@@ -47,19 +57,28 @@ namespace graphics
         void draw(VkCommandBuffer commandBuffer);
         void drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
 
-        static std::shared_ptr<Mesh> createCube(Device& device, float edgeLength);
-        static std::shared_ptr<Mesh> createSierpinskiPyramid(Device& device, float edgeLength, int depth);
-        static std::unique_ptr<Mesh> loadObj(Device& device, const std::string& filename);
+        static std::shared_ptr<Mesh> createCube(float edgeLength);
+        static std::shared_ptr<Mesh> createSierpinskiPyramid(float edgeLength, int depth);
+        static std::shared_ptr<Mesh> createGrid(int width, int length, glm::vec2 dimensions);
+        static std::unique_ptr<Mesh> loadObj(const std::string& filename);
+
+        void createBuffers();
+        
+        void generateNormals();
 
     private:
-        Device& device;
         std::unique_ptr<Buffer> vertexBuffer;
         uint32_t vertexCount;
         bool useIndexBuffer = true;
         std::unique_ptr<Buffer> indexBuffer;
         uint32_t indexCount;
 
-        void createVertexBuffer(const std::vector<Vertex>& vertices);
-        void createIndexBuffer(const std::vector<uint32_t>& indices);
+        std::vector<Vertex> vertices{};
+        std::vector<Triangle> triangles{};
+
+        void createVertexBuffer();
+        void createIndexBuffer();
+        
+        void loadModelFromObj(const std::string& filename);
     };
 }

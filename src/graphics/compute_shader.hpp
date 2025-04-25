@@ -9,6 +9,7 @@
 
 #include "device.hpp"
 #include "shader.hpp"
+#include "shader_base.hpp"
 
 namespace graphics
 {
@@ -16,17 +17,15 @@ namespace graphics
         ComputePipelineConfigInfo() = default;
         ComputePipelineConfigInfo(const ComputePipelineConfigInfo&) = delete;
         ComputePipelineConfigInfo& operator=(const ComputePipelineConfigInfo&) = delete;
-
-        VkPipelineLayout pipelineLayout = nullptr;
     };
 
-    // Container to abstract away shader logic
-    class ComputeShader
+    // Container to abstract away compute shader logic
+    class ComputeShader : public ShaderBase
     {
         public:
             std::string path;
 
-            ComputeShader(Device &_device, const std::string &_path, std::vector<ShaderInput> inputs);
+            ComputeShader(const std::string &_path, std::vector<ShaderInput> inputs, uint32_t textureCount);
             ~ComputeShader();
 
             // Disallow copying of shaders
@@ -43,14 +42,10 @@ namespace graphics
             bool dirty = false;
 
         private:
-            Device &device;
-            const std::vector<ShaderInput> inputs{};
             ComputePipelineConfigInfo configInfo{};
 
-            VkShaderModule computeShaderModule;
+            VkShaderModule computeShaderModule{};
 
             void initializeDefaultConfigInfo();
-
-            void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
     };
 } // namespace graphics

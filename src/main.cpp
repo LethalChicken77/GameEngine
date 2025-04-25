@@ -23,7 +23,7 @@
 #include <GLFW/glfw3native.h>
 #include <windows.h>
 #include <dwmapi.h>
-#pragma comment(lib, "Dwmapi.lib")
+// #pragma comment(lib, "Dwmapi.lib")
 #endif
 
 const std::string APPLICATION_NAME = "Game";

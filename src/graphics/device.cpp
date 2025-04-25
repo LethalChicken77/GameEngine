@@ -156,6 +156,12 @@ void Device::createLogicalDevice() {
     queueCreateInfos.push_back(queueCreateInfo);
   }
 
+  // Enable the feature for image float32 atomics
+  // VkPhysicalDeviceShaderAtomicFloatFeaturesEXT atomicFloatFeatures = {};
+  // atomicFloatFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT;
+  // atomicFloatFeatures.shaderImageFloat32Atomics = VK_TRUE; // Enable float32 atomics on images
+  // atomicFloatFeatures.shaderImageFloat32AtomicAdd = VK_TRUE; // Enable float32 atomics on images
+
   VkPhysicalDeviceFeatures deviceFeatures = {};
   deviceFeatures.samplerAnisotropy = VK_TRUE;
 
@@ -168,6 +174,7 @@ void Device::createLogicalDevice() {
   createInfo.pEnabledFeatures = &deviceFeatures;
   createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
   createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+  createInfo.pNext = nullptr;//&atomicFloatFeatures; // Add the atomic float features to the device create info
 
   // might not really be necessary anymore because device specific validation layers
   // have been deprecated
@@ -509,6 +516,33 @@ void Device::copyBufferToImage(
       buffer,
       image,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      1,
+      &region);
+  endSingleTimeCommands(commandBuffer);
+}
+
+void Device::copyImageToBuffer(
+    VkImage image, VkBuffer buffer, uint32_t width, uint32_t height, uint32_t layerCount) {
+  VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+  VkBufferImageCopy region{};
+  region.bufferOffset = 0;
+  region.bufferRowLength = 0;
+  region.bufferImageHeight = 0;
+
+  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  region.imageSubresource.mipLevel = 0;
+  region.imageSubresource.baseArrayLayer = 0;
+  region.imageSubresource.layerCount = layerCount;
+
+  region.imageOffset = {0, 0, 0};
+  region.imageExtent = {width, height, 1};
+
+  vkCmdCopyImageToBuffer(
+      commandBuffer,
+      image,
+      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+      buffer,
       1,
       &region);
   endSingleTimeCommands(commandBuffer);
