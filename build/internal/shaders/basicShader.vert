@@ -34,33 +34,11 @@ layout(set = 1, binding = 7) uniform sampler2D heightMap;
 
 void main()
 {
-    float heightScale = 1.0;
-    vec3 heightMapPos = vec3(positions.x, texture(heightMap, uv).r * heightScale, positions.z);
-    gl_Position = cameraData.projection * inverse(cameraData.view) * pushConstants.model * vec4(heightMapPos, 1.0);
-    positionOut = heightMapPos;
-
-    // normalOut = normalize(mat3(pushConstants.model) * normals);
-    float texelSize = 1.0 / 512.0 / 2.0;
-    float gridSize = 50.0;
-    // Sample height values from adjacent texels
-    float heightCenter = texture(heightMap, uv).r * heightScale;
-    float heightR = texture(heightMap, uv + vec2(texelSize, 0.0)).r * heightScale;
-    float heightU = texture(heightMap, uv + vec2(0.0, texelSize)).r * heightScale;
-
-    float dx = (heightR - heightCenter);
-    float dy = (heightU - heightCenter);
-
-    float worldStep = gridSize * texelSize;
-
-    float slopeX = dx / worldStep;
-    float slopeZ = dy / worldStep;
-
-    // Compute tangent and bitangent vectors
-    vec3 tangent   = normalize(vec3(1.0, slopeX, 0.0));
-    vec3 bitangent = normalize(vec3(0.0, slopeZ, 1.0));
+    gl_Position = cameraData.projection * inverse(cameraData.view) * pushConstants.model * vec4(positions, 1.0);
+    positionOut = gl_Position.xyz;
 
     // Compute normal via cross product and normalize
-    vec3 normal = normalize(cross(bitangent, tangent));
+    vec3 normal = normals;
 
     mat3 normalMatrix = transpose(inverse(mat3(pushConstants.model)));
     normalOut = normalize(normalMatrix * normal);

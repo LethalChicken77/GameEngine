@@ -11,7 +11,6 @@
 #include "core/game_object.hpp"
 #include "utils/debug.hpp"
 #include "core/random.hpp"
-#include "hydraulic_erosion.hpp"
 
 namespace core
 {
@@ -50,9 +49,6 @@ private:
 
     graphics::Camera camera;
     std::vector<core::GameObject> gameObjects;
-
-    // Program specific objects
-    std::unique_ptr<game::HydraulicErosion> hydraulicErosion;
 };
 
 } // namespace core

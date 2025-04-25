@@ -16,7 +16,6 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_vulkan.h"
 #include "utils/imgui_styles.hpp"
-#include "hydraulic_erosion.hpp"
 
 using namespace graphics;
 
@@ -31,8 +30,6 @@ namespace core
 Engine::Engine(graphics::Graphics& _graphics) : graphics(_graphics)
 {
     init();
-
-    hydraulicErosion = std::make_unique<game::HydraulicErosion>(512, game::HydraulicErosion::ErosionProperties());
 }
 
 Engine::~Engine()
@@ -49,16 +46,6 @@ void Engine::close()
 {
     // graphics->cleanup();
 }
-
-int cpuNumParticles = 20;
-int gpuNumParticles = 5000;
-enum SimulationMode
-{
-    None,
-    CPU,
-    GPU
-};
-SimulationMode simulationMode = SimulationMode::None;
 
 void Engine::update(double deltaTime)
 {
@@ -116,15 +103,6 @@ void Engine::update(double deltaTime)
         // obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
-    }
-
-    if(simulationMode == SimulationMode::CPU)
-    {
-        hydraulicErosion->runIterationsCPU(cpuNumParticles);
-    }
-    else if(simulationMode == SimulationMode::GPU)
-    {
-        hydraulicErosion->runIterationsGPU(gpuNumParticles);
     }
 }
 
@@ -188,30 +166,7 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Simulation Settings");
-        ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
-        ImGui::SliderInt("GPU Particles", &gpuNumParticles, 0, 100000);
-        
-        hydraulicErosion->drawImgui();
-        if(simulationMode == SimulationMode::None)
-        {
-            if(ImGui::Button("Run CPU"))
-            {
-                simulationMode = SimulationMode::CPU;
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Run GPU"))
-            {
-                simulationMode = SimulationMode::GPU;
-            }
-        }
-        else
-        {
-            if(ImGui::Button("Stop"))
-            {
-                simulationMode = SimulationMode::None;
-            }
-        }
+        ImGui::Begin("ImGui :D");
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
@@ -252,8 +207,11 @@ void Engine::loadGameObjects()
     GameObject obj = GameObject::instantiate();
     // GameObject obj2 = GameObject::instantiate();
     // GameObject obj3 = GameObject::instantiate();
+    // std::cout << "Creating Grid" << std::endl;
+    // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
+    // obj.materialID = 0;
     std::cout << "Creating Grid" << std::endl;
-    obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
+    obj.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     obj.materialID = 0;
     // std::cout << "Loading Monkey" << std::endl;
     // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");

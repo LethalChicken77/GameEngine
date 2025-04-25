@@ -136,7 +136,8 @@ void main()
     mat3 TBN = mat3(tangent, bitangent, _normal);
     vec3 normal = normalize(TBN * normalMapSample);
     float normalStrength = 0.3;
-    normal = normalize(_normal + normal * normalStrength);
+    // normal = normalize(_normal + normal * normalStrength);
+    normal = normalize(_normal);
 
     // vec3 normal = _normal;
 
