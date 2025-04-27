@@ -2,6 +2,7 @@
 #include "procedural/noise.hpp"
 #include "graphics/containers.hpp"
 #include "graphics/material.hpp"
+#include "graphics/mesh.hpp"
 #include "imgui.h"
 #include "nfd.h"
 
@@ -98,6 +99,30 @@ namespace game
                 computeResource->setTexture(1, heightMap);
                 computeResource->updateDescriptorSet();
                 heightMap->updateOnGPU();
+                free(path);
+            }
+            else if(result == NFD_CANCEL)
+            {
+                std::cout << "User canceled" << std::endl;
+            }
+            else
+            {
+                std::cout << "Error: " << NFD_GetError() << std::endl;
+            }
+        }
+        ImGui::Separator();
+        ImGui::Text("Model Export:");
+        ImGui::InputInt("Model Resolution", &saveModelDimensions);
+        saveModelDimensions = glm::clamp(saveModelDimensions, 1, 512);
+        if(ImGui::Button("Save as Obj"))
+        {
+            heightMap->updateOnCPU();
+            char* path = nullptr;
+            nfdresult_t result = NFD_SaveDialog("obj", nullptr, &path);
+            if(result == NFD_OKAY)
+            {
+                std::cout << "Saving Terrain to: " << path << std::endl;
+                saveModel(path);
                 free(path);
             }
             else if(result == NFD_CANCEL)
@@ -342,5 +367,18 @@ namespace game
 
         // heightMap->transitionImageLayout(VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         prevGPU = true;
+    }
+
+    void HydraulicErosion::saveModel(const std::string &path)
+    {
+        std::shared_ptr<graphics::Mesh> newMesh = graphics::Mesh::createGrid(saveModelDimensions, saveModelDimensions, {50.0f, 50.0f});
+
+        for(int i = 0; i < newMesh->vertices.size(); i++)
+        {
+            newMesh->vertices[i].position.y = heightMap->sampleBilinear(newMesh->vertices[i].texCoord.x, newMesh->vertices[i].texCoord.y);
+        }
+
+        newMesh->generateNormals();
+        newMesh->saveAsObj(path);
     }
 }

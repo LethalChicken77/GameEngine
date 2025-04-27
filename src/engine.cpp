@@ -189,17 +189,18 @@ void Engine::run()
         ImGui::NewFrame();
 
         ImGui::Begin("Simulation Settings");
-        ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
+        // ImGui::SliderInt("CPU Particles", &cpuNumParticles, 0, 100);
         ImGui::SliderInt("GPU Particles", &gpuNumParticles, 0, 100000);
         
         hydraulicErosion->drawImgui();
         if(simulationMode == SimulationMode::None)
         {
-            if(ImGui::Button("Run CPU"))
-            {
-                simulationMode = SimulationMode::CPU;
-            }
-            ImGui::SameLine();
+            // Removed CPU simulation for now
+            // if(ImGui::Button("Run CPU"))
+            // {
+            //     simulationMode = SimulationMode::CPU;
+            // }
+            // ImGui::SameLine();
             if(ImGui::Button("Run GPU"))
             {
                 simulationMode = SimulationMode::GPU;

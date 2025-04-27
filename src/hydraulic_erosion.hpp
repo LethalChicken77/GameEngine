@@ -49,6 +49,8 @@ namespace game
             void loadHeightmap(const std::string &path);
             void resetHeightmap();
 
+            void saveModel(const std::string &path);
+
         private:
             std::shared_ptr<Texture> heightMap;
             std::unique_ptr<ComputeResource> computeResource;
@@ -59,6 +61,8 @@ namespace game
             std::vector<float> originalHeightMap{};
 
             std::vector<Particle> cpuParticles{};
+
+            int saveModelDimensions = 512;
 
             void initializeTexture(size_t resolution);
             

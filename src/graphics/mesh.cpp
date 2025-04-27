@@ -5,6 +5,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include <tiny_obj_loader.h>
+#include <fstream>
 
 namespace graphics
 {
@@ -40,7 +41,12 @@ namespace graphics
         //     createIndexBuffer();
     }
 
-    Mesh::~Mesh(){}
+    Mesh::~Mesh()
+    {
+        vertexBuffer->unmap();
+        if(useIndexBuffer)
+            indexBuffer->unmap();
+    }
 
     void Mesh::bind(VkCommandBuffer commandBuffer)
     {
@@ -486,5 +492,40 @@ namespace graphics
         std::cout << "Loaded " << vertices.size() << " vertices and " << triangles.size() << " triangles\n";
 
         createBuffers();
+    }
+
+    void Mesh::saveAsObj(const std::string &path)
+    {
+        std::string result = "# VEngine Hydraulic Erosion\n# Made by Daniel Tetreault\n";
+        for(auto &v : vertices)
+        {
+            result += "v " + std::to_string(v.position.x) + " " + std::to_string(v.position.y) + " " + std::to_string(v.position.z) + "\n";
+        }
+        for(auto &v : vertices)
+        {
+            result += "vn " + std::to_string(v.normal.x) + " " + std::to_string(v.normal.y) + " " + std::to_string(v.normal.z) + "\n";
+        }
+        for(auto &v : vertices)
+        {
+            result += "vt " + std::to_string(v.texCoord.x) + " " + std::to_string(v.texCoord.y) + "\n";
+        }
+        result += "s 1\n";
+        for(auto &t : triangles)
+        {
+            result += "f " + std::to_string(t.v0 + 1) + "/" + std::to_string(t.v0 + 1) + "/" + std::to_string(t.v0 + 1) + " " +
+                std::to_string(t.v1 + 1) + "/" + std::to_string(t.v1 + 1) + "/" + std::to_string(t.v1 + 1) + " " +
+                std::to_string(t.v2 + 1) + "/" + std::to_string(t.v2 + 1) + "/" + std::to_string(t.v2 + 1) + "\n";
+        }
+        
+        std::ofstream file(path);
+        if(file.is_open())
+        {
+            file << result;
+            file.close();
+        }
+        else
+        {
+            std::cerr << "Failed to open file: " << path << std::endl;
+        }
     }
 } // namespace graphics
