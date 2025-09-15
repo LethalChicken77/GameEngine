@@ -163,19 +163,19 @@ void Graphics::createPipeline()
 void Graphics::loadTextures()
 {
     std::cout << "Loading textures" << std::endl;
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
 
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
-    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
     
     // textures.push_back(heightmapTexture);
 }
