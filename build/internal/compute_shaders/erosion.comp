@@ -106,7 +106,7 @@ void main()
                 depositionAmount = min(depositionAmount, particle.sediment);
                 newHeight += depositionAmount;
             }
-            else if(particle.sediment < effectiveCapacity)
+            else
             {
                 float erosionAmount = effectiveCapacity - particle.sediment;
                 // erosionAmount = min(erosionAmount, height - lowestNeighbor);

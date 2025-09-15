@@ -43,12 +43,13 @@ void main()
     float texelSize = 1.0 / 512.0 / 2.0;
     float gridSize = 50.0;
     // Sample height values from adjacent texels
-    float heightCenter = texture(heightMap, uv).r * heightScale;
     float heightR = texture(heightMap, uv + vec2(texelSize, 0.0)).r * heightScale;
     float heightU = texture(heightMap, uv + vec2(0.0, texelSize)).r * heightScale;
+    float heightL = texture(heightMap, uv - vec2(texelSize, 0.0)).r * heightScale;
+    float heightD = texture(heightMap, uv - vec2(0.0, texelSize)).r * heightScale;
 
-    float dx = (heightR - heightCenter);
-    float dy = (heightU - heightCenter);
+    float dx = (heightR - heightL) * 0.5;
+    float dy = (heightU - heightD) * 0.5;
 
     float worldStep = gridSize * texelSize;
 

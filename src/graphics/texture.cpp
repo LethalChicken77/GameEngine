@@ -207,13 +207,13 @@ namespace graphics
 
     float Texture::sampleBilinear(float x, float y)
     {
-        x = glm::clamp(x, 0.0f, 1.0f);
-        y = glm::clamp(y, 0.0f, 1.0f);
+        x = glm::clamp(x, 0.0000001f, 0.999999f); // Clamp to edges
+        y = glm::clamp(y, 0.0000001f, 0.999999f);
         float u = x * width;
         float v = y * height;
         int x0 = (int)u;
         int y0 = (int)v;
-        int x1 = (x0 + 1) % width; // Wrap around
+        int x1 = (x0 + 1) % width;
         int y1 = (y0 + 1) % height;
         float s = u - x0;
         float t = v - y0;

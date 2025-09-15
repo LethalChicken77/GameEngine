@@ -65,6 +65,10 @@ namespace graphics
         void createBuffers();
         
         void generateNormals();
+        void saveAsObj(const std::string& path);
+        
+        std::vector<Vertex> vertices{};
+        std::vector<Triangle> triangles{};
 
     private:
         std::unique_ptr<Buffer> vertexBuffer;
@@ -73,8 +77,6 @@ namespace graphics
         std::unique_ptr<Buffer> indexBuffer;
         uint32_t indexCount;
 
-        std::vector<Vertex> vertices{};
-        std::vector<Triangle> triangles{};
 
         void createVertexBuffer();
         void createIndexBuffer();
