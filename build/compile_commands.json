@@ -103,6 +103,12 @@
 },
 {
   "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\pipeline_manager.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\pipeline_manager.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/graphics/pipeline_manager.cpp",
+  "output": "CMakeFiles/GameEngine.dir/src/graphics/pipeline_manager.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe  @CMakeFiles/GameEngine.dir/includes_CXX.rsp  -g -g -std=gnu++20 -o CMakeFiles\\GameEngine.dir\\src\\graphics\\renderer.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\graphics\\renderer.cpp",
   "file": "C:/Users/dante/Development/GameEngine/src/graphics/renderer.cpp",
   "output": "CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj"

@@ -18,25 +18,27 @@ namespace graphics
     class GraphicsPipeline
     {
     public:
-        GraphicsPipeline(Device &_device, Shader& _shader);
-        GraphicsPipeline(Device &_device, const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo);
+        GraphicsPipeline(Shader& _shader, int id, VkPipelineCache cache);
+        GraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, int id, VkPipelineLayout layout);
         ~GraphicsPipeline();
 
         GraphicsPipeline(const GraphicsPipeline&) = delete;
         GraphicsPipeline& operator=(const GraphicsPipeline&) = delete;
 
         void bind(VkCommandBuffer commandBuffer);
+
+        int getID() const { return ID; }
         VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
     protected:
-        void createGraphicsPipeline();
-        void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo);
+        void createGraphicsPipeline(VkPipelineCache cache);
+        void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, VkPipelineLayout layout);
         void createPipelineLayout();
 
-        Device &device;
         VkPipeline m_graphicsPipeline;
-        Shader &shader;
-        VkPipelineCache pipelineCache;
         VkPipelineLayout pipelineLayout;
+        Shader &shader;
+
+        int ID = -1;
     };
 }

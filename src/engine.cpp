@@ -93,7 +93,7 @@ void Engine::update(double deltaTime)
     for(GameObject &obj : gameObjects)
     {
         // if(obj.get_id() == 2) break;
-        // if(obj.get_id() == 0)
+        // if(obj.get_id() == 1)
         // {
         //     obj.transform.rotation.y += 0.5f * deltaTime;
         // }
@@ -205,7 +205,7 @@ void Engine::loadGameObjects()
     // };
 
     GameObject obj = GameObject::instantiate();
-    // GameObject obj2 = GameObject::instantiate();
+    GameObject obj2 = GameObject::instantiate();
     // GameObject obj3 = GameObject::instantiate();
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
@@ -213,13 +213,13 @@ void Engine::loadGameObjects()
     std::cout << "Creating Grid" << std::endl;
     obj.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     obj.materialID = 0;
-    // std::cout << "Loading Monkey" << std::endl;
-    // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    // obj2.materialID = 0;
+    std::cout << "Loading Monkey" << std::endl;
+    obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj2.materialID = 1;
     // obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
     // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
-    // gameObjects.push_back(std::move(obj2));
+    gameObjects.push_back(std::move(obj2));
     // gameObjects.push_back(std::move(obj3));
     std::cout << "Loaded game objects" << std::endl;
 }

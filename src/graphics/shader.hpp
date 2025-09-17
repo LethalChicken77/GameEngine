@@ -10,13 +10,15 @@
 #include "device.hpp"
 #include "descriptors.hpp"
 #include "shader_base.hpp"
+// #include "graphics_pipeline.hpp"
 
 namespace graphics
 {
+    class GraphicsPipeline;
     struct PipelineConfigInfo {
         PipelineConfigInfo() = default;
-        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
-        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+        // PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        // PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
         VkPipelineViewportStateCreateInfo viewportInfo;
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
@@ -47,22 +49,24 @@ namespace graphics
             // Disallow copying of shaders
             Shader(const Shader&) = delete;
             Shader& operator=(const Shader&) = delete;
-            // Shader(Shader&&) = default;
-            // Shader& operator=(Shader&&) = default;
 
-            PipelineConfigInfo& getConfigInfo() { return configInfo; };
+            constexpr PipelineConfigInfo& getConfigInfo() { return configInfo; };
             VkShaderModule& getVertexModule() { return vertShaderModule; }
             VkShaderModule& getFragmentModule() { return fragShaderModule; }
             const std::vector<ShaderInput>& getInputs() const { return inputs; }
+            GraphicsPipeline* getPipeline() const { return parentPipeline; }
             void reloadShader(); // Rereads the shader files and recreates the shader modules
 
             bool dirty = false;
 
-        private:
             PipelineConfigInfo configInfo{};
+
+            GraphicsPipeline* parentPipeline;
+        private:
 
             VkShaderModule vertShaderModule{};
             VkShaderModule fragShaderModule{};
+
 
             // Descriptor Set pool and layout
             // DescriptorPool descriptorPool;

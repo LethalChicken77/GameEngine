@@ -12,17 +12,17 @@ using namespace std;
 
 namespace graphics
 {    
-    GraphicsPipeline::GraphicsPipeline(Device &_device, Shader &_shader) : device(_device), shader(_shader)
+    GraphicsPipeline::GraphicsPipeline(Shader &_shader, int id, VkPipelineCache cache) : shader(_shader), ID(id)
     {
         createPipelineLayout();
-        createGraphicsPipeline();
+        createGraphicsPipeline(cache);
     }
 
     GraphicsPipeline::~GraphicsPipeline()
     {
-        vkDestroyPipeline(device.device(), m_graphicsPipeline, nullptr);
-        vkDestroyPipelineCache(device.device(), pipelineCache, nullptr);
-        vkDestroyPipelineLayout(device.device(), pipelineLayout, nullptr);
+        vkDestroyPipeline(Shared::device->device(), m_graphicsPipeline, nullptr);
+        if(pipelineLayout != nullptr)
+            vkDestroyPipelineLayout(Shared::device->device(), pipelineLayout, nullptr);
     }
 
     void GraphicsPipeline::createPipelineLayout()
@@ -37,9 +37,13 @@ namespace graphics
         std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
             Descriptors::globalSetLayout->getDescriptorSetLayout()
         };
-        // for(auto &m : Shared::materials)
+        // for(std::unique_ptr<Shader>& shader : Shared::shaders)
         // {
             descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
+        // }
+        // for(std::unique_ptr<Shader>& shader : Shared::shaders)
+        // {
+        //     descriptorSetLayouts.push_back(shader->getDescriptorSetLayout()->getDescriptorSetLayout());
         // }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -48,15 +52,16 @@ namespace graphics
         pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-        if(vkCreatePipelineLayout(device.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+        if(vkCreatePipelineLayout(Shared::device->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create pipeline layout");
         }
     }
 
-    void GraphicsPipeline::createGraphicsPipeline()
+    void GraphicsPipeline::createGraphicsPipeline(VkPipelineCache cache)
     {
         // TODO: Implement hot reloading of shaders
+        shader.parentPipeline = this;
         PipelineConfigInfo &configInfo = shader.getConfigInfo();
         
         assert(pipelineLayout != nullptr && "Cannot create graphics pipeline:: layout is null");
@@ -109,15 +114,8 @@ namespace graphics
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        VkPipelineCacheCreateInfo cacheCreateInfo{};
-        cacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-
-        if(vkCreatePipelineCache(device.device(), &cacheCreateInfo, nullptr, &pipelineCache) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create pipeline cache!");
-        }
         cout << "Creating Graphics Pipeline" << endl;
-        if(vkCreateGraphicsPipelines(device.device(), pipelineCache, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
+        if(vkCreateGraphicsPipelines(Shared::device->device(), cache, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create graphics pipeline! (Skill issue)");
         }

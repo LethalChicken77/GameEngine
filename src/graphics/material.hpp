@@ -38,6 +38,9 @@ namespace graphics
             void updateDescriptorSet();
 
             uint32_t getId() const { return id; }
+            const Shader* getShader() { return shader; }
+
+            static VkDescriptorSet getDummySet();
 
         private:
             Material(id_t mat_id, const Shader *_shader);

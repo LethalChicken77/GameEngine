@@ -82,7 +82,8 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     loadTextures();
     loadShaders();
     loadMaterials();
-    createPipeline();
+    pipelineManager = std::make_unique<PipelineManager>(renderer);
+    // pipelineManager->createPipelines();
 
     std::cout << "Successfully initialized graphics" << std::endl;
 }
@@ -98,8 +99,9 @@ void Graphics::cleanup()
     Descriptors::globalSetLayout.reset();
     Descriptors::globalDescriptorSets.clear();
     Descriptors::imguiPool.reset();
-    graphicsPipeline.reset();
-    shaders.clear();
+    pipelineManager->destroyPipelines();
+    // graphicsPipeline.reset();
+    Shared::shaders.clear();
     Shared::materials.clear();
     waitForDevice();
     // vkDestroyInstance(instance, nullptr);
@@ -143,22 +145,6 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
     }
 }
 
-void Graphics::createPipeline()
-{
-    // assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
-    std::cout << "Creating pipeline" << std::endl;
-    // PipelineConfigInfo pipelineConfig{};
-    // GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
-    PipelineConfigInfo &pipelineConfig = shaders[0]->getConfigInfo();
-
-    pipelineConfig.renderPass = renderer.getRenderPass();
-    // pipelineConfig.pipelineLayout = pipelineLayout;
-
-    graphicsPipeline = std::make_unique<GraphicsPipeline>(
-        device,
-        *shaders[0]
-    );
-}
 
 void Graphics::loadTextures()
 {
@@ -183,7 +169,7 @@ void Graphics::loadTextures()
 void Graphics::loadShaders()
 {
     std::cout << "Loading shaders\n";
-    shaders.push_back(std::make_unique<Shader>(
+    Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/basicShader.vert.spv", 
         "internal/shaders/basicShader.frag.spv", 
         std::vector<ShaderInput>{
@@ -192,8 +178,21 @@ void Graphics::loadShaders()
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
         },
-        7
+        6
     ));
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/wireframe.vert.spv", 
+        "internal/shaders/wireframe.frag.spv", 
+        std::vector<ShaderInput>{
+            {"color", ShaderInput::DataType::VEC3}
+        },
+        0
+    ));
+    Shared::shaders[1]->configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+    // Shared::shaders[1]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
+    // Shared::shaders[1]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
+    // Shared::shaders[1]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    Shared::shaders[1]->reloadShader();
 }
 
 void Graphics::loadMaterials()
@@ -201,13 +200,12 @@ void Graphics::loadMaterials()
     std::cout << "Loading materials\n";
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
 
-    Material m1 = Material::instantiate(shaders[0].get());
+    Material m1 = Material::instantiate(Shared::shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", glm::vec3(1.f, 1.f, 1.f));
     m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
     m1.setValue("roughness", 0.95f);
     m1.setValue("metallic", 0.f);
-
 
     m1.createShaderInputBuffer();
     // Grass
@@ -220,6 +218,14 @@ void Graphics::loadMaterials()
     m1.setTexture(5, textures[5]);
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1));
+
+    
+    Material m2 = Material::instantiate(Shared::shaders[1].get());
+    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    m2.setValue("color", glm::vec3(0.f, 0.f, 0.f));
+    m2.createShaderInputBuffer();
+    m2.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(m2));
 
     // Material m2 = Material::instantiate(shaders[0].get());
     // // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
@@ -243,33 +249,40 @@ void Graphics::loadMaterials()
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
-    graphicsPipeline->bind(commandBuffer);
 
-    std::vector<VkDescriptorSet> descriptorSets = { frameInfo.globalDescriptorSet };
-    // for(auto &m : materials)
-    // {
-    //     descriptorSets.push_back(m.getDescriptorSet());
-    //     std::cout << "Material Descriptor Set: " << m.getDescriptorSet() << std::endl;
-    // }
-
-    vkCmdBindDescriptorSets(
-        commandBuffer, 
-        VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        graphicsPipeline->getPipelineLayout(), 
-        0,
-        static_cast<uint32_t>(descriptorSets.size()),
-        descriptorSets.data(), 
-        0,
-        nullptr
-    );
-
+    // pipelineManager.renderObjects(frameInfo, gameObjects, commandBuffer);
+    GraphicsPipeline* prevPipeline = nullptr;
     for(core::GameObject& obj : gameObjects)
     {
+        const Shader* shader = Shared::materials[obj.materialID].getShader();
+        GraphicsPipeline* pipeline = shader->getPipeline();
+        uint32_t setIndex = pipeline->getID() + 1;
+        if(pipeline != prevPipeline)
+        {
+            pipeline->bind(commandBuffer);
+
+            std::vector<VkDescriptorSet> descriptorSets = { frameInfo.globalDescriptorSet };
+
+            vkCmdBindDescriptorSets(
+                commandBuffer, 
+                VK_PIPELINE_BIND_POINT_GRAPHICS, 
+                pipeline->getPipelineLayout(), 
+                0,
+                static_cast<uint32_t>(descriptorSets.size()),
+                descriptorSets.data(), 
+                0,
+                nullptr
+            );
+            prevPipeline = pipeline;
+        }
         std::vector<VkDescriptorSet> localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };
+
+        // Bind local descriptors (Material info, do this every frame to allow materials to change)
+        // Might want to add dirty flag to materials
         vkCmdBindDescriptorSets(
             commandBuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS, 
-            graphicsPipeline->getPipelineLayout(), 
+            pipeline->getPipelineLayout(), 
             1,
             1,
             localDescriptorSets.data(), 
@@ -277,12 +290,11 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
             nullptr
         );
 
-
         PushConstants push{};
         push.model = obj.transform.getTransform();
         vkCmdPushConstants(
             commandBuffer, 
-            graphicsPipeline->getPipelineLayout(), 
+            pipeline->getPipelineLayout(), 
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
             0, 
             sizeof(PushConstants), 

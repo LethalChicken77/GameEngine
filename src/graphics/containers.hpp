@@ -6,6 +6,8 @@
 #include "texture.hpp"
 #include "descriptors.hpp"
 #include "material.hpp"
+#include "shader.hpp"
+// #include "compute_shader.hpp"
 
 
 namespace graphics
@@ -13,11 +15,15 @@ namespace graphics
     #define GR_MAX_MATERIAL_COUNT 128
     // Forward declaration of Material class
     class Material;
+    class Shader;
+    class ComputeShader;
     namespace Shared
     {
         extern VkInstance instance;
         extern Device *device;
         extern std::vector<Material> materials;
+        extern std::vector<std::unique_ptr<Shader>> shaders;
+        // std::vector<ComputeShader> computeShaders;
     }
     // Declaration order matters
     // Global Descriptor Set

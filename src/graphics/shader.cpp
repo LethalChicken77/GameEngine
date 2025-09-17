@@ -109,7 +109,7 @@ namespace graphics
         configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
         configInfo.dynamicStateInfo.flags = 0;
     }
-    
+
     void Shader::reloadShader()
     {
         if(vertShaderModule != VK_NULL_HANDLE)

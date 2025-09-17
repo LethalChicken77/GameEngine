@@ -7,6 +7,7 @@
 #include <map>
 
 #include "window.hpp"
+#include "pipeline_manager.hpp"
 #include "graphics_pipeline.hpp"
 #include "renderer.hpp"
 #include "device.hpp"
@@ -59,7 +60,6 @@ private:
     void loadTextures();
     void loadShaders();
     void loadMaterials();
-    void createPipeline();
 
     static void windowRefreshCallback(GLFWwindow *window);
 
@@ -70,14 +70,11 @@ private:
     Renderer renderer{window, device};
     // Containers containers{&device};
 
-    std::unique_ptr<GraphicsPipeline> graphicsPipeline;
+    std::unique_ptr<PipelineManager> pipelineManager;
     PipelineConfigInfo configInfo;
 
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
     std::vector<std::shared_ptr<Texture>> textures;
-
-    std::vector<std::unique_ptr<Shader>> shaders;
-    std::vector<std::unique_ptr<ComputeShader>> computeShaders;
 
     Camera* camera;
 };

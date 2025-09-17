@@ -30,14 +30,11 @@ layout(set = 1, binding = 0) uniform MaterialInfo
     float metallic;
 } materialInfo;
 
-layout(set = 1, binding = 7) uniform sampler2D heightMap;
-
 void main()
 {
     gl_Position = cameraData.projection * inverse(cameraData.view) * pushConstants.model * vec4(positions, 1.0);
     positionOut = gl_Position.xyz;
 
-    // Compute normal via cross product and normalize
     vec3 normal = normals;
 
     mat3 normalMatrix = transpose(inverse(mat3(pushConstants.model)));

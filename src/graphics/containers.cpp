@@ -8,6 +8,7 @@ namespace Shared
     Device *device;
     
     std::vector<Material> materials{};
+    std::vector<std::unique_ptr<Shader>> shaders{};
 }
 
 namespace Descriptors
