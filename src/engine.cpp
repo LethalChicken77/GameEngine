@@ -161,12 +161,31 @@ void Engine::run()
     while (graphics.isOpen()) {
         // Poll for and process events
         glfwPollEvents();
+        
+        if(core::Input::getKeyDown(GLFW_KEY_R))
+        {
+            graphics.reloadShaders();
+        }
 
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("ImGui :D");
+        ImGui::Begin("Material Properties");
+        Material& mat = Shared::materials[0];
+        glm::vec3 color = mat.getVec3("color");
+        float roughness = mat.getFloat("roughness");
+        float metallic = mat.getFloat("metallic");
+        bool changed = ImGui::ColorPicker3("Albedo", &color.r);
+        changed |= ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
+        changed |= ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
+        if(changed)
+        {
+            mat.setValue("color", color);
+            mat.setValue("roughness", roughness);
+            mat.setValue("metallic", metallic);
+            mat.updateValues();
+        }
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
@@ -206,7 +225,7 @@ void Engine::loadGameObjects()
 
     GameObject obj = GameObject::instantiate();
     GameObject obj2 = GameObject::instantiate();
-    // GameObject obj3 = GameObject::instantiate();
+    GameObject obj3 = GameObject::instantiate();
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
@@ -216,11 +235,15 @@ void Engine::loadGameObjects()
     std::cout << "Loading Monkey" << std::endl;
     obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     obj2.materialID = 1;
-    // obj3.mesh = Mesh::createSierpinskiPyramid(*graphics.getDevice(), 12.0f, 8);
+    obj2.transform.position = glm::vec3(3, 0, 0);
+    obj3.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj3.materialID = 2;
+    obj3.transform.position = glm::vec3(-3, 0, 0);
+    // obj3.mesh = Mesh::createSierpinskiPyramid(12.0f, 8);
     // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
     gameObjects.push_back(std::move(obj2));
-    // gameObjects.push_back(std::move(obj3));
+    gameObjects.push_back(std::move(obj3));
     std::cout << "Loaded game objects" << std::endl;
 }
 

@@ -35,12 +35,14 @@ namespace graphics
 
             void createShaderInputBuffer();
             void createDescriptorSet();
-            void updateDescriptorSet();
+            void updateValues();
 
             uint32_t getId() const { return id; }
             const Shader* getShader() { return shader; }
 
-            static VkDescriptorSet getDummySet();
+            float getFloat(std::string name);
+            glm::vec3 getVec3(std::string name);
+            // TODO: Handle other types
 
         private:
             Material(id_t mat_id, const Shader *_shader);

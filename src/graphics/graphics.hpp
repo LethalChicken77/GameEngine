@@ -56,6 +56,8 @@ public:
 
     void graphicsInitImgui();
 
+    void reloadShaders();
+
 private:
     void loadTextures();
     void loadShaders();

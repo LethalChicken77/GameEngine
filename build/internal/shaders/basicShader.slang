@@ -1,0 +1,90 @@
+import utils;
+import shading_models;
+import colorspace; // TODO: Perform colorspace transforms in post-processing
+
+// --- Push constants ---
+struct PushConstants
+{
+    float4x4 model;
+};
+[[vk::push_constant]]
+PushConstants pushConstants;
+
+// --- Descriptor set 0: Camera ---
+struct CameraUbo
+{
+    float4x4 view;
+    float4x4 invView;
+    float4x4 projection;
+    float4x4 viewProj;
+};
+[[vk::binding(0, 0)]]
+ConstantBuffer<CameraUbo> cameraData;
+
+// --- Descriptor set 1: Material ---
+struct MaterialInfo
+{
+    float3 color;
+    float roughness;
+    float metallic;
+};
+[[vk::binding(0, 1)]]
+ConstantBuffer<MaterialInfo> materialInfo;
+
+// Constants
+static const float PI      = 3.14159265359;
+static const float INV_PI  = 1.0 / PI;
+static const float EPSILON = 0.0001;
+
+struct Vertex
+{
+    float3 Position : POSITION;
+    float3 Normal : NORMAL;
+    float3 Color : COLOR;
+    float2 UV : TEXCOORD0;
+}
+
+struct VOut
+{
+    float4 FragPosition : SV_POSITION;
+    float3 Position : POSITION;
+    float3 Normal : NORMAL;
+    float3 Color : COLOR;
+    float2 UV : TEXCOORD0;
+}
+
+[shader("vertex")]
+VOut vsMain(Vertex input)
+{
+    VOut output;
+    output.FragPosition = mul(transpose(cameraData.viewProj), mul(transpose(pushConstants.model), float4(input.Position, 1.0)));
+    output.Position = mul(transpose(pushConstants.model), float4(input.Position, 1.0)).xyz;
+    
+    float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
+    output.Normal = normalize(mul(normalMatrix, input.Normal));
+    output.Normal = input.Normal;
+    output.Color = input.Color;
+    output.UV = input.UV;
+
+    return output;
+}
+
+// Entry point
+[shader("fragment")]
+float4 fsMain(VOut input)
+{
+    float3 normal = normalize(input.Normal);
+    float3 lightDir = normalize(float3(1, 1, 1));
+    float3 cameraPos = cameraData.view[3].xyz;
+    float3 viewDir = normalize(input.Position.xyz - cameraPos);
+    float3 halfDir = 0.5 * (lightDir - viewDir);
+    float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
+    float3 ambientColor = float3(0.02, 0.03, 0.1);
+
+    float3 albedo = input.Color * materialInfo.color;
+
+    float3 outColor = pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, lightColor, ambientColor, normal, lightDir, viewDir);
+
+    outColor = gamma_srgb(outColor); // Gamma correction
+    return float4(outColor, 1.0);
+}

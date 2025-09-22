@@ -73,5 +73,6 @@ namespace graphics
             // DescriptorSetLayout descriptorSetLayout;
 
             void initializeDefaultConfigInfo();
+
     };
 } // namespace graphics

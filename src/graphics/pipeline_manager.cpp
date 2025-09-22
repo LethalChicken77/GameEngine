@@ -9,6 +9,19 @@ PipelineManager::PipelineManager(Renderer& _renderer) : renderer(_renderer)
     createPipelines();
 }
 
+PipelineManager::~PipelineManager()
+{
+    if(pipelineCache != nullptr)
+        vkDestroyPipelineCache(Shared::device->device(), pipelineCache, nullptr);
+}
+
+void PipelineManager::reloadPipelines()
+{
+    vkDeviceWaitIdle(Shared::device->device());
+    destroyPipelines();
+    createPipelines();
+}
+
 void PipelineManager::createPipelines()
 {
     // assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
@@ -41,8 +54,6 @@ void PipelineManager::destroyPipelines()
     //     graphicsPipeline.();
     // }
     graphicsPipelines.clear();
-    if(pipelineCache != nullptr)
-        vkDestroyPipelineCache(Shared::device->device(), pipelineCache, nullptr);
 }
 
 void PipelineManager::createPipelineCache()

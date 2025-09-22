@@ -153,6 +153,48 @@ namespace graphics
         throw std::runtime_error("Shader input not found");
     }
 
+    float Material::getFloat(std::string name)
+    {
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            if (shaderInputs[i].name == name)
+            {
+                if(shaderInputs[i].type == ShaderInput::DataType::FLOAT)
+                {
+                    return std::get<float>(inputValues[i]);
+                }
+                else
+                {
+                    std::cerr << "Incorrect Datatype" << std::endl;
+                    return 0.0f;
+                }
+            }
+        }
+        return 0.0f;
+    }
+
+    glm::vec3 Material::getVec3(std::string name)
+    {
+        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
+        for (size_t i = 0; i < shaderInputs.size(); ++i)
+        {
+            if (shaderInputs[i].name == name)
+            {
+                if(shaderInputs[i].type == ShaderInput::DataType::VEC3)
+                {
+                    return std::get<glm::vec3>(inputValues[i]);
+                }
+                else
+                {
+                    std::cerr << "Incorrect Datatype" << std::endl;
+                    return glm::vec3(0.0f);
+                }
+            }
+        }
+        return glm::vec3(0.0f);;
+    }
+
     void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
     {
         if(!initialized)
@@ -185,5 +227,12 @@ namespace graphics
             writer.writeImage(i + 1, textures[i]->getDescriptorInfo());
         }
         writer.build(descriptorSet);
+    }
+    
+    void Material::updateValues()
+    {
+        vkDeviceWaitIdle(Shared::device->device());
+        createShaderInputBuffer();
+        createDescriptorSet();
     }
 } // namespace graphics

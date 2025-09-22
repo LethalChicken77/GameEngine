@@ -17,9 +17,11 @@ class PipelineManager
 {
     public:
         PipelineManager(Renderer& _renderer);
+        ~PipelineManager();
 
         void createPipelines();
         void destroyPipelines();
+        void reloadPipelines();
 
         void renderObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects, VkCommandBuffer& commandBuffer);
 

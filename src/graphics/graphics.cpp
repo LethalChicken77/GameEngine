@@ -126,7 +126,9 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
 
         CameraUbo cameraUbo{};
         cameraUbo.view = camera->getView();
+        cameraUbo.invView = glm::inverse(camera->getView());
         cameraUbo.proj = camera->getProjection();
+        cameraUbo.viewProj = camera->getViewProjection();
         // std::cout << "View: " << glm::to_string(cameraUbo.view) << std::endl;
         // std::cout << "Proj: " << glm::to_string(cameraUbo.proj) << std::endl;
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
@@ -169,28 +171,38 @@ void Graphics::loadTextures()
 void Graphics::loadShaders()
 {
     std::cout << "Loading shaders\n";
+    // Shared::shaders.push_back(std::make_unique<Shader>(
+    //     "internal/shaders/basicShader.vert.spv", 
+    //     "internal/shaders/basicShader.frag.spv", 
+    //     std::vector<ShaderInput>{
+    //         {"color", ShaderInput::DataType::VEC3},
+    //         {"ior", ShaderInput::DataType::VEC3},
+    //         {"roughness", ShaderInput::DataType::FLOAT},
+    //         {"metallic", ShaderInput::DataType::FLOAT}
+    //     },
+    //     6
+    // ));
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/basicShader.vert.spv", 
-        "internal/shaders/basicShader.frag.spv", 
+        "internal/shaders/basicShader.slang", 
+        "internal/shaders/basicShader.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::VEC3},
-            {"ior", ShaderInput::DataType::VEC3},
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
         },
-        6
+        0
     ));
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/wireframe.vert.spv", 
-        "internal/shaders/wireframe.frag.spv", 
+        "internal/shaders/basicShader.slang", 
+        "internal/shaders/basicShader.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::VEC3}
         },
         0
     ));
-    Shared::shaders[1]->configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-    // Shared::shaders[1]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
-    // Shared::shaders[1]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
+    // Shared::shaders[0]->configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+    Shared::shaders[1]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
+    Shared::shaders[1]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
     // Shared::shaders[1]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
     Shared::shaders[1]->reloadShader();
 }
@@ -199,51 +211,31 @@ void Graphics::loadMaterials()
 {
     std::cout << "Loading materials\n";
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
-
+    
     Material m1 = Material::instantiate(Shared::shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    m1.setValue("color", glm::vec3(1.f, 1.f, 1.f));
-    m1.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    m1.setValue("roughness", 0.95f);
-    m1.setValue("metallic", 0.f);
-
+    m1.setValue("color", glm::vec3(1.f, 0.8f, 0.3f));
+    m1.setValue("roughness", 0.4f);
+    m1.setValue("metallic", 0.0f);
     m1.createShaderInputBuffer();
-    // Grass
-    m1.setTexture(0, textures[0]);
-    m1.setTexture(1, textures[1]);
-    m1.setTexture(2, textures[2]);
-    // Stone
-    m1.setTexture(3, textures[3]);
-    m1.setTexture(4, textures[4]);
-    m1.setTexture(5, textures[5]);
     m1.createDescriptorSet();
-    Shared::materials.emplace_back(std::move(m1));
+    Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    
-    Material m2 = Material::instantiate(Shared::shaders[1].get());
+    Material m2 = Material::instantiate(Shared::shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    m2.setValue("color", glm::vec3(0.f, 0.f, 0.f));
+    m2.setValue("color", glm::vec3(1.f, 0.8f, 0.3f));
+    m2.setValue("roughness", 0.4f);
+    m2.setValue("metallic", 0.0f);
     m2.createShaderInputBuffer();
     m2.createDescriptorSet();
-    Shared::materials.emplace_back(std::move(m2));
+    Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
 
-    // Material m2 = Material::instantiate(shaders[0].get());
-    // // m2.setValue("color", glm::vec3(0.944f, 0.776f, 0.373f)); // Gold from physicallybased.info
-    // m2.setValue("color", glm::vec3(1.f, 1.f, 1.f));
-    // // m2.setValue("ior", glm::vec3(0.18299f, 0.42108f, 1.37340f)); // Gold
-    // m2.setValue("ior", glm::vec3(0.159f, 0.145f, 0.135f)); // Silver
-    // m2.setValue("roughness", 0.4f);
-    // m2.setValue("metallic", 1.f);
-    // m2.createShaderInputBuffer();
-    // Shared::materials.emplace_back(std::move(m2));
-
-    // Material m3 = Material::instantiate(shaders[0].get());
-    // m3.setValue("color", glm::vec3(0.8f, 0.2f, 0.1f));
-    // m3.setValue("ior", glm::vec3(1.5f, 1.5f, 1.5f));
-    // m3.setValue("roughness", 0.43f);
-    // m3.setValue("metallic", 0.f);
-    // m3.createShaderInputBuffer();
-    // Shared::materials.emplace_back(std::move(m3));
+    Material m3 = Material::instantiate(Shared::shaders[1].get());
+    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    m3.setValue("color", glm::vec3(0.f, 0.f, 0.f));
+    m3.createShaderInputBuffer();
+    m3.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
@@ -344,4 +336,16 @@ void Graphics::graphicsInitImgui()
     };
     ImGui_ImplVulkan_Init(&initInfo);
 }
+
+void Graphics::reloadShaders()
+{
+    std::cout << "Reloading Shaders" << std::endl;
+    for(std::unique_ptr<Shader>& shader : Shared::shaders)
+    {
+        shader->reloadShader();
+    }
+
+    pipelineManager->reloadPipelines();
+}
+
 } // namespace graphics
