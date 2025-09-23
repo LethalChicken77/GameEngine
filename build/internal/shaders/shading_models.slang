@@ -119,9 +119,11 @@ public float3 pbrBRDF(
     float3 albedo,
     float roughness,
     float metallic,
+    float3 F0,
 
     float3 lightColor,
     float3 ambientColor,
+    float3 reflectSample,
     
     float3 normal, 
     float3 lightDir,
@@ -129,7 +131,6 @@ public float3 pbrBRDF(
 )
 {
     // float3 F0 = (ior - 1.0) * (ior - 1.0) / ((ior + 1.0) * (ior + 1.0));
-    float3 F0 = float3(0.04); // Typical for dielectrics
     F0 = lerp(F0, albedo, metallic); // Metals use albedo for F0
 
     float3 F_L = SchlickFresnel(F0, normal, lightDir);             // Reflectance with respect to the light direction
@@ -142,9 +143,7 @@ public float3 pbrBRDF(
     // float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness) * (1.0 - metallic));            // Metallic term is more realistic, but looks worse without reflection map
     float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness));            // Effect on ambient based on roughness
     float3 ambientDiffuse = ambientColor * albedo * (1.0 - F_ambient) * (1.0 - metallic);
-    float3 ambientSpecular = ambientColor * F_ambient;
+    float3 ambientSpecular = reflectSample * F_ambient;
 
-    return lightColor * (diffuse + specular) + ambientDiffuse + ambientSpecular;//ambientSpecular;
-    // return ambientSpecular;
-    // return float3(F_V);
+    return lightColor * (diffuse + specular) + ambientDiffuse + ambientSpecular;
 }

@@ -5,6 +5,7 @@
 #include "containers.hpp"
 #define TINYEXR_IMPLEMENTATION
 #include "tinyexr.h"
+#include <format>
 
 namespace graphics
 {
@@ -70,44 +71,128 @@ namespace graphics
     {
         if (access(path.c_str(), F_OK) != 0)
         {
-            throw std::runtime_error("File not found: " + path);
+            throw std::runtime_error("[EXR Loader] File not found: " + path);
         }
 
-        float* exrImage = nullptr;
-        int texWidth, texHeight;
         const char* err = nullptr;
 
-        int ret = LoadEXR(&exrImage, &texWidth, &texHeight, path.c_str(), &err);
-        if (ret != TINYEXR_SUCCESS)
-        {
-            std::string errorMsg = err ? std::string(err) : "Unknown EXR error";
+        // Parse EXR version
+        EXRVersion version;
+        if (ParseEXRVersionFromFile(&version, path.c_str()) != TINYEXR_SUCCESS) {
+            throw std::runtime_error("Failed to parse EXR version");
+        }
+
+        // Parse the EXR header
+        EXRHeader header;
+        InitEXRHeader(&header);
+        if (ParseEXRHeaderFromFile(&header, &version, path.c_str(), &err) != TINYEXR_SUCCESS) {
+            std::string errorMsg = err ? std::string(err) : "Unknown EXR header error";
+            FreeEXRErrorMessage(err);
+            throw std::runtime_error("Failed to parse EXR header: " + errorMsg);
+        }
+
+        // Request conversion to FLOAT for any HALF channels
+        for (int i = 0; i < header.num_channels; ++i) {
+            if (header.pixel_types[i] == TINYEXR_PIXELTYPE_HALF) {
+                header.requested_pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT;
+            }
+        }
+        // Load the EXR image
+        EXRImage image;
+        if (LoadEXRImageFromFile(&image, &header, path.c_str(), &err) != TINYEXR_SUCCESS) {
+            std::string errorMsg = err ? std::string(err) : "Unknown EXR image error";
             FreeEXRErrorMessage(err);
             throw std::runtime_error("Failed to load EXR image: " + errorMsg);
         }
+        // Access image data
+        int numChannels = image.num_channels;
+        int texWidth = image.width;
+        int texHeight = image.height;
 
-        const uint32_t pixelCount = texWidth * texHeight;
-        const int numChannels = 4; // LoadEXR always gives RGBA
+        size_t rIndex, gIndex, bIndex, aIndex = -1;
 
-        std::shared_ptr<Texture> texture = std::make_shared<Texture>(texWidth, texHeight);
-
-        // Allocate for single-channel float data
-        texture->data.resize(pixelCount * sizeof(float));
-
-        // Copy only the red channel (first float per pixel)
-        for (uint32_t i = 0; i < pixelCount; ++i)
+        for(int i = 0; i < numChannels; i++)
         {
-            float r = exrImage[i * numChannels];
-            memcpy(&texture->data[i * sizeof(float)], &r, sizeof(float));
+            std::cout << "Channel " << i << ": " << header.channels[i].name << "\n";
+            if(strcmp(header.channels[i].name, "R") == 0 || strcmp(header.channels[i].name, "Y") == 0) rIndex = i;
+            else if(strcmp(header.channels[i].name, "G") == 0) gIndex = i;
+            else if(strcmp(header.channels[i].name, "B") == 0) bIndex = i;
+            else if(strcmp(header.channels[i].name, "A") == 0) aIndex = i;
         }
 
-        free(exrImage);
+        const uint32_t pixelCount = texWidth * texHeight;
+
+        // Map channels by name
+        std::vector<float> chR(pixelCount);
+        memcpy(chR.data(), image.images[rIndex], sizeof(float) * pixelCount);
+        std::vector<float> chG, chB, chA;
+        if (numChannels >= 2) {
+            chG.resize(pixelCount);
+            memcpy(chG.data(), image.images[gIndex], sizeof(float) * pixelCount);
+        }
+        if (numChannels >= 3) {
+            chB.resize(pixelCount);
+            memcpy(chB.data(), image.images[bIndex], sizeof(float) * pixelCount);
+        }
+        if (numChannels >= 4) {
+            chA.resize(pixelCount);
+            memcpy(chA.data(), image.images[aIndex], sizeof(float) * pixelCount);
+        }
+
+        
+        int effectiveNumChannels = (numChannels == 3) ? 4 : numChannels; // Expand RGB to RGBA
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(texWidth, texHeight);
+
+        texture->data.resize(pixelCount * sizeof(float) * effectiveNumChannels);
+
+        for (uint32_t i = 0; i < pixelCount; i++)
+        {
+            // std::cout << "Pixel: " << i << " / " << pixelCount << "\n";
+            float pixelData[4] = {
+                chR[i],
+                (numChannels >= 2) ? chG[i] : 0.0f,
+                (numChannels >= 3) ? chB[i] : 0.0f,
+                (numChannels >= 4) ? chA[i] : 1.0f
+            };
+            memcpy(
+                texture->data.data() + i * sizeof(float) * effectiveNumChannels, 
+                pixelData, 
+                sizeof(float) * effectiveNumChannels
+            );
+        }
+        
+        if(!header.tiled)
+        {
+            image.num_tiles = 0; // Prevent tinyexr from trying to free tiles
+            image.tiles = nullptr;
+        }
+        // Free the image data when done
+        FreeEXRImage(&image);
+        FreeEXRHeader(&header);
 
         texture->width = texWidth;
         texture->height = texHeight;
         texture->properties = properties;
         texture->samplerProperties = samplerProperties;
-
-        texture->properties.format = VK_FORMAT_R32_SFLOAT;
+        
+        switch(numChannels)
+        {
+            case 1:
+                texture->properties.format = VK_FORMAT_R32_SFLOAT;
+                break;
+            case 2:
+                texture->properties.format = VK_FORMAT_R32G32_SFLOAT;
+                break;
+            case 3:
+                texture->properties.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+                break;
+            case 4:
+                texture->properties.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+                break;
+            default:
+                texture->properties.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+                break;
+        }
 
         texture->createTexture();
 
@@ -431,10 +516,37 @@ namespace graphics
         Shared::device->endSingleTimeCommands(commandBuffer); // Submit and free the command buffer
     }
 
+    size_t getFormatSize(VkFormat format)
+    {
+        switch (format)
+        {
+            case VK_FORMAT_R8_SRGB:
+            case VK_FORMAT_R8_UNORM: return 1;
+
+            case VK_FORMAT_R8G8_SRGB:
+            case VK_FORMAT_R8G8_UNORM: return 2;
+
+            case VK_FORMAT_R8G8B8_SRGB:
+            case VK_FORMAT_R8G8B8_UNORM: return 3;
+
+            case VK_FORMAT_R8G8B8A8_SRGB:
+            case VK_FORMAT_R8G8B8A8_UNORM: return 4;
+
+            case VK_FORMAT_R32_SFLOAT: return 4;
+            case VK_FORMAT_R32G32_SFLOAT: return 8;
+            case VK_FORMAT_R32G32B32_SFLOAT: return 12;
+            case VK_FORMAT_R32G32B32A32_SFLOAT: return 16;
+
+            // Add more as needed
+            default: 
+                throw std::runtime_error("Unknown or unsupported VkFormat: " + std::to_string(format));
+        }
+    }
+
     void Texture::copyDataToImage() 
     {
         uint32_t pixelCount = width * height;
-        uint32_t pixelSize = sizeof(data[0]) * 4;
+        uint32_t pixelSize = sizeof(data[0]) * getFormatSize(properties.format);
         VkDeviceSize bufferSize = pixelSize * pixelCount;
         // std::cout << "Buffer size: " << bufferSize << std::endl;
         // std::cout << "Data size: " << data.size() << std::endl;

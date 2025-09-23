@@ -203,7 +203,7 @@ namespace graphics
         }
         if (binding >= textures.size()) 
         {
-            textures.resize(binding + 1);
+            textures.resize(binding + 1); // ???
         }
         textures[binding] = texture;
         // updateDescriptorSet();

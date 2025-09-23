@@ -1,4 +1,5 @@
 import utils;
+import constants;
 
 // --- Push constants ---
 struct PushConstants
@@ -9,7 +10,6 @@ struct PushConstants
 PushConstants pushConstants;
 
 // --- Descriptor set 0: Camera ---
-[[vk::binding(0, 0)]]
 struct CameraUbo
 {
     float4x4 view;
@@ -17,20 +17,17 @@ struct CameraUbo
     float4x4 projection;
     float4x4 viewProj;
 };
+[[vk::binding(0, 0)]]
 uniform CameraUbo cameraData;
 
 // --- Descriptor set 1: Material ---
-[[vk::binding(0, 1)]]
 struct MaterialInfo
 {
     float3 color;
 };
+[[vk::binding(0, 1)]]
 uniform MaterialInfo materialInfo;
 
-// Constants
-static const float PI      = 3.14159265359;
-static const float INV_PI  = 1.0 / PI;
-static const float EPSILON = 0.0001;
 
 struct Vertex
 {

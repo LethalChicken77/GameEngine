@@ -229,12 +229,11 @@ void Engine::loadGameObjects()
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    std::cout << "Creating Grid" << std::endl;
     obj.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     obj.materialID = 0;
-    std::cout << "Loading Monkey" << std::endl;
     obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj2.materialID = 1;
+    // obj2.mesh = Mesh::createGrid(16,16, {3.0f, 3.0f});
+    obj2.materialID = 3;
     obj2.transform.position = glm::vec3(3, 0, 0);
     obj3.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     obj3.materialID = 2;

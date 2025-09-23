@@ -1,6 +1,7 @@
 import utils;
 import shading_models;
 import colorspace; // TODO: Perform colorspace transforms in post-processing
+import constants;
 
 // --- Push constants ---
 struct PushConstants
@@ -30,11 +31,6 @@ struct MaterialInfo
 };
 [[vk::binding(0, 1)]]
 ConstantBuffer<MaterialInfo> materialInfo;
-
-// Constants
-static const float PI      = 3.14159265359;
-static const float INV_PI  = 1.0 / PI;
-static const float EPSILON = 0.0001;
 
 struct Vertex
 {
@@ -82,8 +78,9 @@ float4 fsMain(VOut input)
     float3 ambientColor = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
 
     float3 albedo = input.Color * materialInfo.color;
+    float3 F0 = float3(0.04f); // Typical for dielectrics
 
-    float3 outColor = pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, lightColor, ambientColor, normal, lightDir, viewDir);
+    float3 outColor = pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, F0, lightColor, ambientColor, ambientColor, normal, lightDir, viewDir);
     // float3 outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
 
     outColor = gamma_srgb(outColor); // Gamma correction

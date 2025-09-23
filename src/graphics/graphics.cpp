@@ -151,16 +151,22 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
 void Graphics::loadTextures()
 {
     std::cout << "Loading textures" << std::endl;
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/rusted_metal/rusty_metal_04_diff_1k.jpg"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_rough_1k.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_metal_1k.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_spec_1k.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_nor_gl_1k.exr"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/skybox_blurred.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_512.png"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.png"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.png"));
 
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
-    textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_512.jpg"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_512.png"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_512.png"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_diff_4k.jpg"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_rough_4k.png"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rock_face/rock_face_nor_gl_4k.png"));
@@ -205,6 +211,15 @@ void Graphics::loadShaders()
     Shared::shaders[1]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
     // Shared::shaders[1]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
     Shared::shaders[1]->reloadShader();
+
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/PBR.slang", 
+        "internal/shaders/PBR.slang", 
+        std::vector<ShaderInput>{
+            {"color", ShaderInput::DataType::VEC3}
+        },
+        6
+    ));
 }
 
 void Graphics::loadMaterials()
@@ -236,6 +251,19 @@ void Graphics::loadMaterials()
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
+
+    Material m4 = Material::instantiate(Shared::shaders[2].get());
+    m4.setValue("color", glm::vec3(1.f, 1.f, 1.f));
+    m4.setTexture(0, textures[0]); // Albedo
+    m4.setTexture(1, textures[1]); // Roughness
+    m4.setTexture(2, textures[2]); // Metallic
+    m4.setTexture(3, textures[3]); // Specular
+    m4.setTexture(4, textures[4]); // Normal
+    m4.setTexture(5, textures[5]); // Skybox (TEMPORARY)
+    
+    m4.createShaderInputBuffer();
+    m4.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(m4));
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
