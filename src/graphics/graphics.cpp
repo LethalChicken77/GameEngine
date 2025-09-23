@@ -193,8 +193,8 @@ void Graphics::loadShaders()
         0
     ));
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/basicShader.slang", 
-        "internal/shaders/basicShader.slang", 
+        "internal/shaders/wireframe.slang", 
+        "internal/shaders/wireframe.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::VEC3}
         },

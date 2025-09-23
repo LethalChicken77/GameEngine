@@ -79,11 +79,12 @@ float4 fsMain(VOut input)
     float3 viewDir = normalize(input.Position.xyz - cameraPos);
     float3 halfDir = 0.5 * (lightDir - viewDir);
     float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
-    float3 ambientColor = float3(0.02, 0.03, 0.1);
+    float3 ambientColor = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
 
     float3 albedo = input.Color * materialInfo.color;
 
     float3 outColor = pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, lightColor, ambientColor, normal, lightDir, viewDir);
+    // float3 outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
 
     outColor = gamma_srgb(outColor); // Gamma correction
     return float4(outColor, 1.0);
