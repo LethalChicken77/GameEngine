@@ -25,12 +25,11 @@ ConstantBuffer<CameraUbo> cameraData;
 // --- Descriptor set 1: Material ---
 struct MaterialInfo
 {
-    float3 color;
+    float4 color;
     float roughness;
     float metallic;
 };
-[[vk::binding(0, 1)]]
-ConstantBuffer<MaterialInfo> materialInfo;
+[[vk::binding(0, 1)]] ConstantBuffer<MaterialInfo> materialInfo;
 
 struct Vertex
 {
@@ -53,12 +52,12 @@ struct VOut
 VOut vsMain(Vertex input)
 {
     VOut output;
-    output.FragPosition = mul(transpose(cameraData.viewProj), mul(transpose(pushConstants.model), float4(input.Position, 1.0)));
-    output.Position = mul(transpose(pushConstants.model), float4(input.Position, 1.0)).xyz;
-    
-    float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
+    float4x4 model = transpose(pushConstants.model);
+    output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(input.Position, 1.0)));
+    output.Position = mul(model, float4(input.Position, 1.0)).xyz;
+
+    float3x3 normalMatrix = transpose(inverse(float3x3(model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
-    output.Normal = input.Normal;
     output.Color = input.Color;
     output.UV = input.UV;
 
@@ -77,7 +76,7 @@ float4 fsMain(VOut input)
     float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
     float3 ambientColor = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
 
-    float3 albedo = input.Color * materialInfo.color;
+    float3 albedo = input.Color * materialInfo.color.xyz;
     float3 F0 = float3(0.04f); // Typical for dielectrics
 
     float3 outColor = pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, F0, lightColor, ambientColor, ambientColor, normal, lightDir, viewDir);

@@ -192,7 +192,7 @@ void Graphics::loadShaders()
         "internal/shaders/basicShader.slang", 
         "internal/shaders/basicShader.slang", 
         std::vector<ShaderInput>{
-            {"color", ShaderInput::DataType::VEC3},
+            {"color", ShaderInput::DataType::COLOR},
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
         },
@@ -202,7 +202,7 @@ void Graphics::loadShaders()
         "internal/shaders/wireframe.slang", 
         "internal/shaders/wireframe.slang", 
         std::vector<ShaderInput>{
-            {"color", ShaderInput::DataType::VEC3}
+            {"color", ShaderInput::DataType::COLOR}
         },
         0
     ));
@@ -216,7 +216,7 @@ void Graphics::loadShaders()
         "internal/shaders/PBR.slang", 
         "internal/shaders/PBR.slang", 
         std::vector<ShaderInput>{
-            {"color", ShaderInput::DataType::VEC3}
+            {"color", ShaderInput::DataType::COLOR}
         },
         6
     ));
@@ -229,31 +229,22 @@ void Graphics::loadMaterials()
     
     Material m1 = Material::instantiate(Shared::shaders[0].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    m1.setValue("color", glm::vec3(1.f, 0.8f, 0.3f));
+    m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
     m1.setValue("metallic", 0.0f);
     m1.createShaderInputBuffer();
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m2 = Material::instantiate(Shared::shaders[0].get());
-    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    m2.setValue("color", glm::vec3(1.f, 0.8f, 0.3f));
-    m2.setValue("roughness", 0.4f);
-    m2.setValue("metallic", 0.0f);
-    m2.createShaderInputBuffer();
-    m2.createDescriptorSet();
-    Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
-
     Material m3 = Material::instantiate(Shared::shaders[1].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    m3.setValue("color", glm::vec3(0.f, 0.f, 0.f));
+    m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
     Material m4 = Material::instantiate(Shared::shaders[2].get());
-    m4.setValue("color", glm::vec3(1.f, 1.f, 1.f));
+    m4.setValue("color", Color(1.f, 1.f, 1.f));
     m4.setTexture(0, textures[0]); // Albedo
     m4.setTexture(1, textures[1]); // Roughness
     m4.setTexture(2, textures[2]); // Metallic

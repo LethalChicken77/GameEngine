@@ -23,7 +23,7 @@ struct CameraUbo
 // --- Descriptor set 1: Material ---
 struct MaterialInfo
 {
-    float3 color;
+    float4 color;
 };
 [[vk::binding(0, 1)]] ConstantBuffer<MaterialInfo> materialInfo;
 [[vk::binding(1, 1)]] Sampler2D albedoMap;
@@ -65,7 +65,6 @@ VOut vsMain(Vertex input)
     
     float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
-    output.Normal = input.Normal;
     output.Color = input.Color;
     output.UV = input.UV;
 
@@ -88,7 +87,7 @@ float4 fsMain(VOut input)
     float3 ambientColor = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
     float2 UV = input.UV * 3;
 
-    float3 albedo = invGamma_srgb(input.Color * materialInfo.color * albedoMap.Sample(UV).xyz);
+    float3 albedo = invGamma_srgb(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
     float roughness = roughnessMap.Sample(UV).x;
     float metallic = metallicMap.Sample(UV).x;
     float specular = specularMap.Sample(UV).x;

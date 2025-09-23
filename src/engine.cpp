@@ -172,20 +172,12 @@ void Engine::run()
         ImGui::NewFrame();
 
         ImGui::Begin("Material Properties");
-        Material& mat = Shared::materials[0];
-        glm::vec3 color = mat.getVec3("color");
-        float roughness = mat.getFloat("roughness");
-        float metallic = mat.getFloat("metallic");
-        bool changed = ImGui::ColorPicker3("Albedo", &color.r);
-        changed |= ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
-        changed |= ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
-        if(changed)
+
+        for(Material &mat : Shared::materials)
         {
-            mat.setValue("color", color);
-            mat.setValue("roughness", roughness);
-            mat.setValue("metallic", metallic);
-            mat.updateValues();
+            mat.drawImGui();
         }
+        
         ImGui::End();
 
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
@@ -229,14 +221,20 @@ void Engine::loadGameObjects()
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    obj.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj.mesh = Mesh::loadObj("internal/models/ducky.obj");
+    obj.mesh->generateNormals();
+    obj.mesh->createBuffers();
     obj.materialID = 0;
+    obj.transform.scale = glm::vec3(0.1f);
+    obj.transform.rotation.x = glm::radians(-90.0f);
+
     obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
     // obj2.mesh = Mesh::createGrid(16,16, {3.0f, 3.0f});
-    obj2.materialID = 3;
+    obj2.materialID = 2;
     obj2.transform.position = glm::vec3(3, 0, 0);
+
     obj3.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj3.materialID = 2;
+    obj3.materialID = 1;
     obj3.transform.position = glm::vec3(-3, 0, 0);
     // obj3.mesh = Mesh::createSierpinskiPyramid(12.0f, 8);
     // obj3.materialID = 2;

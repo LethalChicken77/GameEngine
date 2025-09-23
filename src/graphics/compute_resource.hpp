@@ -22,7 +22,7 @@ namespace graphics
                 return ComputeResource(next_id++, _shader);
             }
             
-            void setValue(std::string name, ShaderResource::Value value);
+            void setValue(std::string name, MaterialValue value);
             void setTexture(uint32_t binding, std::shared_ptr<graphics::Texture> texture);
 
             void createShaderInputBuffer();

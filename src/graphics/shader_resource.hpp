@@ -20,20 +20,6 @@ namespace graphics
     {
         public:
             using id_t = uint64_t;
-            typedef std::variant<
-                int,
-                bool,
-                float,
-                glm::vec2,
-                glm::vec3,
-                glm::vec4,
-                glm::mat2,
-                glm::mat3,
-                glm::mat4
-                // Texture Reference
-                // Sampler Reference
-                // Whatever else
-            > Value;
 
             // Determine the size and alignment for a given ShaderInput::DataType
             struct TypeInfo
@@ -50,7 +36,7 @@ namespace graphics
             Buffer *getBuffer() const { return buffer.get(); }
 
         protected:
-            std::vector<Value> inputValues{};
+            std::vector<MaterialValue> inputValues{};
             std::vector<uint8_t> data{};
             VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
             std::unique_ptr<Buffer> buffer;
@@ -74,8 +60,9 @@ namespace graphics
                 case ShaderInput::DataType::VEC2:  return {sizeof(glm::vec2), 8};
                 case ShaderInput::DataType::VEC3:  return {sizeof(glm::vec3), 16}; // Vec3 uses Vec4 alignment
                 case ShaderInput::DataType::VEC4:  return {sizeof(glm::vec4), 16};
+                case ShaderInput::DataType::COLOR: return {sizeof(Color), 16};
                 case ShaderInput::DataType::MAT2:  return {sizeof(glm::mat2), 16}; // Matrices align to vec4
-                case ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16}; // Matrices align to vec4
+                case ShaderInput::DataType::MAT3:  return {sizeof(glm::mat3), 16};
                 case ShaderInput::DataType::MAT4:  return {sizeof(glm::mat4), 16};
                 case ShaderInput::DataType::INT:   return {sizeof(int), 4};
                 case ShaderInput::DataType::BOOL:  return {sizeof(int), 4}; // bools are treated as 4 bytes in std140

@@ -85,7 +85,8 @@
         "ranges": "cpp",
         "stack": "cpp"
     },
-    "cmake.generator": "MinGW Makefiles",
+    "cmake.generator": "Ninja",
+    "cmake.parallelJobs": 8,
     "cmake.configureOnOpen": true,
     "cmake.configureSettings": {
         "CMAKE_C_COMPILER": "C:/msys64/ucrt64/bin/clang.exe",

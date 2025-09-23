@@ -23,10 +23,9 @@ uniform CameraUbo cameraData;
 // --- Descriptor set 1: Material ---
 struct MaterialInfo
 {
-    float3 color;
+    float4 color;
 };
-[[vk::binding(0, 1)]]
-uniform MaterialInfo materialInfo;
+[[vk::binding(0, 1)]] ConstantBuffer<MaterialInfo> materialInfo;
 
 
 struct Vertex
@@ -53,9 +52,8 @@ VOut vsMain(Vertex input)
     output.FragPosition = mul(transpose(cameraData.viewProj), mul(transpose(pushConstants.model), float4(input.Position, 1.0)));
     output.Position = mul(transpose(pushConstants.model), float4(input.Position, 1.0)).xyz;
 
-    float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
+    float3x3 normalMatrix = inverse(transpose(float3x3(pushConstants.model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
-    output.Normal = input.Normal;
     output.Color = input.Color;
     output.UV = input.UV;
 
@@ -66,6 +64,6 @@ VOut vsMain(Vertex input)
 [shader("fragment")]
 float4 fsMain(VOut input)
 {
-    float3 outColor = input.Color * materialInfo.color;
+    float3 outColor = input.Color * materialInfo.color.xyz;
     return float4(outColor, 1.0);
 }

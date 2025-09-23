@@ -5,14 +5,16 @@ namespace graphics
 {
     Material::Material(id_t mat_id, const Shader *_shader) : id(mat_id), shader(_shader)
     {
-        const std::vector<ShaderInput> &inputs = shader->getInputs();
-        inputValues.resize(inputs.size());
-        
+        shaderInputs = shader->getInputs();
+        inputValues.resize(shaderInputs.size());
+        // createShaderInputBuffer();
     }
 
     void Material::createShaderInputBuffer()
     {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
+        // std::cout << "Creating shader input buffer for material " << id << std::endl;
+        shaderInputs = shader->getInputs();
+        inputValues.resize(shaderInputs.size());
         assert(inputValues.size() == shader->getInputs().size() && "Input values size must match shader input size");
 
         size_t offset = 0;
@@ -20,9 +22,10 @@ namespace graphics
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
-            const Value& value = inputValues[i];
+            const MaterialValue& value = inputValues[i];
 
             // Get type info for alignment and size
+            // std::cout << "Input " << i << ": " << input.name << " Type: " << static_cast<int>(input.type) << std::endl;
             TypeInfo typeInfo = getTypeInfo(input.type);
 
             // Align the offset
@@ -36,7 +39,7 @@ namespace graphics
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
-            const Value& value = inputValues[i];
+            const MaterialValue& value = inputValues[i];
 
             // Get type info for alignment and size
             TypeInfo typeInfo = getTypeInfo(input.type);
@@ -76,6 +79,11 @@ namespace graphics
                 case ShaderInput::DataType::VEC4:
                     if constexpr (std::is_same_v<T, glm::vec4>) memcpy(&data[offset], &val, sizeof(glm::vec4));
                     else throw std::runtime_error("Type mismatch for VEC4");
+                    break;
+
+                case ShaderInput::DataType::COLOR:
+                    if constexpr (std::is_same_v<T, Color>) memcpy(&data[offset], &val, sizeof(Color));
+                    else throw std::runtime_error("Type mismatch for COLOR");
                     break;
 
                 case ShaderInput::DataType::MAT2:
@@ -139,9 +147,8 @@ namespace graphics
         initialized = true;
     }
 
-    void Material::setValue(std::string name, ShaderResource::Value value)
+    void Material::setValue(std::string name, MaterialValue value)
     {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             if (shaderInputs[i].name == name)
@@ -153,46 +160,25 @@ namespace graphics
         throw std::runtime_error("Shader input not found");
     }
 
-    float Material::getFloat(std::string name)
+    template <class T>
+    T Material::getValue(std::string name)
     {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             if (shaderInputs[i].name == name)
             {
-                if(shaderInputs[i].type == ShaderInput::DataType::FLOAT)
+                if(shaderInputs[i].type == ShaderInput::getTypeID<T>())
                 {
-                    return std::get<float>(inputValues[i]);
+                    return std::get<T>(inputValues[i]);
                 }
                 else
                 {
                     std::cerr << "Incorrect Datatype" << std::endl;
-                    return 0.0f;
+                    return T{};
                 }
             }
         }
-        return 0.0f;
-    }
-
-    glm::vec3 Material::getVec3(std::string name)
-    {
-        const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
-        for (size_t i = 0; i < shaderInputs.size(); ++i)
-        {
-            if (shaderInputs[i].name == name)
-            {
-                if(shaderInputs[i].type == ShaderInput::DataType::VEC3)
-                {
-                    return std::get<glm::vec3>(inputValues[i]);
-                }
-                else
-                {
-                    std::cerr << "Incorrect Datatype" << std::endl;
-                    return glm::vec3(0.0f);
-                }
-            }
-        }
-        return glm::vec3(0.0f);;
+        return T{};
     }
 
     void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
@@ -234,5 +220,78 @@ namespace graphics
         vkDeviceWaitIdle(Shared::device->device());
         createShaderInputBuffer();
         createDescriptorSet();
+    }
+
+    void Material::drawImGui()
+    {
+        // glm::vec3 color = getVec3("color");
+        // float roughness = getFloat("roughness");
+        // float metallic = getFloat("metallic");
+        // bool changed = ImGui::ColorPicker3("Albedo", &color.r);
+        // changed |= ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
+        // changed |= ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
+        ImGui::PushID(this);
+        if(ImGui::CollapsingHeader(("Material " + std::to_string(id)).c_str()))
+        {
+            bool changed = false;
+            for(const ShaderInput &input : shaderInputs)
+            {
+                switch(input.type)
+                {
+                    case ShaderInput::DataType::FLOAT:
+                        {float fValue = getValue<float>(input.name.c_str());
+                        changed |= ImGui::DragFloat(input.name.c_str(), &fValue, 0.01f);
+                        if(changed) setValue(input.name.c_str(), fValue);}
+                        break;
+                    case ShaderInput::DataType::VEC2:
+                        {glm::vec2 v2Value = getValue<glm::vec2>(input.name.c_str());
+                        changed |= ImGui::DragFloat2(input.name.c_str(), &v2Value.x, 0.01f);
+                        if(changed) setValue(input.name.c_str(), v2Value);}
+                        break;
+                    case ShaderInput::DataType::VEC3:
+                        {glm::vec3 v3Value = getValue<glm::vec3>(input.name.c_str());
+                        changed |= ImGui::DragFloat3(input.name.c_str(), &v3Value.x, 0.01f);
+                        if(changed) setValue(input.name.c_str(), v3Value);}
+                        break;
+                    case ShaderInput::DataType::VEC4:
+                        {glm::vec4 v4Value = getValue<glm::vec4>(input.name.c_str());
+                        changed |= ImGui::DragFloat4(input.name.c_str(), &v4Value.x, 0.01f);
+                        if(changed) setValue(input.name.c_str(), v4Value);}
+                        break;
+                    case ShaderInput::DataType::COLOR:
+                        {Color colorValue = getValue<Color>(input.name.c_str());
+                        float color[4] = { colorValue.r, colorValue.g, colorValue.b, colorValue.a };
+                        changed |= ImGui::ColorEdit4(input.name.c_str(), color);
+                        if(changed) setValue(input.name.c_str(), Color(color[0], color[1], color[2], color[3]));}
+                        break;
+                    case ShaderInput::DataType::MAT2:
+                        // Not implemented
+                        break;
+                    case ShaderInput::DataType::MAT3:
+                        // Not implemented
+                        break;
+                    case ShaderInput::DataType::MAT4:
+                        // Not implemented
+                        break;
+                    case ShaderInput::DataType::INT:
+                        {int iValue = getValue<int>(input.name.c_str());
+                        changed |= ImGui::DragInt(input.name.c_str(), &iValue, 1.0f);
+                        if(changed) setValue(input.name.c_str(), iValue);}
+                        break;
+                    case ShaderInput::DataType::BOOL:
+                        {bool bValue = getValue<bool>(input.name.c_str());
+                        changed |= ImGui::Checkbox(input.name.c_str(), &bValue);
+                        if(changed) setValue(input.name.c_str(), bValue);}
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if(changed)
+            {
+                updateValues();
+            }
+        }
+        ImGui::PopID();
     }
 } // namespace graphics

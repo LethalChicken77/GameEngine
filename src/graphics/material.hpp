@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include "shader.hpp"
 #include "shader_resource.hpp"
+#include "imgui.h"
+#include "color.hpp"
 // #include "containers.hpp"
 
 namespace graphics
@@ -30,7 +32,7 @@ namespace graphics
                 return Material(next_id++, _shader);
             }
             
-            void setValue(std::string name, ShaderResource::Value value);
+            void setValue(std::string name, MaterialValue value);
             void setTexture(uint32_t binding, std::shared_ptr<graphics::Texture> texture);
 
             void createShaderInputBuffer();
@@ -40,8 +42,10 @@ namespace graphics
             uint32_t getId() const { return id; }
             const Shader* getShader() { return shader; }
 
-            float getFloat(std::string name);
-            glm::vec3 getVec3(std::string name);
+            template <class T>
+            T getValue(std::string name);
+
+            void drawImGui();
             // TODO: Handle other types
 
         private:
@@ -49,6 +53,7 @@ namespace graphics
 
             uint32_t id;
             const Shader *shader;
+            std::vector<ShaderInput> shaderInputs;
 
             bool initialized = false;
     };

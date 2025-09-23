@@ -113,7 +113,6 @@ namespace graphics
 
         for(int i = 0; i < numChannels; i++)
         {
-            std::cout << "Channel " << i << ": " << header.channels[i].name << "\n";
             if(strcmp(header.channels[i].name, "R") == 0 || strcmp(header.channels[i].name, "Y") == 0) rIndex = i;
             else if(strcmp(header.channels[i].name, "G") == 0) gIndex = i;
             else if(strcmp(header.channels[i].name, "B") == 0) bIndex = i;
@@ -165,6 +164,10 @@ namespace graphics
         {
             image.num_tiles = 0; // Prevent tinyexr from trying to free tiles
             image.tiles = nullptr;
+        }
+        if(image.next_level)
+        {
+            image.next_level = nullptr; // Prevent tinyexr from trying to free mipmaps
         }
         // Free the image data when done
         FreeEXRImage(&image);

@@ -20,7 +20,7 @@ namespace graphics
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
-            const Value& value = inputValues[i];
+            const MaterialValue& value = inputValues[i];
 
             // Get type info for alignment and size
             TypeInfo typeInfo = getTypeInfo(input.type);
@@ -36,7 +36,7 @@ namespace graphics
         for (size_t i = 0; i < shaderInputs.size(); ++i)
         {
             const ShaderInput& input = shaderInputs[i];
-            const Value& value = inputValues[i];
+            const MaterialValue& value = inputValues[i];
 
             // Get type info for alignment and size
             TypeInfo typeInfo = getTypeInfo(input.type);
@@ -140,7 +140,7 @@ namespace graphics
         }
     }
 
-    void ComputeResource::setValue(std::string name, ShaderResource::Value value)
+    void ComputeResource::setValue(std::string name, MaterialValue value)
     {
         const std::vector<ShaderInput> &shaderInputs = shader->getInputs();
         for (size_t i = 0; i < shaderInputs.size(); ++i)
