@@ -5,3 +5,5 @@ build/cmake_install.cmake
 build/Makefile
 build/compile_commands.json
 .vscode/*
+build/GameEngine.exe
+build/compile_commands.json
