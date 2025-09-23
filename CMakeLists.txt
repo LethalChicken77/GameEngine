@@ -48,6 +48,12 @@ include_directories("${CMAKE_SOURCE_DIR}/lib/stbimage")
 include_directories("${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
 include_directories("${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
 
+
+# add_library(slang SHARED IMPORTED)
+# set_target_properties(slang PROPERTIES
+#     IMPORTED_LOCATION "${Vulkan_SDK_ROOT}/Bin/slang.dll"
+#     INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_SDK_ROOT}/Include/slang"
+# )
 # Add ImGui source files
 set(IMGUI_SOURCES
     ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui.cpp
@@ -83,11 +89,14 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyexr-1
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/stbimage")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
+target_include_directories(GameEngine PRIVATE "${Vulkan_INCLUDE_DIRS}/slang")
 
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 
     C:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a  # Link GLFW
     Vulkan::Vulkan                                   # Link Vulkan
+    # slang
+    "C:/VulkanSDK/1.4.309.0/Lib/slang.lib"
     gdi32     # Windows libraries
     user32
     shell32

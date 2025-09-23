@@ -19,7 +19,9 @@ namespace graphics
 struct CameraUbo
 {
     alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 invView;
     alignas(16) glm::mat4 proj;
+    alignas(16) glm::mat4 viewProj;
 };
 
 struct LightsUbo

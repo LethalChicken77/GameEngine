@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "containers.hpp"
+#include <format>
 
 namespace graphics
 {
@@ -109,7 +110,7 @@ namespace graphics
         configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
         configInfo.dynamicStateInfo.flags = 0;
     }
-    
+
     void Shader::reloadShader()
     {
         if(vertShaderModule != VK_NULL_HANDLE)
@@ -123,9 +124,27 @@ namespace graphics
             vkDestroyShaderModule(Shared::device->device(), fragShaderModule, nullptr);
         }
 
-        std::vector<char> vertCode = file_util::readFileToCharVector(vertexPath);
+        // TODO: Re-add support for directly loading SPIR-V files
+        // TODO: Add support for GLSL shaders
+        std::vector<char> vertCode = file_util::readFileToCharVector(fragmentPath);
+        std::string vertCodeString(vertCode.begin(), vertCode.end());
+        std::vector<uint32_t> vertCodeSPV = SlangToSpirv(vertCode, "VertexShader", "vsMain", SLANG_STAGE_VERTEX);
+        std::vector<char> vertCodeSPVChar(
+            reinterpret_cast<const char*>(vertCodeSPV.data()),
+            reinterpret_cast<const char*>(vertCodeSPV.data()) + vertCodeSPV.size() * sizeof(uint32_t)
+        );
+        
         std::vector<char> fragCode = file_util::readFileToCharVector(fragmentPath);
-        createShaderModule(vertCode, &vertShaderModule);
-        createShaderModule(fragCode, &fragShaderModule);
+        std::string fragCodeString(fragCode.begin(), fragCode.end());
+        std::vector<uint32_t> fragCodeSPV = SlangToSpirv(fragCode, "FragmentShader", "fsMain", SLANG_STAGE_FRAGMENT);
+        std::vector<char> fragCodeSPVChar(
+            reinterpret_cast<const char*>(fragCodeSPV.data()),
+            reinterpret_cast<const char*>(fragCodeSPV.data()) + fragCodeSPV.size() * sizeof(uint32_t)
+        );
+        // std::cout << std::format("{:#X}", fragCodeSPV[0]) << std::endl;
+        // std::cout << std::format("{:#X}", fragCodeSPV[1]) << std::endl;
+        
+        createShaderModule(vertCodeSPVChar, &vertShaderModule);
+        createShaderModule(fragCodeSPVChar, &fragShaderModule);
     }
 } // namespace graphics

@@ -10,7 +10,7 @@ glm::mat4 Transform::getTransform() const
     glm::mat4 rotationM = glm::rotate(glm::mat4(1.0f), rotation.y, glm::vec3(0, 1, 0));
     rotationM = glm::rotate(rotationM, rotation.x, glm::vec3(1, 0, 0));
     rotationM = glm::rotate(rotationM, rotation.z, glm::vec3(0, 0, 1));
-    glm::mat4 scaling = glm::scale(glm::mat4(1.0f), scale);
+    glm::mat4 scaling = glm::scale(glm::mat4(1.0f), 1.0f / scale);
 
     return translation * rotationM * scaling;
 }

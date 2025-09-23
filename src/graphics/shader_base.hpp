@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
+#include <slang/slang.h>
+#include <slang/slang-com-ptr.h>
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -53,5 +55,7 @@ namespace graphics
             virtual void initializeDefaultConfigInfo() = 0; // Implement in sub-classes
 
             void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+            
+            static std::vector<uint32_t> SlangToSpirv(const std::vector<char>& shaderData, const char* moduleName, const char* entryPointName, SlangStage slangStage);
     };
 } // namespace graphics

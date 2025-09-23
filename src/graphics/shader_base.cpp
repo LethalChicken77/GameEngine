@@ -17,4 +17,83 @@ namespace graphics
             throw std::runtime_error("Failed to create shader module!");
         }
     }
+
+    
+    std::vector<uint32_t> ShaderBase::SlangToSpirv(
+        const std::vector<char>& shaderData,
+        const char* moduleName,
+        const char* entryPointName,
+        SlangStage slangStage)
+    {
+        std::string source(shaderData.begin(), shaderData.end());
+
+        // 1) Global session
+        Slang::ComPtr<slang::IGlobalSession> globalSession;
+        SlangGlobalSessionDesc globalDesc = {};
+        if (SLANG_FAILED(createGlobalSession(&globalDesc, globalSession.writeRef())))
+            throw std::runtime_error("Slang: failed to create global session");
+
+        // 2) Session with search paths (must be set before createSession)
+        slang::SessionDesc sessionDesc = {};
+        // const char* paths[] = { "C:/VulkanSDK/1.4.309.0/Include/slang" }; // adjust as needed
+        const char* paths[] = { "./internal/shaders", "./assets/shaders" };
+        sessionDesc.searchPaths = paths;
+        sessionDesc.searchPathCount = 2;
+
+        Slang::ComPtr<slang::ISession> session;
+        if (SLANG_FAILED(globalSession->createSession(sessionDesc, session.writeRef())))
+            throw std::runtime_error("Slang: failed to create session");
+
+        // 3) Compile request
+        Slang::ComPtr<slang::ICompileRequest> request;
+        if (SLANG_FAILED(session->createCompileRequest(request.writeRef())))
+            throw std::runtime_error("Slang: failed to create compile request");
+
+        request->addCodeGenTarget(SLANG_SPIRV);
+        // 4) Set SPIR-V target as target index 0
+        SlangProfileID spirvProfile = globalSession->findProfile("sm_6_8");
+        if (!spirvProfile)
+            throw std::runtime_error("Slang: sm_6_8 profile not available");
+        request->setTargetProfile(0, spirvProfile);
+
+        // 5) Add translation unit and source (name used for diagnostics only)
+        int tuIndex = request->addTranslationUnit(SLANG_SOURCE_LANGUAGE_SLANG, moduleName);
+        if (tuIndex < 0) throw std::runtime_error("Slang: addTranslationUnit failed");
+        request->addTranslationUnitSourceString(tuIndex, moduleName, source.c_str());
+
+        // 6) Add entry point (returns entryPointIndex)
+        int entryPointIndex = request->addEntryPoint(tuIndex, entryPointName, slangStage);
+        if (entryPointIndex < 0) throw std::runtime_error("Slang: addEntryPoint failed");
+        // 7) Compile
+        if (SLANG_FAILED(request->compile()))
+        {
+            const char* diag = request->getDiagnosticOutput();
+            // getDiagnosticOutput may provide (const char**, size_t*) or a single-string API depending on build
+            if(diag != nullptr)
+                throw std::runtime_error(std::string("Slang: compile failed:\n") + std::string(diag));
+            else
+                throw std::runtime_error("Slang: compile failed (no diagnostic info)\n");
+        }
+
+        // 8) Get SPIR-V blob for the compiled entry point (entryPointIndex, targetIndex=0)
+        slang::IBlob* rawBlob = nullptr;
+        if (SLANG_FAILED(request->getEntryPointCodeBlob(entryPointIndex, 0, &rawBlob)))
+            throw std::runtime_error("Slang: failed to get SPIR-V code blob");
+
+        Slang::ComPtr<slang::IBlob> spirvBlob;
+        spirvBlob.attach(rawBlob); // take ownership
+
+        // 9) Copy into vector<uint32_t>
+        const void* data = spirvBlob->getBufferPointer();
+        size_t sizeBytes = spirvBlob->getBufferSize();
+        if (!data || sizeBytes == 0)
+            throw std::runtime_error("Slang: empty SPIR-V output");
+
+        if (sizeBytes % sizeof(uint32_t) != 0)
+            throw std::runtime_error("Slang: SPIR-V size not a multiple of 4");
+
+        const uint32_t* words = reinterpret_cast<const uint32_t*>(data);
+        size_t wordCount = sizeBytes / sizeof(uint32_t);
+        return std::vector<uint32_t>(words, words + wordCount);
+    }
 } // namespace graphics

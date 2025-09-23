@@ -30,7 +30,6 @@ layout(set = 1, binding = 3) uniform sampler2D grassNormalMap;
 layout(set = 1, binding = 4) uniform sampler2D rockAlbedo;
 layout(set = 1, binding = 5) uniform sampler2D rockRoughness;
 layout(set = 1, binding = 6) uniform sampler2D rockNormalMap;
-layout(set = 1, binding = 7) uniform sampler2D heightMap;
 // layout(set = 1, binding = 3) uniform sampler2D heightMap;
 
 const float PI = 3.14159265359;
@@ -109,7 +108,7 @@ void main()
     // Compute the normal map and roughness map
     vec3 texColor = vec3(0.0);
     float roughness = 0.0;
-    vec3 normalMapSample = vec3(0.0);
+    vec3 normalMapSample = vec3(0.5, 0.5, 1.0);
 
     float blend = smoothstep2(1, 0, dot(_normal, vec3(0,1,0)), 0.65, 0.2);
 
@@ -137,7 +136,7 @@ void main()
     vec3 normal = normalize(TBN * normalMapSample);
     float normalStrength = 0.3;
     // normal = normalize(_normal + normal * normalStrength);
-    normal = normalize(_normal);
+    normal = _normal;
 
     // vec3 normal = _normal;
 

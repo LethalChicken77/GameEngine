@@ -51,5 +51,8 @@ namespace graphics
 
         std::vector<char> code = file_util::readFileToCharVector(path);
         createShaderModule(code, &computeShaderModule);
+        
+        // std::vector<uint32_t> codeInts(code.begin(), code.end());
+        // createShaderModule(codeInts, &computeShaderModule);
     }
 } // namespace graphics

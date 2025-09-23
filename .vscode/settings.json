@@ -80,7 +80,10 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "codecvt": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "queue": "cpp",
+        "ranges": "cpp",
+        "stack": "cpp"
     },
     "cmake.generator": "MinGW Makefiles",
     "cmake.configureOnOpen": true,
