@@ -24,6 +24,7 @@ struct CameraUbo
 struct MaterialInfo
 {
     float4 color;
+    float normalMapStrength;
 };
 [[vk::binding(0, 1)]] ConstantBuffer<MaterialInfo> materialInfo;
 [[vk::binding(1, 1)]] Sampler2D albedoMap;
@@ -43,6 +44,8 @@ struct Vertex
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
+    float4 Tangent : TANGENT;
+    float3 Bitangent : BITANGENT;
     float3 Color : COLOR;
     float2 UV : TEXCOORD0;
 }
@@ -52,6 +55,8 @@ struct VOut
     float4 FragPosition : SV_POSITION;
     float3 Position : POSITION;
     float3 Normal : NORMAL;
+    float4 Tangent : TANGENT;
+    float3 Bitangent : BITANGENT;
     float3 Color : COLOR;
     float2 UV : TEXCOORD0;
 }
@@ -65,6 +70,8 @@ VOut vsMain(Vertex input)
     
     float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
+    output.Tangent = float4(normalize(mul(normalMatrix, input.Tangent.xyz)), input.Tangent.w);
+    output.Bitangent = normalize(mul(normalMatrix, input.Bitangent));
     output.Color = input.Color;
     output.UV = input.UV;
 
@@ -76,34 +83,38 @@ VOut vsMain(Vertex input)
 float4 fsMain(VOut input)
 {
     float3 normal = normalize(input.Normal);
-    float3 tangent = normalize(float3(1, 0, 0));
-    float3 bitangent = normalize(float3(0, 1, 0));
+    float3 tangent = normalize(input.Tangent.xyz);
+    float3 bitangent = normalize(input.Bitangent);
 
-    float3 lightDir = normalize(float3(1, 1, 1));
+    float3 lightDir = normalize(float3(0.5, 0.4, 1));
     float3 cameraPos = cameraData.view[3].xyz;
     float3 viewDir = normalize(input.Position.xyz - cameraPos);
     float3 halfDir = 0.5 * (lightDir - viewDir);
     float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
     float3 ambientColor = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
-    float2 UV = input.UV * 3;
+    float2 UV = input.UV * 10;
 
     float3 albedo = invGamma_srgb(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
     float roughness = roughnessMap.Sample(UV).x;
-    float metallic = metallicMap.Sample(UV).x;
+    float metallic = saturate(metallicMap.Sample(UV).x * 1.2);
     float specular = specularMap.Sample(UV).x;
     float3 normalMapSample = normalMap.Sample(UV).xyz * 2.0 - 1.0;
-    normal = normalize(normalMapSample.x * tangent + normalMapSample.y * bitangent + normalMapSample.z * normal);
+
+    normalMapSample *= float3(materialInfo.normalMapStrength, materialInfo.normalMapStrength, 1);
+    normalMapSample = normalize(normalMapSample);
+    // normal = normalize(
+    //     normalMapSample.x * tangent + 
+    //     normalMapSample.y * -bitangent * input.Tangent.w + 
+    //     normalMapSample.z * normal);
 
     float3 reflectDir = reflect(viewDir, normal);
-    float theta = -atan2(reflectDir.z, reflectDir.x) / (2.0 * PI) + 0.5;
-    float phi = acos(reflectDir.y) / PI;
-    float3 reflColor = skyboxTexture.Sample(float2(theta, phi)).xyz;
+    float2 sphericalCoords = cartesianToSphericalNorm(reflectDir);
+    float3 reflColor = skyboxTexture.Sample(sphericalCoords).xyz;
 
-    float3 outColor = pbrBRDF(albedo, roughness, metallic, 0.1, lightColor, ambientColor, reflColor, normal, lightDir, viewDir);
+    float3 outColor = pbrBRDF(albedo, roughness, metallic, 0.1, lightColor, ambientColor, ambientColor, normal, lightDir, viewDir);
     // float3 outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
 
-
-
     outColor = gamma_srgb(outColor); // Gamma correction
+    // outColor = gamma_srgb(reflColor); // Gamma correction
     return float4(outColor, 1.0);
 }

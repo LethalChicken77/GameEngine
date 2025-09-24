@@ -35,6 +35,8 @@ struct Vertex
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
+    float4 Tangent : TANGENT;
+    float3 Bitangent : BITANGENT;
     float3 Color : COLOR;
     float2 UV : TEXCOORD0;
 }
@@ -69,7 +71,7 @@ VOut vsMain(Vertex input)
 float4 fsMain(VOut input)
 {
     float3 normal = normalize(input.Normal);
-    float3 lightDir = normalize(float3(1, 1, 1));
+    float3 lightDir = normalize(float3(0.5, 0.4, 1));
     float3 cameraPos = cameraData.view[3].xyz;
     float3 viewDir = normalize(input.Position.xyz - cameraPos);
     float3 halfDir = 0.5 * (lightDir - viewDir);

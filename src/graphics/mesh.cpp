@@ -148,7 +148,7 @@ namespace graphics
 
     std::vector<VkVertexInputAttributeDescription> Mesh::Vertex::getAttributeDescriptions()
     {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(4);
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(6);
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -162,12 +162,22 @@ namespace graphics
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
         attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[2].offset = offsetof(Vertex, color);
+        attributeDescriptions[2].offset = offsetof(Vertex, tangent);
 
         attributeDescriptions[3].binding = 0;
         attributeDescriptions[3].location = 3;
-        attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
+        attributeDescriptions[3].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[3].offset = offsetof(Vertex, bitangent);
+
+        attributeDescriptions[4].binding = 0;
+        attributeDescriptions[4].location = 4;
+        attributeDescriptions[4].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[4].offset = offsetof(Vertex, color);
+
+        attributeDescriptions[5].binding = 0;
+        attributeDescriptions[5].location = 5;
+        attributeDescriptions[5].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[5].offset = offsetof(Vertex, texCoord);
 
         return attributeDescriptions;
     }
@@ -223,6 +233,73 @@ namespace graphics
             vertex.normal = glm::normalize(vertex.normal);
         }
     }
+
+    void Mesh::generateTangents()
+    {
+        if(triangles.size() == 0)
+        {
+            return;
+        }
+
+        for(Vertex& vertex : vertices)
+        {
+            vertex.tangent = glm::vec4(0.0f);
+            vertex.bitangent = glm::vec3(0.0f);
+        }
+        for(Triangle& triangle : triangles)
+        {
+            Vertex& v0 = vertices[triangle.v0];
+            Vertex& v1 = vertices[triangle.v1];
+            Vertex& v2 = vertices[triangle.v2];
+
+            glm::vec3 edge1 = v1.position - v0.position;
+            glm::vec3 edge2 = v2.position - v0.position;
+            
+
+            if(glm::length(edge1) < 1e-6f || glm::length(edge2) < 1e-6f)
+                continue; // Degenerate triangle
+
+            glm::vec2 deltaUV1 = v1.texCoord - v0.texCoord;
+            glm::vec2 deltaUV2 = v2.texCoord - v0.texCoord;
+
+            float f = (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+            glm::vec3 tangent;
+            glm::vec3 bitangent;
+
+            if(glm::abs(f) < 1e-9f)
+                continue; // Degenerate UVs
+                
+            tangent = (deltaUV2.y * edge1 - deltaUV1.y * edge2) / f;
+            bitangent = (-deltaUV2.x * edge1 + deltaUV1.x * edge2) / f;
+
+            glm::vec4 tempTangent = glm::vec4(tangent, 0.0f);
+            v0.tangent += tempTangent;
+            v1.tangent += tempTangent;
+            v2.tangent += tempTangent;
+            v0.bitangent += bitangent;
+            v1.bitangent += bitangent;
+            v2.bitangent += bitangent;
+        }
+        for(Vertex& vertex : vertices)
+        {
+            vertex.tangent = glm::normalize(vertex.tangent);
+            vertex.bitangent = glm::normalize(vertex.bitangent);
+
+            // Gram-Schmidt orthogonalize
+            glm::vec3 tempTangent = glm::vec3(vertex.tangent);
+            vertex.tangent = glm::vec4(glm::normalize(tempTangent - vertex.normal * glm::dot(vertex.normal, tempTangent)), 1.0f);
+            vertex.bitangent = glm::normalize(vertex.bitangent - vertex.normal * glm::dot(vertex.normal, vertex.bitangent));
+
+            // Calculate handedness
+            tempTangent = glm::vec3(vertex.tangent);
+            if(glm::dot(glm::cross(vertex.normal, tempTangent), vertex.bitangent) < 0.0f)
+            {
+                vertex.bitangent = vertex.bitangent * -1.0f;
+                vertex.tangent.w = -1.0f;
+            }
+        }
+    }
     
     std::shared_ptr<Mesh> Mesh::createCube(float edgeLength)
     {
@@ -230,14 +307,14 @@ namespace graphics
         float inverseSqrt3 = 1.0f / glm::sqrt(3.0f);
 
         std::vector<Mesh::Vertex> vertices {
-            {{-1, -1, -1}, {-inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
-            {{1, -1, -1}, {inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
-            {{-1, 1, -1}, {-inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
-            {{1, 1, -1}, {inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
-            {{-1, -1, 1}, {-inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
-            {{1, -1, 1}, {inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
-            {{-1, 1, 1}, {-inverseSqrt3, inverseSqrt3, inverseSqrt3}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
-            {{1, 1, 1}, {inverseSqrt3, inverseSqrt3, inverseSqrt3}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
+            {{-1, -1, -1}, {-inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
+            {{1, -1, -1}, {inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
+            {{-1, 1, -1}, {-inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
+            {{1, 1, -1}, {inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
+            {{-1, -1, 1}, {-inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
+            {{1, -1, 1}, {inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
+            {{-1, 1, 1}, {-inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
+            {{1, 1, 1}, {inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
         };
 
         std::vector<uint32_t> indices{
@@ -364,6 +441,8 @@ namespace graphics
                     // {x0, glm::sin(x0) + glm::sin(z0), z0},
                     {x0, 0, z0},
                     {0, 1, 0},
+                    {1, 0, 0, 1},
+                    {0, 0, 1},
                     {1, 1, 1},
                     {x / (float)width, z / (float)length}
                 };
@@ -381,6 +460,41 @@ namespace graphics
             }
         }
         
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, triangles);
+        mesh->generateNormals();
+        mesh->createBuffers();
+        return mesh;
+    }
+
+    std::shared_ptr<Mesh> Mesh::createSkybox(float size)
+    {
+        std::vector<Vertex> vertices{8};
+        float halfSize = size / 2.0f;
+        vertices[0].position = {-halfSize, -halfSize, -halfSize};
+        vertices[1].position = { halfSize, -halfSize, -halfSize};
+        vertices[2].position = { halfSize,  halfSize, -halfSize};
+        vertices[3].position = {-halfSize,  halfSize, -halfSize};
+        vertices[4].position = {-halfSize, -halfSize,  halfSize};
+        vertices[5].position = { halfSize, -halfSize,  halfSize};
+        vertices[6].position = { halfSize,  halfSize,  halfSize};
+        vertices[7].position = {-halfSize,  halfSize,  halfSize};
+        std::vector<uint32_t> triangles{
+            0, 1, 2, 
+            2, 3, 0,
+            1, 5, 6, 
+            6, 2, 1,
+
+            5, 4, 7, 
+            7, 6, 5,
+            4, 0, 3, 
+            3, 7, 4,
+            
+            3, 2, 6,
+            3, 6, 7,
+            4, 5, 1,
+            4, 1, 0
+        };
+
         std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, triangles);
         mesh->generateNormals();
         mesh->createBuffers();
@@ -498,6 +612,7 @@ namespace graphics
 
         std::cout << "Loaded " << vertices.size() << " vertices and " << triangles.size() << " triangles\n";
 
+        generateTangents(); // Not included in OBJ, so we must generate them
         createBuffers();
     }
 } // namespace graphics

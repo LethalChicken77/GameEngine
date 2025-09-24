@@ -1,5 +1,6 @@
 import utils;
 import constants;
+import colorspace;
 
 // --- Push constants ---
 struct PushConstants
@@ -32,6 +33,8 @@ struct Vertex
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
+    float4 Tangent : TANGENT;
+    float3 Bitangent : BITANGENT;
     float3 Color : COLOR;
     float2 UV : TEXCOORD0;
 }
@@ -65,5 +68,6 @@ VOut vsMain(Vertex input)
 float4 fsMain(VOut input)
 {
     float3 outColor = input.Color * materialInfo.color.xyz;
+    outColor = gamma_srgb(outColor);
     return float4(outColor, 1.0);
 }

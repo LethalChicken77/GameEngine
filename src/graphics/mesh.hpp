@@ -23,6 +23,8 @@ namespace graphics
         {
             glm::vec3 position{};
             glm::vec3 normal{};
+            glm::vec4 tangent{};
+            glm::vec3 bitangent{};
             glm::vec3 color{1.0f, 1.0f, 1.0f};
             glm::vec2 texCoord{};
 
@@ -60,11 +62,13 @@ namespace graphics
         static std::shared_ptr<Mesh> createCube(float edgeLength);
         static std::shared_ptr<Mesh> createSierpinskiPyramid(float edgeLength, int depth);
         static std::shared_ptr<Mesh> createGrid(int width, int length, glm::vec2 dimensions);
+        static std::shared_ptr<Mesh> createSkybox(float size);
         static std::unique_ptr<Mesh> loadObj(const std::string& filename);
 
         void createBuffers();
         
         void generateNormals();
+        void generateTangents();
 
     private:
         std::unique_ptr<Buffer> vertexBuffer;

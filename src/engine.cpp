@@ -92,6 +92,8 @@ void Engine::update(double deltaTime)
     int counter = 0;
     for(GameObject &obj : gameObjects)
     {
+        if(obj.get_id() == 0)
+            obj.transform.position = camera.transform.position;
         // if(obj.get_id() == 2) break;
         // if(obj.get_id() == 1)
         // {
@@ -215,29 +217,35 @@ void Engine::loadGameObjects()
     //     {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f}}
     // };
 
+    GameObject skybox = GameObject::instantiate();
+    skybox.mesh = Mesh::createSkybox(100.0f);
+    skybox.materialID = 0;
+
+
     GameObject obj = GameObject::instantiate();
     GameObject obj2 = GameObject::instantiate();
     GameObject obj3 = GameObject::instantiate();
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    obj.mesh = Mesh::loadObj("internal/models/Nefertiti.obj");
-    obj.mesh->generateNormals();
-    obj.mesh->createBuffers();
-    obj.materialID = 0;
-    obj.transform.scale = glm::vec3(0.1f);
-    obj.transform.rotation.x = glm::radians(-90.0f);
+    obj.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    // obj.mesh->generateNormals();
+    // obj.mesh->createBuffers();
+    obj.materialID = 1;
+    // obj.transform.scale = glm::vec3(0.1f);
+    // obj.transform.rotation.x = glm::radians(-90.0f);
 
-    obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    // obj2.mesh = Mesh::createGrid(16,16, {3.0f, 3.0f});
-    obj2.materialID = 2;
-    obj2.transform.position = glm::vec3(3, 0, 0);
+    // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj2.mesh = Mesh::createGrid(16,16, {50.0f, 50.0f});
+    obj2.materialID = 3;
+    obj2.transform.position = glm::vec3(0, -3, 0);
 
     obj3.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj3.materialID = 1;
+    obj3.materialID = 2;
     obj3.transform.position = glm::vec3(-3, 0, 0);
     // obj3.mesh = Mesh::createSierpinskiPyramid(12.0f, 8);
     // obj3.materialID = 2;
+    gameObjects.push_back(std::move(skybox));
     gameObjects.push_back(std::move(obj));
     gameObjects.push_back(std::move(obj2));
     gameObjects.push_back(std::move(obj3));

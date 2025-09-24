@@ -151,11 +151,17 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
 void Graphics::loadTextures()
 {
     std::cout << "Loading textures" << std::endl;
-    textures.push_back(Texture::loadFromFile("./internal/textures/rusted_metal/rusty_metal_04_diff_1k.jpg"));
-    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_rough_1k.exr"));
-    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_metal_1k.exr"));
-    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_spec_1k.exr"));
-    textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_nor_gl_1k.exr"));
+    textures.push_back(Texture::loadFromFile("./internal/textures/worn_tile_floor/worn_tile_floor_diff_1k.jpg"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_rough_1k.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/defaults/default_metal.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/defaults/default_spec.exr"));
+    textures.push_back(Texture::loadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_nor_gl_1k.exr"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/rusted_metal/rusty_metal_04_diff_1k.jpg"));
+    // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_rough_1k.exr"));
+    // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_metal_1k.exr"));
+    // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_spec_1k.exr"));
+    // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_nor_gl_1k.exr"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/TestNormalMap.png"));
     textures.push_back(Texture::loadFromFile("./internal/textures/skybox_blurred.png"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_512.jpg"));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png"));
@@ -189,6 +195,19 @@ void Graphics::loadShaders()
     //     6
     // ));
     Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/skybox.slang", 
+        "internal/shaders/skybox.slang", 
+        std::vector<ShaderInput>{
+            {"color", ShaderInput::DataType::COLOR}
+        },
+        0
+    ));
+    
+    Shared::shaders[0]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    Shared::shaders[0]->configInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    Shared::shaders[0]->reloadShader();
+
+    Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/basicShader.slang", 
         "internal/shaders/basicShader.slang", 
         std::vector<ShaderInput>{
@@ -198,6 +217,7 @@ void Graphics::loadShaders()
         },
         0
     ));
+
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/wireframe.slang", 
         "internal/shaders/wireframe.slang", 
@@ -207,16 +227,17 @@ void Graphics::loadShaders()
         0
     ));
     // Shared::shaders[0]->configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-    Shared::shaders[1]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
-    Shared::shaders[1]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
+    Shared::shaders[2]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
+    Shared::shaders[2]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
     // Shared::shaders[1]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
-    Shared::shaders[1]->reloadShader();
+    Shared::shaders[2]->reloadShader();
 
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/PBR.slang", 
         "internal/shaders/PBR.slang", 
         std::vector<ShaderInput>{
-            {"color", ShaderInput::DataType::COLOR}
+            {"color", ShaderInput::DataType::COLOR},
+            {"normalMapStrength", ShaderInput::DataType::FLOAT}
         },
         6
     ));
@@ -227,7 +248,14 @@ void Graphics::loadMaterials()
     std::cout << "Loading materials\n";
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
     
-    Material m1 = Material::instantiate(Shared::shaders[0].get());
+    Material skybox = Material::instantiate(Shared::shaders[0].get());
+    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    skybox.setValue("color", Color(0.f, 0.f, 0.f));
+    skybox.createShaderInputBuffer();
+    skybox.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(skybox));
+
+    Material m1 = Material::instantiate(Shared::shaders[1].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
@@ -236,15 +264,16 @@ void Graphics::loadMaterials()
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m3 = Material::instantiate(Shared::shaders[1].get());
+    Material m3 = Material::instantiate(Shared::shaders[2].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
-    Material m4 = Material::instantiate(Shared::shaders[2].get());
+    Material m4 = Material::instantiate(Shared::shaders[3].get());
     m4.setValue("color", Color(1.f, 1.f, 1.f));
+    m4.setValue("normalMapStrength", 1.0f);
     m4.setTexture(0, textures[0]); // Albedo
     m4.setTexture(1, textures[1]); // Roughness
     m4.setTexture(2, textures[2]); // Metallic
