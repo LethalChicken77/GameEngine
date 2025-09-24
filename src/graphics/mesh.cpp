@@ -174,7 +174,7 @@ namespace graphics
 
     float angleBetween(glm::vec3 v1, glm::vec3 v2)
     {
-        return glm::acos(glm::dot(v1, v2) / (glm::length(v1) * glm::length(v2)));
+        return glm::acos(glm::clamp(glm::dot(v1, v2) / (glm::length(v1) * glm::length(v2)), -1.0f + 1e-6f, 1.0f - 1e-6f));
     }
 
     void Mesh::generateNormals()
@@ -196,10 +196,23 @@ namespace graphics
 
             glm::vec3 edge1 = v1.position - v0.position;
             glm::vec3 edge2 = v2.position - v0.position;
-            glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+            
+            // if(glm::length(edge1) < 1e-6f || glm::length(edge2) < 1e-6f)
+            //     continue; // Degenerate triangle, just like me :(
+                
+            glm::vec3 cross = glm::cross(edge1, edge2);
+
+            if(glm::length(cross) < 1e-6f)
+                continue; // Degenerate triangle
+
+            glm::vec3 normal = glm::normalize(cross);
+
             float angle0 = angleBetween(v1.position - v0.position, v2.position - v0.position);
             float angle1 = angleBetween(v0.position - v1.position, v2.position - v1.position);
             float angle2 = angleBetween(v0.position - v2.position, v1.position - v2.position);
+
+            // if(std::isnan(angle0) || std::isnan(angle1) || std::isnan(angle2))
+            //     continue;
 
             v0.normal += normal * angle0;
             v1.normal += normal * angle1;

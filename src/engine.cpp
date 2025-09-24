@@ -221,7 +221,7 @@ void Engine::loadGameObjects()
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    obj.mesh = Mesh::loadObj("internal/models/ducky.obj");
+    obj.mesh = Mesh::loadObj("internal/models/Nefertiti.obj");
     obj.mesh->generateNormals();
     obj.mesh->createBuffers();
     obj.materialID = 0;
