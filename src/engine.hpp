@@ -11,6 +11,7 @@
 #include "core/game_object.hpp"
 #include "utils/debug.hpp"
 #include "core/random.hpp"
+#include "core/console.hpp"
 
 namespace core
 {

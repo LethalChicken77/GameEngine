@@ -122,8 +122,6 @@ public float3 pbrBRDF(
     float3 F0,
 
     float3 lightColor,
-    float3 ambientColor,
-    float3 reflectSample,
     
     float3 normal, 
     float3 lightDir,
@@ -139,11 +137,30 @@ public float3 pbrBRDF(
     float3 diffuse = (1 - metallic) * (1 - F_diffuse) * DiffOrenNayar(normal, lightDir, viewDir, albedo, roughness);
     float3 specular = SpecCookTorrance(normal, lightDir, viewDir, roughness, F0);
 
+    return lightColor * (diffuse + specular);
+}
+
+public float3 pbrAmbient(
+    float3 albedo,
+    float roughness,
+    float metallic,
+    float3 F0,
+
+    float3 ambientColor,
+    float3 reflectSample, // Specular ambient color
+
+    float3 normal,
+    float3 viewDir
+)
+{
+    F0 = lerp(F0, albedo, metallic); // Metals use albedo for F0
+
     float3 F_V = saturate(SchlickFresnel(F0, normal, -viewDir)); // Reflectance with respect to the view direction
     // float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness) * (1.0 - metallic));            // Metallic term is more realistic, but looks worse without reflection map
-    float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness));            // Effect on ambient based on roughness
+    float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness)); // Effect on ambient based on roughness
+
     float3 ambientDiffuse = ambientColor * albedo * (1.0 - F_ambient) * (1.0 - metallic);
     float3 ambientSpecular = reflectSample * F_ambient;
 
-    return lightColor * (diffuse + specular) + ambientDiffuse + ambientSpecular;
+    return ambientDiffuse + ambientSpecular;
 }

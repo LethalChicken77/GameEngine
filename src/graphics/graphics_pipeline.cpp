@@ -27,7 +27,7 @@ namespace graphics
 
     void GraphicsPipeline::createPipelineLayout()
     {
-        std::cout << "Creating pipeline layout" << std::endl;
+        Console::log("Creating pipeline layout", "GraphicsPipeline");
 
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -35,11 +35,12 @@ namespace graphics
         pushConstantRange.size = sizeof(PushConstants);
 
         std::vector<VkDescriptorSetLayout> descriptorSetLayouts{
+            Descriptors::cameraSetLayout->getDescriptorSetLayout(),
             Descriptors::globalSetLayout->getDescriptorSetLayout()
         };
         // for(std::unique_ptr<Shader>& shader : Shared::shaders)
         // {
-            descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
+        descriptorSetLayouts.push_back(shader.getDescriptorSetLayout()->getDescriptorSetLayout());
         // }
         // for(std::unique_ptr<Shader>& shader : Shared::shaders)
         // {
@@ -114,12 +115,12 @@ namespace graphics
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        cout << "Creating Graphics Pipeline" << endl;
+        Console::log("Creating Graphics Pipeline", "Graphics");
         if(vkCreateGraphicsPipelines(Shared::device->device(), cache, 1, &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create graphics pipeline! (Skill issue)");
         }
-        cout << "Created graphics pipeline successfully" << endl;
+        Console::log("Created Graphics Pipeline Successfully", "Graphics");
     }
 
     void GraphicsPipeline::bind(VkCommandBuffer commandBuffer)

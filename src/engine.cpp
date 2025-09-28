@@ -173,6 +173,8 @@ void Engine::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        Console::drawImGui();
+
         ImGui::Begin("Material Properties");
 
         for(Material &mat : Shared::materials)

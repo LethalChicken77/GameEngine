@@ -209,7 +209,7 @@ namespace graphics
         writer.writeBuffer(0, &bufferInfo);
         for(int i = 0; i < textures.size(); i++)
         {
-            std::cout << "Writing image to binding " << i + 1 << std::endl;
+            // std::cout << "Writing image to binding " << i + 1 << std::endl;
             writer.writeImage(i + 1, textures[i]->getDescriptorInfo());
         }
         writer.build(descriptorSet);

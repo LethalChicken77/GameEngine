@@ -10,6 +10,7 @@
 #include <memory>
 #include <variant>
 
+#include "../core/console.hpp"
 #include "device.hpp"
 #include "descriptors.hpp"
 

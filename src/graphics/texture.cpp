@@ -36,13 +36,16 @@ namespace graphics
         cleanup();
     }
 
-    std::shared_ptr<Texture> Texture::loadFromFile(const std::string& path)
+    std::shared_ptr<Texture> Texture::loadFromFile(const std::string& path, VkFormat format)
     {
         // if(!std::filesystem::exists(path))
         if(access(path.c_str(), F_OK) != 0)
         {
             throw std::runtime_error("File not found: " + path);
         }
+        
+        stbi_set_flip_vertically_on_load(true); // Flip texture on load to match UV coords
+
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         if(!pixels)
@@ -60,7 +63,7 @@ namespace graphics
         texture->height = texHeight;
         texture->properties = TextureProperties().getDefaultProperties();
         texture->samplerProperties = SamplerProperties().getDefaultProperties();
-        texture->properties.format = VK_FORMAT_R8G8B8A8_SRGB;
+        texture->properties.format = format;
 
         texture->createTexture();
 
