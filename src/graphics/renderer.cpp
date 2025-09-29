@@ -42,29 +42,28 @@ VkCommandBuffer Renderer::startFrame()
 
     frameInProgress = true;
 
-    VkCommandBuffer commandBuffer = getCurrentCommandBuffer();
+    currentCommandBuffer = getCurrentCommandBuffer();
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    if(vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+    if(vkBeginCommandBuffer(currentCommandBuffer, &beginInfo) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to begin recording command buffers!");
     }
 
-    return commandBuffer;
+    return currentCommandBuffer;
 }
 
 void Renderer::endFrame()
 {
     assert(frameInProgress && "Can't end frame that hasn't been started");
 
-    VkCommandBuffer commandBuffer = getCurrentCommandBuffer();
-    if(vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+    if(vkEndCommandBuffer(currentCommandBuffer) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to record command buffer!");
     }
 
-    VkResult result = swapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
+    VkResult result = swapChain->submitCommandBuffers(&currentCommandBuffer, &currentImageIndex);
     if(result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.windowResized())
     {
         window.resetWindowResizedFlag();
@@ -77,20 +76,22 @@ void Renderer::endFrame()
 
     frameInProgress = false;
     currentFrameIndex = (currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
+
+    currentCommandBuffer = nullptr; // Clear current command buffer pointer, still tracked in vector
 }
 
-void Renderer::beginRenderPass(VkCommandBuffer commandBuffer)
+void Renderer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent)
 {
     assert(frameInProgress && "Can't begin render pass when frame is not in progress");
-    assert(commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer that isn't current");
+    assert(currentCommandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer that isn't current");
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = swapChain->getRenderPass();
-    renderPassInfo.framebuffer = swapChain->getFrameBuffer(currentImageIndex);
+    renderPassInfo.renderPass = renderPass;
+    renderPassInfo.framebuffer = frameBuffer;
 
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChain->getSwapChainExtent();
+    renderPassInfo.renderArea.extent = extent;
 
     std::array<VkClearValue, 2> clearValues{};
     // clearValues[0].color = {0.1f, 0.2f, 0.4f, 1.0f};
@@ -99,26 +100,26 @@ void Renderer::beginRenderPass(VkCommandBuffer commandBuffer)
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(currentCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = static_cast<float>(swapChain->getSwapChainExtent().width);
-    viewport.height = static_cast<float>(swapChain->getSwapChainExtent().height);
+    viewport.width = static_cast<float>(extent.width);
+    viewport.height = static_cast<float>(extent.height);
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    VkRect2D scissor{{0, 0}, swapChain->getSwapChainExtent()};
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    VkRect2D scissor{{0, 0}, extent};
+    vkCmdSetViewport(currentCommandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(currentCommandBuffer, 0, 1, &scissor);
 }
 
-void Renderer::endRenderPass(VkCommandBuffer commandBuffer)
+void Renderer::endRenderPass()
 {
     assert(frameInProgress && "Can't end render pass when frame is not in progress");
-    assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer that isn't current");
+    assert(currentCommandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer that isn't current");
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRenderPass(currentCommandBuffer);
 }
 
 

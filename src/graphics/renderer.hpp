@@ -55,8 +55,8 @@ public:
     VkCommandBuffer startFrame();
     void endFrame();
 
-    void beginRenderPass(VkCommandBuffer commandBuffer);
-    void endRenderPass(VkCommandBuffer commandBuffer);
+    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent);
+    void endRenderPass();
 
     void waitForDevice() { vkDeviceWaitIdle(device.device()); }
 
@@ -67,9 +67,10 @@ public:
         assert(frameInProgress && "Cannot get command buffer as frame is not in progress");
         return commandBuffers[currentFrameIndex]; 
     }
-    VkRenderPass getRenderPass() const { return swapChain->getRenderPass(); }
-    VkRenderPass getImGuiRenderPass() const { return swapChain->getImGuiRenderPass(); }
+    VkRenderPass getSCRenderPass() const { return swapChain->getRenderPass(); }
+    // VkRenderPass getImGuiRenderPass() const { return swapChain->getImGuiRenderPass(); }
     VkExtent2D getExtent() const { return swapChain->getSwapChainExtent(); }
+    VkFramebuffer getSCFrameBuffer() const { return swapChain->getFrameBuffer(currentImageIndex); }
     uint32_t getFrameIndex() const 
     { 
         assert(frameInProgress && "Cannot get frame index as frame is not in progress");
@@ -92,6 +93,7 @@ private:
     Device& device;
     std::unique_ptr<SwapChain> swapChain;
     std::vector<VkCommandBuffer> commandBuffers;
+    VkCommandBuffer currentCommandBuffer;
 
     uint32_t currentImageIndex = 0;
     uint32_t currentFrameIndex = 0;

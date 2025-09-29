@@ -35,7 +35,7 @@ void PipelineManager::createPipelines()
     {
         PipelineConfigInfo &pipelineConfig = shader->getConfigInfo();
     
-        pipelineConfig.renderPass = renderer.getRenderPass();
+        pipelineConfig.renderPass = renderer.getSCRenderPass();
     
         std::unique_ptr<GraphicsPipeline> graphicsPipeline = std::make_unique<GraphicsPipeline>(
             *shader,

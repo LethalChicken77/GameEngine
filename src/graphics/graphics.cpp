@@ -154,7 +154,7 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSet, Descriptors::cameraDescriptorSets[frameIndex]};
 
         GlobalUbo globalUbo{};
-        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 3.0};
+        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 9.0};
         globalUbo.lights[1] = {glm::vec3(4, 0, 0), LightType::POINT, glm::vec3(1.0, 0.8, 0.1), 30.0};
         globalUbo.lights[2] = {glm::vec3(0, 4, -4), LightType::POINT, glm::vec3(0.5, 1.0, 0.1), 10.0};
         globalUbo.lights[3] = {glm::vec3(-4, 0, 2), LightType::POINT, glm::vec3(0.9, 0.2, 1.0), 10.0};
@@ -173,14 +173,15 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
         // Objects render pass
-        renderer.beginRenderPass(commandBuffer);
+        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent());
         renderGameObjects(frameInfo, gameObjects);
-        // renderer.endRenderPass(commandBuffer);
 
-        // ImGui render pass
+        // renderer.endRenderPass(commandBuffer);
+        
         // renderer.beginRenderPass(commandBuffer);
+        
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-        renderer.endRenderPass(commandBuffer);
+        renderer.endRenderPass();
 
         renderer.endFrame();
     }
@@ -434,7 +435,7 @@ void Graphics::graphicsInitImgui()
     initInfo.Queue = device.graphicsQueue();
     initInfo.PipelineCache = VK_NULL_HANDLE;
     initInfo.DescriptorPool = Descriptors::imguiPool->getPool();
-    initInfo.RenderPass = renderer.getRenderPass();
+    initInfo.RenderPass = renderer.getSCRenderPass();
     initInfo.Allocator = nullptr;
     initInfo.MinImageCount = 2;
     initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
