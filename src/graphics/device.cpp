@@ -17,25 +17,41 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-    void *pUserData) {
-  std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+    void *pUserData)
+{
+    if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+    {
+        Console::log(pCallbackData->pMessage, "Validation Layer");
+    }
+    else if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+    {
+        Console::warn(pCallbackData->pMessage, "Validation Layer");
+    }
+    else if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+    {
+        Console::error(pCallbackData->pMessage, "Validation Layer");
+    }
 
-  return VK_FALSE;
+    return VK_FALSE;
 }
 
 VkResult CreateDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
     const VkAllocationCallbacks *pAllocator,
-    VkDebugUtilsMessengerEXT *pDebugMessenger) {
-  auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
-      instance,
-      "vkCreateDebugUtilsMessengerEXT");
-  if (func != nullptr) {
-    return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-  } else {
-    return VK_ERROR_EXTENSION_NOT_PRESENT;
-  }
+    VkDebugUtilsMessengerEXT *pDebugMessenger) 
+{
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+        instance,
+        "vkCreateDebugUtilsMessengerEXT");
+    if (func != nullptr) 
+    {
+        return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+    } 
+    else 
+    {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
 }
 
 void DestroyDebugUtilsMessengerEXT(

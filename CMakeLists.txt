@@ -15,10 +15,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Set flags
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")# -ffast-math")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")# -ffast-math")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 # set(ASAN_LIB_PATH "/ucrt64/lib/clang/20/lib/x86_64-w64-windows-gnu")
+
+add_compile_options(
+    -g
+    # -O3
+    # -ffast-math
+    -fno-caret-diagnostics
+    -fno-diagnostics-show-option
+    -fno-diagnostics-show-note-include-stack
+    -fcolor-diagnostics
+)
 
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${ASAN_LIB_PATH} -lclang_rt.asan_dynamic -lclang_rt.asan_dynamic_runtime_thunk")
 

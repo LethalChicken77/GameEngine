@@ -64,7 +64,7 @@ namespace graphics
         Texture &operator=(Texture &&) = default;
         ~Texture();
 
-        static std::shared_ptr<Texture> loadFromFile(const std::string &filename); // Use stb_image to load image
+        static std::shared_ptr<Texture> loadFromFile(const std::string &filename, VkFormat format = VkFormat::VK_FORMAT_R8G8B8A8_SRGB); // Use stb_image to load image
         static std::shared_ptr<Texture> loadFromFileEXR(const std::string& path, TextureProperties properties, SamplerProperties samplerProperties); // Use tinyexr to load image
         static std::shared_ptr<Texture> loadFromFileEXR(const std::string &filename)
         {
@@ -110,6 +110,9 @@ namespace graphics
 
         std::vector<uint8_t> *getData() { return &data; }
 
+        TextureProperties properties;
+        SamplerProperties samplerProperties;
+
     private:
         VkCommandPool commandPool;
         VkQueue queue;
@@ -121,8 +124,6 @@ namespace graphics
 
         VkDescriptorImageInfo descriptorInfo;
 
-        TextureProperties properties;
-        SamplerProperties samplerProperties;
 
         std::vector<uint8_t> data{}; // Data stored in binary format, can be interpreted as whatever
         // std::unique_ptr<Buffer> buffer;

@@ -31,6 +31,10 @@ namespace graphics
 Graphics::Graphics(const std::string& name, const std::string& engine_name)
 {
     Descriptors::globalPool = DescriptorPool::Builder(device)
+        .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1)
+        .build();
+
+    Descriptors::cameraPool = DescriptorPool::Builder(device)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
@@ -45,13 +49,36 @@ Graphics::~Graphics()
 
 void Graphics::init(const std::string& name, const std::string& engine_name)
 {
-    std::cout << "Initializing Graphics\n";
+    Console::log("Initializing graphics module", "Graphics");
     Shared::device = &device;
     if(!window.open)
     {
         throw std::runtime_error("Failed to open window");
     }
 
+    Console::log("Creating global UBO", "Graphics");
+    // Global data
+    globalUboBuffer = std::make_unique<Buffer>(
+        device,
+        sizeof(GlobalUbo),
+        1,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        device.properties.limits.minUniformBufferOffsetAlignment
+    );
+    globalUboBuffer->map();
+    Descriptors::globalSetLayout = DescriptorSetLayout::Builder(device)
+        .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+        .build();
+    
+    
+    VkDescriptorBufferInfo bufferInfo = globalUboBuffer->descriptorInfo();
+    DescriptorWriter(*Descriptors::globalSetLayout, *Descriptors::globalPool)
+        .writeBuffer(0, &bufferInfo)
+        .build(Descriptors::globalDescriptorSet);
+
+    // Camera
+    Console::log("Creating camera UBO", "Graphics");
     cameraUboBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
     for(int i = 0; i < cameraUboBuffers.size(); i++)
     {
@@ -66,17 +93,17 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
         cameraUboBuffers[i]->map();
     }
 
-    Descriptors::globalSetLayout = DescriptorSetLayout::Builder(device)
+    Descriptors::cameraSetLayout = DescriptorSetLayout::Builder(device)
         .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
         .build();
     
-    Descriptors::globalDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
-    for(int i = 0; i < Descriptors::globalDescriptorSets.size(); i++)
+    Descriptors::cameraDescriptorSets = std::vector<VkDescriptorSet>(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    for(int i = 0; i < Descriptors::cameraDescriptorSets.size(); i++)
     {
         VkDescriptorBufferInfo bufferInfo = cameraUboBuffers[i]->descriptorInfo();
-        DescriptorWriter(*Descriptors::globalSetLayout, *Descriptors::globalPool)
+        DescriptorWriter(*Descriptors::cameraSetLayout, *Descriptors::cameraPool)
             .writeBuffer(0, &bufferInfo)
-            .build(Descriptors::globalDescriptorSets[i]);
+            .build(Descriptors::cameraDescriptorSets[i]);
     }
 
     loadTextures();
@@ -85,7 +112,7 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     pipelineManager = std::make_unique<PipelineManager>(renderer);
     // pipelineManager->createPipelines();
 
-    std::cout << "Successfully initialized graphics" << std::endl;
+    Console::log("Successfully initialized graphics", "Graphics");
 }
 
 void Graphics::cleanup()
@@ -94,10 +121,12 @@ void Graphics::cleanup()
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     
+    globalUboBuffer.reset();
     cameraUboBuffers.clear();
     Descriptors::globalPool.reset();
     Descriptors::globalSetLayout.reset();
-    Descriptors::globalDescriptorSets.clear();
+    Descriptors::cameraPool.reset();
+    Descriptors::cameraSetLayout.reset();
     Descriptors::imguiPool.reset();
     pipelineManager->destroyPipelines();
     // graphicsPipeline.reset();
@@ -122,7 +151,17 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
     if(VkCommandBuffer commandBuffer = renderer.startFrame())
     {
         uint32_t frameIndex = renderer.getFrameIndex();
-        FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSets[frameIndex]};
+        FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSet, Descriptors::cameraDescriptorSets[frameIndex]};
+
+        GlobalUbo globalUbo{};
+        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 3.0};
+        globalUbo.lights[1] = {glm::vec3(4, 0, 0), LightType::POINT, glm::vec3(1.0, 0.8, 0.1), 30.0};
+        globalUbo.lights[2] = {glm::vec3(0, 4, -4), LightType::POINT, glm::vec3(0.5, 1.0, 0.1), 10.0};
+        globalUbo.lights[3] = {glm::vec3(-4, 0, 2), LightType::POINT, glm::vec3(0.9, 0.2, 1.0), 10.0};
+        globalUbo.numLights = 4;
+        globalUbo.ambient = glm::vec3(0.04, 0.08, 0.2);
+        // globalUbo.ambient = glm::vec3(1, 1, 1);
+        globalUboBuffer->writeToBuffer(&globalUbo);
 
         CameraUbo cameraUbo{};
         cameraUbo.view = camera->getView();
@@ -150,12 +189,13 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
 
 void Graphics::loadTextures()
 {
-    std::cout << "Loading textures" << std::endl;
+    Console::log("Loading textures", "Graphics");
     textures.push_back(Texture::loadFromFile("./internal/textures/worn_tile_floor/worn_tile_floor_diff_1k.jpg"));
     textures.push_back(Texture::loadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_rough_1k.exr"));
     textures.push_back(Texture::loadFromFileEXR("./internal/textures/defaults/default_metal.exr"));
     textures.push_back(Texture::loadFromFileEXR("./internal/textures/defaults/default_spec.exr"));
     textures.push_back(Texture::loadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_nor_gl_1k.exr"));
+    // textures.push_back(Texture::loadFromFile("./internal/textures/TestNormalMap.png", VK_FORMAT_R8G8B8A8_UNORM));
     // textures.push_back(Texture::loadFromFile("./internal/textures/rusted_metal/rusty_metal_04_diff_1k.jpg"));
     // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_rough_1k.exr"));
     // textures.push_back(Texture::loadFromFileEXR("./internal/textures/rusted_metal/rusty_metal_04_metal_1k.exr"));
@@ -182,7 +222,7 @@ void Graphics::loadTextures()
 
 void Graphics::loadShaders()
 {
-    std::cout << "Loading shaders\n";
+    Console::log("Loading shaders", "Graphics");
     // Shared::shaders.push_back(std::make_unique<Shader>(
     //     "internal/shaders/basicShader.vert.spv", 
     //     "internal/shaders/basicShader.frag.spv", 
@@ -245,7 +285,7 @@ void Graphics::loadShaders()
 
 void Graphics::loadMaterials()
 {
-    std::cout << "Loading materials\n";
+    Console::log("Loading materials", "Graphics");
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
     
     Material skybox = Material::instantiate(Shared::shaders[0].get());
@@ -292,43 +332,64 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
 
     // pipelineManager.renderObjects(frameInfo, gameObjects, commandBuffer);
     GraphicsPipeline* prevPipeline = nullptr;
+    std::vector<VkDescriptorSet> localDescriptorSets;
+    VkPipelineLayout pipelineLayout;
+    Material::id_t prevMaterial = UINT64_MAX;
     for(core::GameObject& obj : gameObjects)
     {
         const Shader* shader = Shared::materials[obj.materialID].getShader();
         GraphicsPipeline* pipeline = shader->getPipeline();
         uint32_t setIndex = pipeline->getID() + 1;
-        if(pipeline != prevPipeline)
+        if(pipeline != prevPipeline) // Bind camera and global data
         {
             pipeline->bind(commandBuffer);
+            pipelineLayout = pipeline->getPipelineLayout();
 
-            std::vector<VkDescriptorSet> descriptorSets = { frameInfo.globalDescriptorSet };
+            std::vector<VkDescriptorSet> descriptorSets = { frameInfo.cameraDescriptorSet };
 
             vkCmdBindDescriptorSets(
                 commandBuffer, 
                 VK_PIPELINE_BIND_POINT_GRAPHICS, 
-                pipeline->getPipelineLayout(), 
+                pipelineLayout, 
                 0,
                 static_cast<uint32_t>(descriptorSets.size()),
                 descriptorSets.data(), 
                 0,
                 nullptr
             );
+
+
+            descriptorSets = { frameInfo.globalDescriptorSet };
+
+            vkCmdBindDescriptorSets(
+                commandBuffer, 
+                VK_PIPELINE_BIND_POINT_GRAPHICS, 
+                pipelineLayout, 
+                1,
+                static_cast<uint32_t>(descriptorSets.size()),
+                descriptorSets.data(), 
+                0,
+                nullptr
+            );
+
             prevPipeline = pipeline;
         }
-        std::vector<VkDescriptorSet> localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };
+        localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };
 
-        // Bind local descriptors (Material info, do this every frame to allow materials to change)
-        // Might want to add dirty flag to materials
-        vkCmdBindDescriptorSets(
-            commandBuffer, 
-            VK_PIPELINE_BIND_POINT_GRAPHICS, 
-            pipeline->getPipelineLayout(), 
-            1,
-            1,
-            localDescriptorSets.data(), 
-            0,
-            nullptr
-        );
+        if(prevMaterial != obj.materialID) // Bind material info if changed
+        {
+            vkCmdBindDescriptorSets(
+                commandBuffer, 
+                VK_PIPELINE_BIND_POINT_GRAPHICS, 
+                pipelineLayout, 
+                2,
+                1,
+                localDescriptorSets.data(), 
+                0,
+                nullptr
+            );
+            prevMaterial = obj.materialID;
+        }
 
         PushConstants push{};
         push.model = obj.transform.getTransform();

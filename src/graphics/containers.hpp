@@ -31,7 +31,11 @@ namespace graphics
     {
         extern std::unique_ptr<DescriptorPool> globalPool;
         extern std::unique_ptr<DescriptorSetLayout> globalSetLayout;
-        extern std::vector<VkDescriptorSet> globalDescriptorSets;
+        extern VkDescriptorSet globalDescriptorSet;
+        // Camera Descriptor Set
+        extern std::unique_ptr<DescriptorPool> cameraPool;
+        extern std::unique_ptr<DescriptorSetLayout> cameraSetLayout;
+        extern std::vector<VkDescriptorSet> cameraDescriptorSets;
         // ImGui Sets
         extern std::unique_ptr<DescriptorPool> imguiPool;
     }

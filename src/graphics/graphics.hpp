@@ -6,6 +6,7 @@
 #include <memory>
 #include <map>
 
+#include "../core/console.hpp"
 #include "window.hpp"
 #include "pipeline_manager.hpp"
 #include "graphics_pipeline.hpp"
@@ -75,6 +76,7 @@ private:
     std::unique_ptr<PipelineManager> pipelineManager;
     PipelineConfigInfo configInfo;
 
+    std::unique_ptr<Buffer> globalUboBuffer;
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
     std::vector<std::shared_ptr<Texture>> textures;
 

@@ -2,31 +2,14 @@ import utils;
 import constants;
 import colorspace;
 
-// --- Push constants ---
-struct PushConstants
-{
-    float4x4 model;
-};
-[[vk::push_constant]]
-PushConstants pushConstants;
+import shaderInputs;
 
-// --- Descriptor set 0: Camera ---
-struct CameraUbo
-{
-    float4x4 view;
-    float4x4 invView;
-    float4x4 projection;
-    float4x4 viewProj;
-};
-[[vk::binding(0, 0)]]
-uniform CameraUbo cameraData;
-
-// --- Descriptor set 1: Material ---
+// Material Descriptor Set
 struct MaterialInfo
 {
     float4 color;
 };
-[[vk::binding(0, 1)]] ConstantBuffer<MaterialInfo> materialInfo;
+[[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
 
 
 struct Vertex

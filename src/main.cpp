@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <memory>
 
+#include "core/console.hpp"
 #include "engine.hpp"
 #include "utils/debug.hpp"
 #include "graphics/window.hpp"
@@ -34,6 +35,7 @@ using namespace graphics;
 
 void setWindowIcons(GLFWwindow* window)
 {
+    stbi_set_flip_vertically_on_load(false); // Window icons are not flipped
     // Load small icon
     int widthSmall, heightSmall, channelsSmall;
     unsigned char* pixelsSmall = stbi_load("internal/images/icon_48.png", &widthSmall, &heightSmall, &channelsSmall, 4);  // Load as RGBA
@@ -99,7 +101,7 @@ int main()
 
     if(!graphics.isOpen())
     {
-        std::cerr << "Failed to initialize graphics" << std::endl;
+        Console::error("Failed to initialize graphics");
         return -1;
     }
 

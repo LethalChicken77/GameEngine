@@ -24,11 +24,23 @@ struct CameraUbo
     alignas(16) glm::mat4 viewProj;
 };
 
-struct LightsUbo
+enum LightType
 {
-    alignas(16) glm::vec3 lightPos;
-    alignas(16) glm::vec3 lightColor;
-    alignas(4) float lightIntensity;
+    DIRECTIONAL = 0,
+    POINT = 1
+};
+struct Light
+{
+    glm::vec3 position;
+    int type = DIRECTIONAL;
+    glm::vec3 color;
+    float intensity;
+};
+struct GlobalUbo
+{
+    glm::vec3 ambient;
+    int numLights;
+    Light lights[128];
 };
 
 class Renderer

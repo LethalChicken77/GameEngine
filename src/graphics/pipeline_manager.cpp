@@ -1,4 +1,5 @@
 #include "pipeline_manager.hpp"
+#include "../core/console.hpp"
 
 namespace graphics{
 
@@ -25,7 +26,7 @@ void PipelineManager::reloadPipelines()
 void PipelineManager::createPipelines()
 {
     // assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
-    std::cout << "Creating pipelines" << std::endl;
+    Console::log("Creating pipelines", "PipelineManager");
     currentID = 0;
     // PipelineConfigInfo pipelineConfig{};
     // GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
@@ -44,7 +45,7 @@ void PipelineManager::createPipelines()
 
         graphicsPipelines.push_back(std::move(graphicsPipeline));
     }
-    std::cout << "Pipelines created successfully" << std::endl;
+    Console::log("Pipelines created successfully", "PipelineManager");
 }
 
 void PipelineManager::destroyPipelines()

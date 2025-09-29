@@ -17,7 +17,11 @@ namespace Descriptors
 // Global Descriptor Set
 std::unique_ptr<DescriptorPool> globalPool;
 std::unique_ptr<DescriptorSetLayout> globalSetLayout;
-std::vector<VkDescriptorSet> globalDescriptorSets;
+VkDescriptorSet globalDescriptorSet;
+// Camera Descriptor Set
+std::unique_ptr<DescriptorPool> cameraPool;
+std::unique_ptr<DescriptorSetLayout> cameraSetLayout;
+std::vector<VkDescriptorSet> cameraDescriptorSets;
 // ImGui Sets
 std::unique_ptr<DescriptorPool> imguiPool;
 }

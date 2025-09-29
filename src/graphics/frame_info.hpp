@@ -12,5 +12,6 @@ namespace graphics
         double frameTime;
         VkCommandBuffer commandBuffer;
         VkDescriptorSet globalDescriptorSet;
+        VkDescriptorSet cameraDescriptorSet;
     };
 } // namespace graphics
