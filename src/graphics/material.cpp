@@ -214,12 +214,12 @@ namespace graphics
         }
         writer.build(descriptorSet);
     }
-    
+
     void Material::updateValues()
     {
         vkDeviceWaitIdle(Shared::device->device());
         createShaderInputBuffer();
-        createDescriptorSet();
+        createDescriptorSet(); // TODO: Update individual buffers
     }
 
     void Material::drawImGui()

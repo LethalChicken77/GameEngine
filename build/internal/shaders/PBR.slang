@@ -102,10 +102,10 @@ float4 fsMain(VOut input)
 
     normalMapSample *= float3(materialInfo.normalMapStrength, materialInfo.normalMapStrength, 1);
     normalMapSample = normalize(normalMapSample);
-    // normal = normalize(
-    //     normalMapSample.x * tangent + 
-    //     normalMapSample.y * -bitangent * input.Tangent.w + 
-    //     normalMapSample.z * normal);
+    normal = normalize(
+        normalMapSample.x * tangent + 
+        normalMapSample.y * -bitangent * input.Tangent.w + 
+        normalMapSample.z * normal);
 
     float3 reflectDir = reflect(viewDir, normal);
     float2 sphericalCoords = cartesianToSphericalNorm(reflectDir);

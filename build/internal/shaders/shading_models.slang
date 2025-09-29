@@ -92,7 +92,7 @@ public float3 SpecCookTorrance(float3 normal, float3 lightDir, float3 viewDir, f
     float3 specular = D * G * F / (4.0 * NdotL * NdotR);
     specular *= NdotL;
     return max(specular, 0.0);
-    // return float3(chi);
+    // return float3(G);
 }
 
 public float3 PhongBRDF(
@@ -132,18 +132,22 @@ public float3 pbrBRDF(
 {
     // float3 F0 = (ior - 1.0) * (ior - 1.0) / ((ior + 1.0) * (ior + 1.0));
     F0 = lerp(F0, albedo, metallic); // Metals use albedo for F0
+    float alpha = roughness * roughness;
+    float3 reflDir = reflect(viewDir, normal);
 
     float3 F_L = SchlickFresnel(F0, normal, lightDir);             // Reflectance with respect to the light direction
-    float3 F_diffuse = lerp(F0, F_L, 1.0 - roughness * roughness); // Effect on diffuse based on roughness
+    float3 F_diffuse = lerp(F0, F_L, 1.0 - roughness); // Effect on diffuse based on roughness
     
     float3 diffuse = (1 - metallic) * (1 - F_diffuse) * DiffOrenNayar(normal, lightDir, viewDir, albedo, roughness);
     float3 specular = SpecCookTorrance(normal, lightDir, viewDir, roughness, F0);
 
-    float3 F_V = saturate(SchlickFresnel(F0, normal, -viewDir)); // Reflectance with respect to the view direction
-    // float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness) * (1.0 - metallic));            // Metallic term is more realistic, but looks worse without reflection map
-    float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness));            // Effect on ambient based on roughness
+    float3 F_V = saturate(SchlickFresnel(float3(length(F0)), normal, -viewDir)); // Reflectance with respect to the view direction
+    F_V *= lerp(1.0, F0, metallic);
+    float3 F_ambient = lerp(F0, F_V, (1.0 - roughness));            // Metallic term is more realistic, but looks worse without reflection map
+    // float3 F_ambient = lerp(F0, F_V, (1.0 - roughness * roughness));            // Effect on ambient based on roughness
     float3 ambientDiffuse = ambientColor * albedo * (1.0 - F_ambient) * (1.0 - metallic);
     float3 ambientSpecular = reflectSample * F_ambient;
 
     return lightColor * (diffuse + specular) + ambientDiffuse + ambientSpecular;
+    // return F_V;
 }

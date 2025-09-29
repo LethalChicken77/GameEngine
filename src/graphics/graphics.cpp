@@ -208,8 +208,8 @@ void Graphics::loadShaders()
     Shared::shaders[0]->reloadShader();
 
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/basicShader.slang", 
-        "internal/shaders/basicShader.slang", 
+        "internal/shaders/basicShader.slang",
+        "internal/shaders/basicShader.slang",
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR},
             {"roughness", ShaderInput::DataType::FLOAT},
