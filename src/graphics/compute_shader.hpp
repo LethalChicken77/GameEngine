@@ -15,8 +15,8 @@ namespace graphics
 {
     struct ComputePipelineConfigInfo {
         ComputePipelineConfigInfo() = default;
-        ComputePipelineConfigInfo(const ComputePipelineConfigInfo&) = delete;
-        ComputePipelineConfigInfo& operator=(const ComputePipelineConfigInfo&) = delete;
+        // ComputePipelineConfigInfo(const ComputePipelineConfigInfo&) = delete;
+        // ComputePipelineConfigInfo& operator=(const ComputePipelineConfigInfo&) = delete;
     };
 
     // Container to abstract away compute shader logic
@@ -41,11 +41,11 @@ namespace graphics
 
             bool dirty = false;
 
+            static ComputePipelineConfigInfo getDefaultConfigInfo();
+
         private:
             ComputePipelineConfigInfo configInfo{};
 
             VkShaderModule computeShaderModule{};
-
-            void initializeDefaultConfigInfo();
     };
 } // namespace graphics

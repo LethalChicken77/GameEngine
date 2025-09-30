@@ -7,10 +7,39 @@
 
 namespace graphics
 {
-    Shader::Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> _inputs, uint32_t textureCount) : 
-        ShaderBase(_inputs), vertexPath(vPath), fragmentPath(fPath)
+    Shader::Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> _inputs, uint32_t textureCount, VkRenderPass *renderPass) : 
+        ShaderBase(_inputs), vertexPath(vPath), fragmentPath(fPath), configInfo(getDefaultConfigInfo())
     {
-        initializeDefaultConfigInfo();
+        if(configInfo.dynamicStateEnables.size() > 0)
+            configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
+        if(configInfo.colorBlendInfo.attachmentCount > 0)
+            configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
+        configInfo.renderPass = renderPass;
+        reloadShader();
+
+        DescriptorPool::Builder poolBuilder = DescriptorPool::Builder(*Shared::device)
+            .setMaxSets(GR_MAX_MATERIAL_COUNT)
+            .setPoolFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
+        DescriptorSetLayout::Builder layoutBuilder = DescriptorSetLayout::Builder(*Shared::device)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        
+        poolBuilder.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, GR_MAX_MATERIAL_COUNT);
+        for(int i = 0; i < textureCount; i++)
+        {
+            poolBuilder.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, GR_MAX_MATERIAL_COUNT);
+            layoutBuilder.addBinding(i + 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+        }
+        descriptorPool = poolBuilder.build();
+        descriptorSetLayout = layoutBuilder.build();
+    }
+
+    Shader::Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> _inputs, uint32_t textureCount, PipelineConfigInfo _configInfo) : 
+        ShaderBase(_inputs), vertexPath(vPath), fragmentPath(fPath), configInfo(_configInfo)
+    {
+        if(configInfo.dynamicStateEnables.size() > 0)
+            configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
+        if(configInfo.colorBlendInfo.attachmentCount > 0)
+            configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
         reloadShader();
 
 
@@ -42,8 +71,11 @@ namespace graphics
         }
     }
 
-    void Shader::initializeDefaultConfigInfo()
+    PipelineConfigInfo Shader::getDefaultConfigInfo()
     {
+        PipelineConfigInfo configInfo{};
+        configInfo.pipelineType = PipelineType::STANDARD;
+
         configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         configInfo.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -87,7 +119,7 @@ namespace graphics
         configInfo.colorBlendInfo.logicOpEnable = VK_FALSE;
         configInfo.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
         configInfo.colorBlendInfo.attachmentCount = 1;
-        configInfo.colorBlendInfo.pAttachments = &configInfo.colorBlendAttachment;
+        configInfo.colorBlendInfo.pAttachments = nullptr; // Set in constructor
         configInfo.colorBlendInfo.blendConstants[0] = 0.0f;
         configInfo.colorBlendInfo.blendConstants[1] = 0.0f;
         configInfo.colorBlendInfo.blendConstants[2] = 0.0f;
@@ -106,9 +138,11 @@ namespace graphics
 
         configInfo.dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
         configInfo.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
+        configInfo.dynamicStateInfo.pDynamicStates = nullptr; // Set in constructor
         configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
         configInfo.dynamicStateInfo.flags = 0;
+        configInfo.dynamicStateInfo.pNext = nullptr;
+        return configInfo;
     }
 
     void Shader::reloadShader()

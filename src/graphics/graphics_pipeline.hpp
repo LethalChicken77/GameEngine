@@ -19,7 +19,7 @@ namespace graphics
     {
     public:
         GraphicsPipeline(Shader& _shader, int id, VkPipelineCache cache);
-        GraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, int id, VkPipelineLayout layout);
+        // GraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, int id, VkPipelineLayout layout);
         ~GraphicsPipeline();
 
         GraphicsPipeline(const GraphicsPipeline&) = delete;
@@ -31,9 +31,11 @@ namespace graphics
         VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 
     protected:
-        void createGraphicsPipeline(VkPipelineCache cache);
-        void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, VkPipelineLayout layout);
-        void createPipelineLayout();
+        void createStandardPipeline(VkPipelineCache cache);
+        void createPostProcessingPipeline(VkPipelineCache cache);
+        // void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, VkPipelineLayout layout);
+        void createStandardLayout();
+        void createPostProcessingLayout();
 
         VkPipeline m_graphicsPipeline;
         VkPipelineLayout pipelineLayout;

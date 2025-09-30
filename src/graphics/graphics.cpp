@@ -106,6 +106,7 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
             .build(Descriptors::cameraDescriptorSets[i]);
     }
 
+    createRenderPasses();
     loadTextures();
     loadShaders();
     loadMaterials();
@@ -172,13 +173,43 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         // std::cout << "Proj: " << glm::to_string(cameraUbo.proj) << std::endl;
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
+        sceneRenderPass->resetLayouts();
+        if(sceneRenderPass->getExtent().width != renderer.getExtent().width || sceneRenderPass->getExtent().height != renderer.getExtent().height)
+        {
+            sceneRenderPass->create(renderer.getExtent());
+        }
         // Objects render pass
-        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent());
+        renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent());
         renderGameObjects(frameInfo, gameObjects);
-
-        // renderer.endRenderPass(commandBuffer);
+        renderer.endRenderPass();
         
-        // renderer.beginRenderPass(commandBuffer);
+        std::unique_ptr<Texture> &colorTexture = sceneRenderPass->getColorTexture();
+        std::unique_ptr<Texture> &depthTexture = sceneRenderPass->getDepthTexture();
+        colorTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        depthTexture->transitionImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL, commandBuffer);
+        ppMaterial->setTexture(0, colorTexture.get());
+        ppMaterial->setTexture(1, depthTexture.get());
+        ppMaterial->createDescriptorSet();
+        
+        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent());
+        
+        pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
+        
+
+        std::vector<VkDescriptorSet> localDescriptorSets = { ppMaterial->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            pipelineManager->getPipeline(0)->getPipelineLayout(), 
+            0,
+            1,
+            localDescriptorSets.data(), 
+            0,
+            nullptr
+        );
+
+        // Draw 6 vertices (full-screen quad)
+        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
         
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         renderer.endRenderPass();
@@ -187,6 +218,14 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
     }
 }
 
+void Graphics::createRenderPasses()
+{
+    Console::log("Creating scene render pass", "Graphics");
+    sceneRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
+    sceneRenderPass->addDepthAttachment();
+    sceneRenderPass->create(renderer.getExtent());
+}
 
 void Graphics::loadTextures()
 {
@@ -235,18 +274,33 @@ void Graphics::loadShaders()
     //     },
     //     6
     // ));
+    PipelineConfigInfo ppConfigInfo = Shader::getDefaultConfigInfo();
+    ppConfigInfo.pipelineType = POST_PROCESSING;
+    ppConfigInfo.renderPass = &renderer.getSCRenderPass();
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/postProcessing.slang", 
+        "internal/shaders/postProcessing.slang", 
+        std::vector<ShaderInput>{
+            {"filler", ShaderInput::DataType::FLOAT} // TODO: Allow shaders with no parameters (DUH)
+        },
+        2,
+        ppConfigInfo
+    ));
+
+    PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
+    skyboxConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    skyboxConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    skyboxConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/skybox.slang", 
         "internal/shaders/skybox.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR}
         },
-        0
+        0,
+        skyboxConfigInfo
     ));
     
-    Shared::shaders[0]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
-    Shared::shaders[0]->configInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
-    Shared::shaders[0]->reloadShader();
 
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/basicShader.slang",
@@ -256,22 +310,23 @@ void Graphics::loadShaders()
             {"roughness", ShaderInput::DataType::FLOAT},
             {"metallic", ShaderInput::DataType::FLOAT}
         },
-        0
+        0,
+        &sceneRenderPass->getRenderPass()
     ));
 
+    PipelineConfigInfo wireframeConfigInfo = Shader::getDefaultConfigInfo();
+    wireframeConfigInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
+    wireframeConfigInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
+    wireframeConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/wireframe.slang", 
         "internal/shaders/wireframe.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR}
         },
-        0
+        0,
+        wireframeConfigInfo
     ));
-    // Shared::shaders[0]->configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-    Shared::shaders[2]->configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_LINE;
-    Shared::shaders[2]->configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
-    // Shared::shaders[1]->configInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
-    Shared::shaders[2]->reloadShader();
 
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/PBR.slang", 
@@ -280,7 +335,8 @@ void Graphics::loadShaders()
             {"color", ShaderInput::DataType::COLOR},
             {"normalMapStrength", ShaderInput::DataType::FLOAT}
         },
-        6
+        6,
+        &sceneRenderPass->getRenderPass()
     ));
 }
 
@@ -288,15 +344,21 @@ void Graphics::loadMaterials()
 {
     Console::log("Loading materials", "Graphics");
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
+
+    Material _ppMaterial = Material::instantiate(Shared::shaders[0].get());
+    _ppMaterial.setValue("filler", 0.5f); // Dumbass
+    _ppMaterial.createShaderInputBuffer();
+    _ppMaterial.createDescriptorSet();
+    ppMaterial = std::make_unique<Material>(std::move(_ppMaterial));
     
-    Material skybox = Material::instantiate(Shared::shaders[0].get());
+    Material skybox = Material::instantiate(Shared::shaders[1].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     skybox.setValue("color", Color(0.f, 0.f, 0.f));
     skybox.createShaderInputBuffer();
     skybox.createDescriptorSet();
     Shared::materials.emplace_back(std::move(skybox));
 
-    Material m1 = Material::instantiate(Shared::shaders[1].get());
+    Material m1 = Material::instantiate(Shared::shaders[2].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
@@ -305,22 +367,22 @@ void Graphics::loadMaterials()
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m3 = Material::instantiate(Shared::shaders[2].get());
+    Material m3 = Material::instantiate(Shared::shaders[3].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
-    Material m4 = Material::instantiate(Shared::shaders[3].get());
+    Material m4 = Material::instantiate(Shared::shaders[4].get());
     m4.setValue("color", Color(1.f, 1.f, 1.f));
     m4.setValue("normalMapStrength", 1.0f);
-    m4.setTexture(0, textures[0]); // Albedo
-    m4.setTexture(1, textures[1]); // Roughness
-    m4.setTexture(2, textures[2]); // Metallic
-    m4.setTexture(3, textures[3]); // Specular
-    m4.setTexture(4, textures[4]); // Normal
-    m4.setTexture(5, textures[5]); // Skybox (TEMPORARY)
+    m4.setTexture(0, textures[0].get()); // Albedo
+    m4.setTexture(1, textures[1].get()); // Roughness
+    m4.setTexture(2, textures[2].get()); // Metallic
+    m4.setTexture(3, textures[3].get()); // Specular
+    m4.setTexture(4, textures[4].get()); // Normal
+    m4.setTexture(5, textures[5].get()); // Skybox (TEMPORARY)
     
     m4.createShaderInputBuffer();
     m4.createDescriptorSet();

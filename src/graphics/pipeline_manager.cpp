@@ -32,11 +32,7 @@ void PipelineManager::createPipelines()
     // GraphicsPipeline::defaultPipelineConfigInfo(pipelineConfig);
     int numShaders = Shared::shaders.size();
     for(std::unique_ptr<Shader>& shader : Shared::shaders)
-    {
-        PipelineConfigInfo &pipelineConfig = shader->getConfigInfo();
-    
-        pipelineConfig.renderPass = renderer.getSCRenderPass();
-    
+    {    
         std::unique_ptr<GraphicsPipeline> graphicsPipeline = std::make_unique<GraphicsPipeline>(
             *shader,
             currentID++,

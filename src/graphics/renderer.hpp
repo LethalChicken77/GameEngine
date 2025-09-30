@@ -67,7 +67,7 @@ public:
         assert(frameInProgress && "Cannot get command buffer as frame is not in progress");
         return commandBuffers[currentFrameIndex]; 
     }
-    VkRenderPass getSCRenderPass() const { return swapChain->getRenderPass(); }
+    VkRenderPass &getSCRenderPass() { return currentRenderPass; }
     // VkRenderPass getImGuiRenderPass() const { return swapChain->getImGuiRenderPass(); }
     VkExtent2D getExtent() const { return swapChain->getSwapChainExtent(); }
     VkFramebuffer getSCFrameBuffer() const { return swapChain->getFrameBuffer(currentImageIndex); }
@@ -94,6 +94,8 @@ private:
     std::unique_ptr<SwapChain> swapChain;
     std::vector<VkCommandBuffer> commandBuffers;
     VkCommandBuffer currentCommandBuffer;
+
+    VkRenderPass currentRenderPass = nullptr;
 
     uint32_t currentImageIndex = 0;
     uint32_t currentFrameIndex = 0;

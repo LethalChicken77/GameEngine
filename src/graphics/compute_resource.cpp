@@ -154,7 +154,7 @@ namespace graphics
         throw std::runtime_error("Shader input not found");
     }
 
-    void ComputeResource::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
+    void ComputeResource::setTexture(uint32_t binding, Texture* texture) 
     {
         if(!initialized)
         {

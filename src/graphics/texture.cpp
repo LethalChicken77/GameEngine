@@ -15,13 +15,22 @@ namespace graphics
         // {
         //     throw std::runtime_error("Cannot initialize empty texture");
         // }
-        properties = TextureProperties().getDefaultProperties();
-        samplerProperties = SamplerProperties().getDefaultProperties();
+        properties = TextureProperties::getDefaultProperties();
+        samplerProperties = SamplerProperties::getDefaultProperties();
         width = _width;
         height = _height;
         data.resize(width * height * 4);
     }
 
+    Texture::Texture(TextureProperties _properties, uint32_t _width, uint32_t _height)
+    {
+        properties = _properties;
+        samplerProperties = SamplerProperties::getDefaultProperties();
+        width = _width;
+        height = _height;
+        data.resize(width * height * 4);
+    }
+    
     Texture::Texture(TextureProperties _properties, SamplerProperties _samplerProperties, uint32_t _width, uint32_t _height)
     {
         properties = _properties;
@@ -335,6 +344,17 @@ namespace graphics
         createDescriptorInfo();
     }
 
+    void Texture::createTextureUninitialized()
+    {
+        createImage();
+        allocateMemory();
+        transitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, properties.finalLayout);
+        createSampler();
+        createImageView();
+
+        createDescriptorInfo();
+    }
+
     void Texture::updateOnGPU()
     {
         transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -385,6 +405,7 @@ namespace graphics
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = properties.usage;
         imageInfo.samples = properties.sampleCount;
+        imageInfo.sharingMode = properties.sharingMode;
 
         if(vkCreateImage(Shared::device->device(), &imageInfo, nullptr, &image) != VK_SUCCESS)
         {
@@ -424,7 +445,8 @@ namespace graphics
         viewInfo.image = image;
         viewInfo.viewType = properties.imageViewType;
         viewInfo.format = properties.format;
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        // viewInfo.subresourceRange = properties.imageSubResourceRange;
+        viewInfo.subresourceRange.aspectMask = properties.imageSubResourceRange.aspectMask;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -436,10 +458,25 @@ namespace graphics
         }
     }
 
+    void Texture::transitionImageLayout(VkImageLayout newLayout)
+    {
+        transitionImageLayout(currentLayout, newLayout);
+    }
+
+    void Texture::transitionImageLayout(VkImageLayout newLayout, VkCommandBuffer commmandBuffer)
+    {
+        transitionImageLayout(currentLayout, newLayout, commmandBuffer);
+    }
+
     void Texture::transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
     {
         VkCommandBuffer commandBuffer = Shared::device->beginSingleTimeCommands(); // Begin recording a command buffer
+        transitionImageLayout(oldLayout, newLayout, commandBuffer);
+        Shared::device->endSingleTimeCommands(commandBuffer); // Submit and free the command buffer
+    }
 
+    void Texture::transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer)
+    {
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout = oldLayout;
@@ -447,7 +484,7 @@ namespace graphics
         barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = image;
-        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.aspectMask = properties.imageSubResourceRange.aspectMask;
         barrier.subresourceRange.baseMipLevel = 0;
         barrier.subresourceRange.levelCount = 1;
         barrier.subresourceRange.baseArrayLayer = 0;
@@ -476,11 +513,31 @@ namespace graphics
                 sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
                 break;
             case VK_IMAGE_LAYOUT_GENERAL:
-                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
                 sourceStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
                 break;
+            case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                sourceStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+                barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+                barrier.srcAccessMask = 0; // Present doesn’t guarantee writes; usually treated as TOP_OF_PIPE
+                sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+                break;
             default:
-                throw std::invalid_argument("Unsupported old layout transition!");
+                throw std::invalid_argument("Unsupported old layout transition: " + std::to_string((uint32_t)oldLayout));
         }
 
         // Handle newLayout
@@ -506,10 +563,30 @@ namespace graphics
                 barrier.dstAccessMask = 0;
                 destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
                 break;
+            case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL:
+                barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+                break;
+            case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:
+                barrier.dstAccessMask = 0; // Present doesn’t require memory access mask
+                destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+                break;
             default:
-                throw std::invalid_argument("Unsupported new layout transition!");
+                throw std::invalid_argument("Unsupported new layout transition: " + std::to_string((uint32_t)newLayout));
         }
-    
+        
         vkCmdPipelineBarrier(
             commandBuffer,
             sourceStage, destinationStage,
@@ -518,8 +595,9 @@ namespace graphics
             0, nullptr,
             1, &barrier
         );
-    
-        Shared::device->endSingleTimeCommands(commandBuffer); // Submit and free the command buffer
+
+        currentLayout = newLayout;
+        descriptorInfo.imageLayout = currentLayout;
     }
 
     size_t getFormatSize(VkFormat format)

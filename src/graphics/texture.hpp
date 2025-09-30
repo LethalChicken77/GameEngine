@@ -20,9 +20,11 @@ namespace graphics
         VkImageViewType imageViewType;
         VkImageLayout finalLayout;
         VkSampleCountFlagBits sampleCount;
+        VkSharingMode sharingMode;
+        VkImageSubresourceRange imageSubResourceRange;
         VkMemoryPropertyFlags memoryProperties;
 
-        TextureProperties getDefaultProperties()
+        static TextureProperties getDefaultProperties()
         {
             return {
                 VK_FORMAT_R8G8B8A8_SRGB,
@@ -32,6 +34,14 @@ namespace graphics
                 VK_IMAGE_VIEW_TYPE_2D,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_SAMPLE_COUNT_1_BIT,
+                VK_SHARING_MODE_EXCLUSIVE,
+                {
+                    VK_IMAGE_ASPECT_COLOR_BIT,
+                    0,
+                    1,
+                    0,
+                    1
+                },
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
             };
         }
@@ -43,7 +53,7 @@ namespace graphics
         VkFilter minFilter; // Filter when subsampling
         VkSamplerAddressMode addressMode;
 
-        SamplerProperties getDefaultProperties()
+        static SamplerProperties getDefaultProperties()
         {
             return {
                 VK_FILTER_LINEAR,
@@ -57,6 +67,7 @@ namespace graphics
     {
     public:
         Texture(uint32_t _width, uint32_t _height);
+        Texture(TextureProperties _properties, uint32_t _width, uint32_t _height);
         Texture(TextureProperties _properties, SamplerProperties _samplerProperties, uint32_t _width, uint32_t _height);
         Texture(const Texture &) = delete;
         Texture &operator=(const Texture &) = delete;
@@ -92,12 +103,16 @@ namespace graphics
             return result;
         }
         void createTexture();
+        void createTextureUninitialized();
         void updateOnGPU();
         void updateOnCPU();
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
-        // Need this public to swap between compute and graphics pipelines
+        // Need this public
+        void transitionImageLayout(VkImageLayout newLayout);
+        void transitionImageLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer);
         void transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
+        void transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer);
 
         uint32_t getWidth() const { return width; }
         uint32_t getHeight() const { return height; }
@@ -123,6 +138,8 @@ namespace graphics
         VkSampler sampler;
 
         VkDescriptorImageInfo descriptorInfo;
+
+        VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 
         std::vector<uint8_t> data{}; // Data stored in binary format, can be interpreted as whatever

@@ -16,6 +16,7 @@
 #include "texture.hpp"
 #include "descriptors.hpp"
 #include "frame_info.hpp"
+#include "render_pass.hpp"
 
 #include "mesh.hpp"
 #include "camera.hpp"
@@ -60,6 +61,7 @@ public:
     void reloadShaders();
 
 private:
+    void createRenderPasses();
     void loadTextures();
     void loadShaders();
     void loadMaterials();
@@ -81,6 +83,9 @@ private:
     std::vector<std::shared_ptr<Texture>> textures;
 
     Camera* camera;
+
+    std::unique_ptr<RenderPass> sceneRenderPass;
+    std::unique_ptr<Material> ppMaterial;
 };
 
 } // namespace graphics

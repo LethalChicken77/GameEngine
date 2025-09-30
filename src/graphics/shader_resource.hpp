@@ -40,7 +40,7 @@ namespace graphics
             std::vector<uint8_t> data{};
             VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
             std::unique_ptr<Buffer> buffer;
-            std::vector<std::shared_ptr<Texture>> textures;
+            std::vector<Texture*> textures; // TODO: Possibly dangerous
             // std::vector<std::shared_ptr<Texture>> images;
 
             bool initialized = false;

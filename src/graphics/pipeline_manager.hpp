@@ -25,6 +25,8 @@ class PipelineManager
 
         void renderObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects, VkCommandBuffer& commandBuffer);
 
+        std::unique_ptr<GraphicsPipeline> &getPipeline(uint32_t index) { return graphicsPipelines[index]; }
+
     private:
         Renderer& renderer;
         std::vector<std::unique_ptr<GraphicsPipeline>> graphicsPipelines;

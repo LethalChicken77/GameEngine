@@ -7,9 +7,8 @@
 namespace graphics
 {
     ComputeShader::ComputeShader(const std::string &_path, std::vector<ShaderInput> _inputs, uint32_t textureCount) : 
-        ShaderBase(_inputs), path(_path)
+        ShaderBase(_inputs), path(_path), configInfo(getDefaultConfigInfo())
     {
-        initializeDefaultConfigInfo();
         reloadShader();
 
 
@@ -36,9 +35,10 @@ namespace graphics
         vkDestroyShaderModule(Shared::device->device(), computeShaderModule, nullptr);
     }
 
-    void ComputeShader::initializeDefaultConfigInfo()
+    ComputePipelineConfigInfo ComputeShader::getDefaultConfigInfo()
     {
-        
+        ComputePipelineConfigInfo configInfo;
+        return configInfo;
     }
     
     void ComputeShader::reloadShader()

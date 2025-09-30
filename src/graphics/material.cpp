@@ -181,7 +181,7 @@ namespace graphics
         return T{};
     }
 
-    void Material::setTexture(uint32_t binding, std::shared_ptr<Texture> texture) 
+    void Material::setTexture(uint32_t binding, Texture* texture) 
     {
         if(!initialized)
         {

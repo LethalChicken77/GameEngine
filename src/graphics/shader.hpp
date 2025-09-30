@@ -15,10 +15,18 @@
 namespace graphics
 {
     class GraphicsPipeline;
+    
+    enum PipelineType
+    {
+        STANDARD = 0,
+        POST_PROCESSING = 1
+    };
+
     struct PipelineConfigInfo {
         PipelineConfigInfo() = default;
         // PipelineConfigInfo(const PipelineConfigInfo&) = delete;
         // PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+        PipelineType pipelineType;
 
         VkPipelineViewportStateCreateInfo viewportInfo;
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
@@ -32,7 +40,7 @@ namespace graphics
         VkPipelineDynamicStateCreateInfo dynamicStateInfo;
 
         // VkPipelineLayout pipelineLayout = nullptr;
-        VkRenderPass renderPass = nullptr;
+        VkRenderPass* renderPass = nullptr;
         uint32_t subpass = 0;
     };
 
@@ -40,17 +48,15 @@ namespace graphics
     class Shader : public ShaderBase
     {
         public:
-            std::string vertexPath;
-            std::string fragmentPath;
-
-            Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs, uint32_t textureCount);
+            Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs, uint32_t textureCount, VkRenderPass *renderPass);
+            Shader(const std::string &vPath, const std::string &fPath, std::vector<ShaderInput> inputs, uint32_t textureCount, PipelineConfigInfo _configInfo);
             ~Shader();
 
             // Disallow copying of shaders
             Shader(const Shader&) = delete;
             Shader& operator=(const Shader&) = delete;
 
-            constexpr PipelineConfigInfo& getConfigInfo() { return configInfo; };
+            PipelineConfigInfo& getConfigInfo() { return configInfo; };
             VkShaderModule& getVertexModule() { return vertShaderModule; }
             VkShaderModule& getFragmentModule() { return fragShaderModule; }
             const std::vector<ShaderInput>& getInputs() const { return inputs; }
@@ -62,7 +68,12 @@ namespace graphics
             PipelineConfigInfo configInfo{};
 
             GraphicsPipeline* parentPipeline;
+
+            static PipelineConfigInfo getDefaultConfigInfo();
+
         private:
+            std::string vertexPath;
+            std::string fragmentPath;
 
             VkShaderModule vertShaderModule{};
             VkShaderModule fragShaderModule{};
@@ -72,7 +83,6 @@ namespace graphics
             // DescriptorPool descriptorPool;
             // DescriptorSetLayout descriptorSetLayout;
 
-            void initializeDefaultConfigInfo();
 
     };
 } // namespace graphics

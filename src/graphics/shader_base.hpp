@@ -107,7 +107,7 @@ namespace graphics
             std::unique_ptr<DescriptorPool> descriptorPool;
             std::unique_ptr<DescriptorSetLayout> descriptorSetLayout;
 
-            virtual void initializeDefaultConfigInfo() = 0; // Implement in sub-classes
+            // virtual void initializeDefaultConfigInfo() = 0; // Implement in sub-classes
 
             void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
             

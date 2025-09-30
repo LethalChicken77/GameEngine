@@ -2,6 +2,7 @@
 #pragma once
 
 #include "device.hpp"
+#include "render_pass.hpp"
 
 // vulkan headers
 #include <vulkan/vulkan.h>
@@ -25,7 +26,7 @@ class SwapChain {
     SwapChain &operator=(const SwapChain &) = delete;
 
     VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
-    VkRenderPass getRenderPass() { return renderPass; }
+    VkRenderPass &getRenderPass() { return renderPass; }
     VkImageView getImageView(int index) { return swapChainImageViews[index]; }
     size_t imageCount() { return swapChainImages.size(); }
     VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }

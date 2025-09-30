@@ -92,7 +92,7 @@ float4 fsMain(VOut input)
     // outColor = pow(outColor, 2.0);
     // outColor = ACEScgToLinear(outColor);
     // outColor = gamma_srgb(outColor); // Gamma correction
-    outColor *= 0.5;
-    outColor = ACESFilmCurve(outColor);
+    // outColor *= 0.5;
+    // outColor = ACESFilmCurve(outColor);
     return float4(outColor, 1.0);
 }
