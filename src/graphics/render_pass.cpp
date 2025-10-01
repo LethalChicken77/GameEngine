@@ -31,7 +31,10 @@ void RenderPass::addColorAttachment(VkFormat imageFormat, VkImageLayout imageLay
     props.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     props.finalLayout = imageLayout;
 
-    std::unique_ptr<Texture> tex = std::make_unique<Texture>(props, extent.width, extent.height);
+    SamplerProperties sprops = SamplerProperties::getDefaultProperties();
+    sprops.magFilter = VK_FILTER_LINEAR;
+
+    std::unique_ptr<Texture> tex = std::make_unique<Texture>(props, sprops, extent.width, extent.height);
     tex->createTextureUninitialized();
     images.push_back(std::move(tex));
 

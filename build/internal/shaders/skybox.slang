@@ -55,7 +55,7 @@ float4 fsMain(VOut input)
 
     float sunAngle = angleBetween(sunDir, skyDir);
     float3 sunGlow = (1 - saturate(pow(sunAngle / PI, 0.005))) * 30.0 * float3(0.9, 0.9, 0.6);
-    float sunDisk = (1 - saturate(pow(sunAngle * 60, 2.0))) * 1.0;
+    float sunDisk = (1 - saturate(pow(sunAngle * 60, 2.0))) * 10.0;
 
     float2 sphericalCoords = cartesianToSphericalNorm(normalize(input.Position));
     float fudge = 0.01 * Hash(sphericalCoords) - 0.005;
@@ -69,7 +69,6 @@ float4 fsMain(VOut input)
     float downToHorizon = saturate(pow((sphericalCoords.y - 0.5) * 2.0, 0.1)) + fudge;
     float3 result = lerp(lerp(lerp(zenithColor, horizonColor, zenithToHorizon), hazeColor, zenithToHorizonHaze) + sunGlow + float3(sunDisk), groundColor, downToHorizon);
 
-    float3 outColor = input.Color * materialInfo.color.xyz;
-    outColor = gamma_srgb(result);
+    float3 outColor = result;// LinearToACEScg(result);//gamma_srgb(result);
     return float4(outColor, 1.0);
 }

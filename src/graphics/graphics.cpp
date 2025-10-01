@@ -174,9 +174,13 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
         sceneRenderPass->resetLayouts();
-        if(sceneRenderPass->getExtent().width != renderer.getExtent().width || sceneRenderPass->getExtent().height != renderer.getExtent().height)
+        float frameScale = 1.0;
+        VkExtent2D scaledExtent{
+            static_cast<uint32_t>(renderer.getExtent().width * frameScale), 
+            static_cast<uint32_t>(renderer.getExtent().height * frameScale)};
+        if(sceneRenderPass->getExtent().width != scaledExtent.width || sceneRenderPass->getExtent().height != scaledExtent.height)
         {
-            sceneRenderPass->create(renderer.getExtent());
+            sceneRenderPass->create(scaledExtent);
         }
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent());
@@ -190,11 +194,11 @@ void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
         ppMaterial->setTexture(0, colorTexture.get());
         ppMaterial->setTexture(1, depthTexture.get());
         ppMaterial->createDescriptorSet();
-        
+
         renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent());
         
         pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
-        
+
 
         std::vector<VkDescriptorSet> localDescriptorSets = { ppMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(

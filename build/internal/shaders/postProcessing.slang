@@ -48,9 +48,14 @@ float4 fsMain(VOut input)
 {
     float3 outColor = base.Sample(input.UV).xyz;
     outColor *= 0.5;
+    float exposure = 0.0;
+    outColor *= pow(2, exposure);
+    // outColor = (round(outColor) + round(outColor - 0.25) + round(outColor + 0.25)) / 4;
+    outColor = LinearToACEScg(outColor);
     outColor = ACESFilmCurve(outColor);
-    outColor = (round(outColor) + round(outColor - 0.25) + round(outColor + 0.25)) / 4;
     // outColor = gamma_srgb(outColor);
+    float gamma = 1.2;
+    outColor = pow(outColor, gamma);
     return float4(outColor, 1.0);
     // return float4(input.UV.xy, 0.0, 1.0);
 }

@@ -60,9 +60,7 @@ float4 fsMain(VOut input)
     float3 ambientColor = globalData.ambientLight;// = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
 
     float3 albedo = input.Color * materialInfo.color.xyz;
-    albedo = LinearToACEScg(albedo);
     float3 F0 = float3(0.04f); // Typical for dielectrics
-    F0 = LinearToACEScg(F0);
 
     float3 outColor = float3(0);
     for (int i = 0; i < globalData.numLights; i++)
@@ -82,7 +80,6 @@ float4 fsMain(VOut input)
         float3 halfDir = 0.5 * (lightDir - viewDir);
 
         float3 lightColor = currentLight.color * currentLight.intensity * attenuation;
-        lightColor = LinearToACEScg(lightColor);
         outColor += pbrBRDF(albedo, materialInfo.roughness, materialInfo.metallic, F0, lightColor, normal, lightDir, viewDir);
     }
     outColor += pbrAmbient(albedo, materialInfo.roughness, materialInfo.metallic, F0, ambientColor, ambientColor, normal, viewDir);

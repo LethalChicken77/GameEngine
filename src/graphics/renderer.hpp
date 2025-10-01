@@ -95,7 +95,7 @@ private:
     std::vector<VkCommandBuffer> commandBuffers;
     VkCommandBuffer currentCommandBuffer;
 
-    VkRenderPass currentRenderPass = nullptr;
+    VkRenderPass currentRenderPass = nullptr; // Must track in here because swapchain is destroyed and recreated
 
     uint32_t currentImageIndex = 0;
     uint32_t currentFrameIndex = 0;

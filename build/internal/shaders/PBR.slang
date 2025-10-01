@@ -73,7 +73,6 @@ float4 fsMain(VOut input)
     float2 UV = input.UV * 10;
 
     float3 albedo = invGamma_srgb(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
-    albedo = LinearToACEScg(albedo);
     float roughness = roughnessMap.Sample(UV).x;
     float metallic = saturate(metallicMap.Sample(UV).x * 1.2);
     float specular = 0.1;//specularMap.Sample(UV).x;
@@ -108,19 +107,11 @@ float4 fsMain(VOut input)
         float3 halfDir = 0.5 * (lightDir - viewDir);
 
         float3 lightColor = currentLight.color * currentLight.intensity * attenuation;
-        lightColor = LinearToACEScg(lightColor);
+        lightColor = lightColor;
         outColor += pbrBRDF(albedo, roughness, metallic, specular, lightColor, normal, lightDir, viewDir);
     }
     outColor += pbrAmbient(albedo, roughness, metallic, specular, ambientColor, ambientColor, normal, viewDir);
     // float3 outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
 
-    outColor = LinearToACEScg(outColor); // Gamma correction
-    // outColor = gamma_srgb(outColor); // Gamma correction
-    // outColor = gamma_srgb(reflColor); // Gamma correction
-    // return float4(outColor, 1.0);
-    // outColor = ACEScgToLinear(outColor);
-    // outColor = gamma_srgb(outColor); // Gamma correction
-    // outColor *= 0.5;
-    // outColor = ACESFilmCurve(outColor);
     return float4(outColor, 1.0);
 }
