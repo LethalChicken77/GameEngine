@@ -5,36 +5,14 @@
 #include <vector>
 #include <memory>
 
+#include "object.hpp"
+#include "transform.hpp"
+
 namespace core
 {
-    struct Transform
-    {
-        Transform() : position(0.0f), rotation(0.0f), scale(1.0f) {}
-
-        glm::vec3 position;
-        glm::vec3 rotation; // Rotation in radians
-        glm::vec3 scale;
-
-        glm::mat4 getTransform() const;
-
-        glm::vec3 forward() const
-        {
-            return glm::vec3(getTransform()[2]);
-        }
-        glm::vec3 right() const
-        {
-            return glm::vec3(getTransform()[0]);
-        }
-        glm::vec3 up() const
-        {
-            return glm::vec3(getTransform()[1]);
-        }
-    };
-
-    class GameObject
+    class GameObject : Object
     {
     public:
-        using id_t = uint64_t;
 
         GameObject() = delete;
         GameObject(const GameObject&) = delete;
@@ -42,20 +20,20 @@ namespace core
         GameObject(GameObject&&) = default;
         GameObject& operator=(GameObject&&) = default;
 
-        static GameObject instantiate()
+        static GameObject Instantiate()
         {
+            Object parent = Object::Instantiate();
             static id_t next_id = 0;
             return GameObject(next_id++);
         }
 
-        id_t get_id() const { return id; }
+        id_t get_id() const { return localID; }
         std::shared_ptr<graphics::Mesh> mesh{};
 
         Transform transform;
 
         id_t materialID{};
     private:
-        GameObject(id_t obj_id) : id(obj_id) {};
-        id_t id;
+        id_t localID; // ID local to scene/prefab
     };
 }

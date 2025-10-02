@@ -1,14 +1,17 @@
+#pragma once
 #include <string>
+
+#include "object.hpp"
 
 namespace core
 {
-    class Asset
+    // Save in .meta files
+    class Asset : Object
     {
         public:
-            const std::string& getName() const { return name; }
-            const std::string& getPath() const { return path; }
-        protected:
-            std::string name;
+
+        private:
+            id_t UUID; // Unique file ID
             std::string path;
     };
 } // namespace core
