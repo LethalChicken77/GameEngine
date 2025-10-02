@@ -10,21 +10,18 @@
 
 namespace core
 {
-    class GameObject : Object
+    class GameObject_t : public Object
     {
     public:
+        GameObject_t(const GameObject_t&) = delete;
+        GameObject_t& operator=(const GameObject_t&) = delete;
+        GameObject_t(GameObject_t&&) = delete;
+        GameObject_t& operator=(GameObject_t&&) = delete;
 
-        GameObject() = delete;
-        GameObject(const GameObject&) = delete;
-        GameObject& operator=(const GameObject&) = delete;
-        GameObject(GameObject&&) = default;
-        GameObject& operator=(GameObject&&) = default;
-
-        static GameObject Instantiate()
+        static std::unique_ptr<GameObject_t> Instantiate(std::string name = "New Game Object")
         {
-            Object parent = Object::Instantiate();
-            static id_t next_id = 0;
-            return GameObject(next_id++);
+            std::unique_ptr<GameObject_t> parent = Object::Instantiate<GameObject_t>(name);
+            return std::move(parent); // TODO: Put somewhere
         }
 
         id_t get_id() const { return localID; }
@@ -34,6 +31,9 @@ namespace core
 
         id_t materialID{};
     private:
+        GameObject_t(id_t newID) : Object(newID) {}
         id_t localID; // ID local to scene/prefab
+        friend std::unique_ptr<GameObject_t> Object::Instantiate<GameObject_t>(std::string);
     };
+    using GameObject = std::unique_ptr<GameObject_t>;
 }

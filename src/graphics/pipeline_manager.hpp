@@ -23,7 +23,7 @@ class PipelineManager
         void destroyPipelines();
         void reloadPipelines();
 
-        void renderObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects, VkCommandBuffer& commandBuffer);
+        void renderObjects(FrameInfo& frameInfo, std::vector<core::GameObject_t>& gameObjects, VkCommandBuffer& commandBuffer);
 
         std::unique_ptr<GraphicsPipeline> &getPipeline(uint32_t index) { return graphicsPipelines[index]; }
 

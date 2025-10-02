@@ -11,20 +11,26 @@ namespace core
             Object() = delete;
             Object(const Object&) = delete;
             Object& operator=(const Object&) = delete;
-            Object(Object&&) = default;
-            Object& operator=(Object&&) = default;
+            Object(Object&&) = delete;
+            Object& operator=(Object&&) = delete;
 
             std::string name;
         
             template<class T>
-            static std::unique_ptr<T> Instantiate()
+            static std::unique_ptr<T> Instantiate(std::string name = "New Object")
             {
                 static id_t next_id = 0;
-                return std::make_unique<Object>(next_id++);
+                return std::unique_ptr<T>(new T(next_id++));
             }
             static void Destroy();
-        private:
-            Object(id_t id) : instanceID(id) {};
+        protected:
             id_t instanceID;
+            static id_t getNextID()
+            {
+                static id_t next_id = 0;
+                return next_id++;
+            }
+            Object(id_t id) : instanceID(id) {};
+        private:
     };
 }

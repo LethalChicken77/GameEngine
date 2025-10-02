@@ -49,7 +49,7 @@ private:
     graphics::Graphics& graphics;
 
     graphics::Camera camera;
-    std::vector<core::GameObject> gameObjects;
+    std::vector<std::unique_ptr<core::GameObject_t>> gameObjects;
 };
 
 } // namespace core

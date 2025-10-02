@@ -139,7 +139,7 @@ void Graphics::cleanup()
 }
 
 
-void Graphics::drawFrame(std::vector<core::GameObject>& gameObjects)
+void Graphics::drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects)
 {
     if(camera != nullptr)
     {
@@ -393,7 +393,7 @@ void Graphics::loadMaterials()
     Shared::materials.emplace_back(std::move(m4));
 }
 
-void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects)
+void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
 
@@ -402,9 +402,9 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
     std::vector<VkDescriptorSet> localDescriptorSets;
     VkPipelineLayout pipelineLayout;
     Material::id_t prevMaterial = UINT64_MAX;
-    for(core::GameObject& obj : gameObjects)
+    for(std::unique_ptr<core::GameObject_t> &obj : gameObjects)
     {
-        const Shader* shader = Shared::materials[obj.materialID].getShader();
+        const Shader* shader = Shared::materials[obj->materialID].getShader();
         GraphicsPipeline* pipeline = shader->getPipeline();
         uint32_t setIndex = pipeline->getID() + 1;
         if(pipeline != prevPipeline) // Bind camera and global data
@@ -441,9 +441,9 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
 
             prevPipeline = pipeline;
         }
-        localDescriptorSets = { Shared::materials[obj.materialID].getDescriptorSet() };
+        localDescriptorSets = { Shared::materials[obj->materialID].getDescriptorSet() };
 
-        if(prevMaterial != obj.materialID) // Bind material info if changed
+        if(prevMaterial != obj->materialID) // Bind material info if changed
         {
             vkCmdBindDescriptorSets(
                 commandBuffer, 
@@ -455,11 +455,11 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
                 0,
                 nullptr
             );
-            prevMaterial = obj.materialID;
+            prevMaterial = obj->materialID;
         }
 
         PushConstants push{};
-        push.model = obj.transform.getTransform();
+        push.model = obj->transform.getTransform();
         vkCmdPushConstants(
             commandBuffer, 
             pipeline->getPipelineLayout(), 
@@ -469,8 +469,8 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
             &push
         );
 
-        obj.mesh->bind(commandBuffer);
-        obj.mesh->draw(commandBuffer);
+        obj->mesh->bind(commandBuffer);
+        obj->mesh->draw(commandBuffer);
     }
 }
 

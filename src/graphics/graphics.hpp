@@ -47,14 +47,14 @@ public:
     void cleanup();
     bool isOpen() const { return window.isOpen(); }
 
-    void drawFrame(std::vector<core::GameObject>& gameObjects);
+    void drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects);
     void setCamera(Camera* _camera) { camera = _camera; }
 
     void waitForDevice() { vkDeviceWaitIdle(device.device()); }
 
     Window *getWindow() { return &window; }
     Device *getDevice() { return &device; }
-    void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject>& gameObjects);
+    void renderGameObjects(FrameInfo& frameInfo, std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects);
 
     void graphicsInitImgui();
 
