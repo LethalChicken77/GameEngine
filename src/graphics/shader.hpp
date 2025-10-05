@@ -70,6 +70,7 @@ namespace graphics
             GraphicsPipeline* parentPipeline;
 
             static PipelineConfigInfo getDefaultConfigInfo();
+            static PipelineConfigInfo getDefaultTransparentConfigInfo();
 
         private:
             std::string vertexPath;

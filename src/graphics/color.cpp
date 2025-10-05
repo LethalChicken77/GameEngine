@@ -1,6 +1,7 @@
 #include "color.hpp"
 #include <algorithm>
 #include <cmath>
+#include "../core/console.hpp"
 
 namespace graphics
 {
@@ -8,8 +9,60 @@ namespace graphics
 Color::Color() : r(0.0f), g(0.0f), b(0.0f), a(1.0f) {}
 Color::Color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a) : r(_r / 255.0f), g(_g / 255.0f), b(_b / 255.0f), a(_a / 255.0f) {}
 Color::Color(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a) {}
+Color::Color(double _r, double _g, double _b, double _a) : r((float)_r), g((float)_g), b((float)_b), a((float)_a) {}
 Color::Color(const glm::vec3 &color) : r(color.r), g(color.g), b(color.b), a(1.0f) {}
 Color::Color(const glm::vec4 &color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
+Color::Color(const std::string &hexValue)
+{
+    uint32_t stringLength = hexValue.length();
+    std::string trimmedString;
+    if(hexValue.length() < 6)
+    {
+        Console::warn("Invalid hex string, defaulting to black", "Color");
+        return;
+    }
+    if(hexValue.starts_with("0x"))
+    {
+        trimmedString = hexValue.substr(2, stringLength);
+    }
+    else if(hexValue.starts_with("#"))
+    {
+        trimmedString = hexValue.substr(1, stringLength);
+    }
+    if(trimmedString.length() == 6)
+    {
+        trimmedString += "FF";
+    }
+    if(trimmedString.length() != 8)
+    {
+        Console::warn("Invalid hex string, defaulting to black", "Color");
+        return;
+    }
+
+    uint32_t result = 0;
+
+    for(int i = 0; i < 8; i++)
+    {
+        result = result << 4;
+        char currentChar = trimmedString[i];
+        if(currentChar >= '0' && currentChar <= '9')
+        {
+            result |= (currentChar - '0');
+        }
+        else if(currentChar >= 'A' && currentChar <= 'F')
+        {
+            result |= (currentChar - 'A') + 10;
+        }
+        else if(currentChar >= 'a' && currentChar <= 'f')
+        {
+            result |= (currentChar - 'a') + 10;
+        }
+    }
+    a = static_cast<float>(result & 0xFF) / 255.0f;
+    b = static_cast<float>((result >> 8) & 0xFF) / 255.0f;
+    g = static_cast<float>((result >> 16) & 0xFF) / 255.0f;
+    r = static_cast<float>((result >> 24) & 0xFF) / 255.0f;
+}
 
 Color Color::hex(uint32_t value)
 {
@@ -128,6 +181,26 @@ glm::vec3 Color::getHSL() const
     }
 
     return glm::vec3(h, s, l);
+}
+
+constexpr float linearToSRGBVal(float value)
+{
+    return value <= 0.04045 ? value / 12.92 : glm::pow((value + 0.055) / 1.055, 2.4);
+}
+
+Color Color::linearToSRGB(Color color)
+{
+    return Color(linearToSRGBVal(color.r), linearToSRGBVal(color.g), linearToSRGBVal(color.b), color.a);
+}
+
+constexpr float sRGBToLinearVal(float value)
+{
+    return value <= 0.0031308 ? value * 12.92 : 1.055 * glm::pow(value, 1 / 2.4) - 0.055;
+}
+
+Color Color::sRGBToLinear(Color color)
+{
+    return Color(sRGBToLinearVal(color.r), sRGBToLinearVal(color.g), sRGBToLinearVal(color.b), color.a);
 }
 
 Color Color::white = Color(1.0f, 1.0f, 1.0f, 1.0f);

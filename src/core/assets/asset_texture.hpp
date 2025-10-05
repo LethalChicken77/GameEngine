@@ -17,8 +17,7 @@ namespace core
             std::unique_ptr<TextureAsset> parent = Object::Instantiate<TextureAsset>(name);
             return std::move(parent); // TODO: Put somewhere
         }
-
-        id_t materialID{};
+        
     private:
         TextureAsset(id_t newID) : Asset(newID) {}
         friend std::unique_ptr<TextureAsset> Object::Instantiate<TextureAsset>(std::string);

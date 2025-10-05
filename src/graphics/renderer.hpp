@@ -55,7 +55,7 @@ public:
     VkCommandBuffer startFrame();
     void endFrame();
 
-    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent);
+    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent, glm::vec4 clearColor);
     void endRenderPass();
 
     void waitForDevice() { vkDeviceWaitIdle(device.device()); }
@@ -78,8 +78,6 @@ public:
     }
 
     static void windowRefreshCallback(GLFWwindow *window);
-
-    glm::vec3 clearColor{0.04f, 0.08f, 0.2f};
 
 private:
     void recordCommandBuffer(int imageIndex);

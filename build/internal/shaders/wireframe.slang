@@ -51,6 +51,6 @@ VOut vsMain(Vertex input)
 float4 fsMain(VOut input)
 {
     float3 outColor = input.Color * materialInfo.color.xyz;
-    outColor = gamma_srgb(outColor);
+    outColor = LinearToSRGB(outColor);
     return float4(outColor, 1.0);
 }

@@ -139,11 +139,12 @@ void Graphics::cleanup()
 }
 
 
-void Graphics::drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects)
+void Graphics::drawFrame(core::Scene &scene)
 {
+    VkExtent2D extent = renderer.getExtent();
+    if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
     if(camera != nullptr)
     {
-        VkExtent2D extent = renderer.getExtent();
         camera->setAspectRatio(static_cast<float>(extent.width) / static_cast<float>(extent.height));
     }
     
@@ -174,17 +175,24 @@ void Graphics::drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameO
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
         sceneRenderPass->resetLayouts();
-        float frameScale = 1.0;
+        imguiRenderPass->resetLayouts();
+        finalRenderPass->resetLayouts();
+        float frameScale = 2.0;
         VkExtent2D scaledExtent{
-            static_cast<uint32_t>(renderer.getExtent().width * frameScale), 
-            static_cast<uint32_t>(renderer.getExtent().height * frameScale)};
+            static_cast<uint32_t>(extent.width * frameScale), 
+            static_cast<uint32_t>(extent.height * frameScale)};
         if(sceneRenderPass->getExtent().width != scaledExtent.width || sceneRenderPass->getExtent().height != scaledExtent.height)
         {
             sceneRenderPass->create(scaledExtent);
         }
+        if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
+        {
+            imguiRenderPass->create(extent);
+            finalRenderPass->create(extent);
+        }
         // Objects render pass
-        renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent());
-        renderGameObjects(frameInfo, gameObjects);
+        renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
+        renderGameObjects(frameInfo, scene->getGameObjects());
         renderer.endRenderPass();
         
         std::unique_ptr<Texture> &colorTexture = sceneRenderPass->getColorTexture();
@@ -195,10 +203,17 @@ void Graphics::drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameO
         ppMaterial->setTexture(1, depthTexture.get());
         ppMaterial->createDescriptorSet();
 
-        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent());
-        
-        pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
+        renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), glm::vec4(0.0f));
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+        renderer.endRenderPass();
 
+        std::unique_ptr<Texture> &imguiTexture = imguiRenderPass->getColorTexture();
+        imguiTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        imguiMaterial->setTexture(0, imguiTexture.get());
+        imguiMaterial->createDescriptorSet();
+
+        renderer.beginRenderPass(finalRenderPass->getRenderPass(), finalRenderPass->getFrameBuffer(), finalRenderPass->getExtent(), defaultClearColor);
+        pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
 
         std::vector<VkDescriptorSet> localDescriptorSets = { ppMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
@@ -214,8 +229,43 @@ void Graphics::drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameO
 
         // Draw 6 vertices (full-screen quad)
         vkCmdDraw(commandBuffer, 6, 1, 0, 0);
-        
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+        pipelineManager->getPipeline(1)->bind(commandBuffer); // Post-processing pipeline
+        localDescriptorSets = { imguiMaterial->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            pipelineManager->getPipeline(1)->getPipelineLayout(), 
+            0,
+            1,
+            localDescriptorSets.data(), 
+            0,
+            nullptr
+        );
+
+        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+        renderer.endRenderPass();
+
+        std::unique_ptr<Texture> &outputTexture = finalRenderPass->getColorTexture();
+        outputTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        outputMaterial->setTexture(0, outputTexture.get());
+        outputMaterial->createDescriptorSet();
+
+        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), extent, defaultClearColor);
+        pipelineManager->getPipeline(1)->bind(commandBuffer); // Post-processing pipeline
+        localDescriptorSets = { outputMaterial->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            pipelineManager->getPipeline(1)->getPipelineLayout(), 
+            0,
+            1,
+            localDescriptorSets.data(), 
+            0,
+            nullptr
+        );
+
+        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
         renderer.endRenderPass();
 
         renderer.endFrame();
@@ -229,6 +279,18 @@ void Graphics::createRenderPasses()
     sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
     sceneRenderPass->addDepthAttachment();
     sceneRenderPass->create(renderer.getExtent());
+
+    Console::log("Creating ImGui render pass", "Graphics");
+    imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
+    imguiRenderPass->addDepthAttachment();
+    imguiRenderPass->create(renderer.getExtent());
+
+    Console::log("Creating Final render pass", "Graphics");
+    finalRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    finalRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB); // Maybe change to UNORM
+    finalRenderPass->addDepthAttachment();
+    finalRenderPass->create(renderer.getExtent());
 }
 
 void Graphics::loadTextures()
@@ -282,13 +344,29 @@ void Graphics::loadShaders()
     ppConfigInfo.pipelineType = POST_PROCESSING;
     ppConfigInfo.renderPass = &renderer.getSCRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/postProcessing.slang", 
-        "internal/shaders/postProcessing.slang", 
+        "internal/shaders/post_processing/postProcessing.slang", 
+        "internal/shaders/post_processing/postProcessing.slang", 
         std::vector<ShaderInput>{
-            {"filler", ShaderInput::DataType::FLOAT} // TODO: Allow shaders with no parameters (DUH)
+            {"exposure", ShaderInput::DataType::FLOAT},
+            {"gamma", ShaderInput::DataType::FLOAT} // TODO: Allow shaders with no parameters (DUH)
         },
         2,
         ppConfigInfo
+    ));
+
+    PipelineConfigInfo imguiConfigInfo = Shader::getDefaultTransparentConfigInfo();
+    imguiConfigInfo.pipelineType = POST_PROCESSING;
+    imguiConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    imguiConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    imguiConfigInfo.renderPass = &imguiRenderPass->getRenderPass();
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/post_processing/overlay.slang", 
+        "internal/shaders/post_processing/overlay.slang", 
+        std::vector<ShaderInput>{
+            {"doSRGBTransform", ShaderInput::DataType::BOOL} // TODO: Allow shaders with no parameters (DUH)
+        },
+        1,
+        imguiConfigInfo
     ));
 
     PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
@@ -342,6 +420,19 @@ void Graphics::loadShaders()
         6,
         &sceneRenderPass->getRenderPass()
     ));
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/goochShader.slang",
+        "internal/shaders/goochShader.slang",
+        std::vector<ShaderInput>{
+            {"coolColor", ShaderInput::DataType::COLOR},
+            {"warmColor", ShaderInput::DataType::COLOR},
+            {"outlineColor", ShaderInput::DataType::COLOR},
+            {"outlinePower", ShaderInput::DataType::FLOAT},
+            {"roughness", ShaderInput::DataType::FLOAT}
+        },
+        0,
+        &sceneRenderPass->getRenderPass()
+    ));
 }
 
 void Graphics::loadMaterials()
@@ -350,19 +441,32 @@ void Graphics::loadMaterials()
     Shared::materials.reserve(GR_MAX_MATERIAL_COUNT);
 
     Material _ppMaterial = Material::instantiate(Shared::shaders[0].get());
-    _ppMaterial.setValue("filler", 0.5f); // Dumbass
+    _ppMaterial.setValue("exposure", 0.0f);
+    _ppMaterial.setValue("gamma", 1.0f);
     _ppMaterial.createShaderInputBuffer();
     _ppMaterial.createDescriptorSet();
     ppMaterial = std::make_unique<Material>(std::move(_ppMaterial));
+
+    Material _imguiMaterial = Material::instantiate(Shared::shaders[1].get());
+    _imguiMaterial.setValue("doSRGBTransform", true);
+    _imguiMaterial.createShaderInputBuffer();
+    _imguiMaterial.createDescriptorSet();
+    imguiMaterial = std::make_unique<Material>(std::move(_imguiMaterial));
+
+    Material _outputMaterial = Material::instantiate(Shared::shaders[1].get());
+    _outputMaterial.setValue("doSRGBTransform", false);
+    _outputMaterial.createShaderInputBuffer();
+    _outputMaterial.createDescriptorSet();
+    outputMaterial = std::make_unique<Material>(std::move(_outputMaterial));
     
-    Material skybox = Material::instantiate(Shared::shaders[1].get());
+    Material skybox = Material::instantiate(Shared::shaders[2].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     skybox.setValue("color", Color(0.f, 0.f, 0.f));
     skybox.createShaderInputBuffer();
     skybox.createDescriptorSet();
     Shared::materials.emplace_back(std::move(skybox));
 
-    Material m1 = Material::instantiate(Shared::shaders[2].get());
+    Material m1 = Material::instantiate(Shared::shaders[3].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
@@ -371,14 +475,14 @@ void Graphics::loadMaterials()
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m3 = Material::instantiate(Shared::shaders[3].get());
+    Material m3 = Material::instantiate(Shared::shaders[4].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
-    Material m4 = Material::instantiate(Shared::shaders[4].get());
+    Material m4 = Material::instantiate(Shared::shaders[5].get());
     m4.setValue("color", Color(1.f, 1.f, 1.f));
     m4.setValue("normalMapStrength", 1.0f);
     m4.setTexture(0, textures[0].get()); // Albedo
@@ -387,13 +491,22 @@ void Graphics::loadMaterials()
     m4.setTexture(3, textures[3].get()); // Specular
     m4.setTexture(4, textures[4].get()); // Normal
     m4.setTexture(5, textures[5].get()); // Skybox (TEMPORARY)
-    
     m4.createShaderInputBuffer();
     m4.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m4));
+
+    Material m2 = Material::instantiate(Shared::shaders[6].get());
+    m2.setValue("coolColor", Color("#2E257BFF"));
+    m2.setValue("warmColor", Color("#FFD200FF"));
+    m2.setValue("outlineColor", Color(0.f,0.f,0.f));
+    m2.setValue("outlinePower", 1.5f);
+    m2.setValue("roughness", 0.2f);
+    m2.createShaderInputBuffer();
+    m2.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
 }
 
-void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects)
+void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
 
@@ -402,7 +515,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<std::unique_p
     std::vector<VkDescriptorSet> localDescriptorSets;
     VkPipelineLayout pipelineLayout;
     Material::id_t prevMaterial = UINT64_MAX;
-    for(std::unique_ptr<core::GameObject_t> &obj : gameObjects)
+    for(core::GameObject &obj : gameObjects)
     {
         const Shader* shader = Shared::materials[obj->materialID].getShader();
         GraphicsPipeline* pipeline = shader->getPipeline();
@@ -501,7 +614,7 @@ void Graphics::graphicsInitImgui()
     initInfo.Queue = device.graphicsQueue();
     initInfo.PipelineCache = VK_NULL_HANDLE;
     initInfo.DescriptorPool = Descriptors::imguiPool->getPool();
-    initInfo.RenderPass = renderer.getSCRenderPass();
+    initInfo.RenderPass = imguiRenderPass->getRenderPass();
     initInfo.Allocator = nullptr;
     initInfo.MinImageCount = 2;
     initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
@@ -515,7 +628,7 @@ void Graphics::graphicsInitImgui()
 
 void Graphics::reloadShaders()
 {
-    std::cout << "Reloading Shaders" << std::endl;
+    Console::log("Reloading Shaders", "Graphics");
     for(std::unique_ptr<Shader>& shader : Shared::shaders)
     {
         shader->reloadShader();

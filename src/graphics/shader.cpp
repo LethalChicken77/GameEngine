@@ -145,6 +145,21 @@ namespace graphics
         return configInfo;
     }
 
+    PipelineConfigInfo Shader::getDefaultTransparentConfigInfo()
+    {
+        PipelineConfigInfo configInfo = getDefaultConfigInfo();
+
+        configInfo.colorBlendAttachment.blendEnable = VK_TRUE;
+        configInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        configInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        configInfo.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+        configInfo.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        configInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        configInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+        return configInfo;
+    }
+
     void Shader::reloadShader()
     {
         // TODO: Re-add support for directly loading SPIR-V files

@@ -39,7 +39,8 @@ Engine::~Engine()
 
 void Engine::init()
 {
-    loadGameObjects();
+    scene = Scene_t::Instantiate();
+    scene->loadScene();
 }
 
 void Engine::close()
@@ -89,23 +90,7 @@ void Engine::update(double deltaTime)
         camera.transform.rotation.x += -mouseDelta.y * 0.016f;
     }
 
-    int counter = 0;
-    for(std::unique_ptr<core::GameObject_t> &obj : gameObjects)
-    {
-        if(obj->get_id() == 0)
-            obj->transform.position = camera.transform.position; // Skybox
-        // if(obj.get_id() == 2) break;
-        // if(obj.get_id() == 1)
-        // {
-        //     obj.transform.rotation.y += 0.5f * deltaTime;
-        // }
-        // obj.transform.position = glm::vec3(glm::sin(glfwGetTime()) * (counter % 2 ? 1 : -1));
-        // obj.transform.position = glm::vec3(glm::sin(glm::radians(324.f)) * (counter % 2 ? 1 : -1));
-        // obj.transform.rotation = glm::vec3(glm::radians(glfwGetTime() * 90.0f) * (counter % 2 ? 1 : -1));
-        // obj.transform.rotation = glm::vec3(glm::radians(324.f) * (counter % 2 ? 1 : -1));
-        // obj.transform.rotation.x = glm::radians(-90.0f);
-        counter++;
-    }
+    scene->update(deltaTime);
 }
 
 
@@ -132,7 +117,7 @@ void Engine::run()
     // style.ItemSpacing = ImVec2(8, 4);
 
     // Modify colors
-    StyleColorsDarkLinear(&style);
+    // StyleColorsDarkLinear(&style); // Done in post processing now
 
 
     ImGui_ImplGlfw_InitForVulkan(graphics.getWindow()->getWindow(), true);
@@ -197,7 +182,7 @@ void Engine::run()
         update(deltaTime);
 
         // Render here
-        graphics.drawFrame(gameObjects);
+        graphics.drawFrame(scene);
 
 
         // Update Time
@@ -207,51 +192,6 @@ void Engine::run()
         // std::cout << "Delta time: " << deltaTime << std::endl;
     }
     close();
-}
-
-void Engine::loadGameObjects()
-{
-    std::cout << "Loading game objects" << std::endl;
-    // Triangle
-    // std::vector<Mesh::Vertex> vertices {
-    //     {{0.0f, -0.5f, 0.0f}, {0.5f, 1.0f}},
-    //     {{0.5f, 0.5f, 0.0f}, {1.0f, 0.0f}},
-    //     {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f}}
-    // };
-
-    std::unique_ptr<GameObject_t> skybox = GameObject_t::Instantiate(); // TODO: Just use a mesh for this
-    skybox->mesh = Mesh::createSkybox(100.0f);
-    skybox->materialID = 0;
-
-
-    std::unique_ptr<GameObject_t> obj = GameObject_t::Instantiate();
-    std::unique_ptr<GameObject_t> obj2 = GameObject_t::Instantiate();
-    std::unique_ptr<GameObject_t> obj3 = GameObject_t::Instantiate();
-    // std::cout << "Creating Grid" << std::endl;
-    // obj.mesh = Mesh::createGrid(512, 512, {50.0f, 50.0f});
-    // obj.materialID = 0;
-    obj->mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    // obj.mesh->generateNormals();
-    // obj.mesh->createBuffers();
-    obj->materialID = 1;
-    // obj.transform.scale = glm::vec3(0.1f);
-    // obj.transform.rotation.x = glm::radians(-90.0f);
-
-    // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj2->mesh = Mesh::createGrid(16,16, {50.0f, 50.0f});
-    obj2->materialID = 3;
-    obj2->transform.position = glm::vec3(0, -3, 0);
-
-    obj3->mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj3->materialID = 2;
-    obj3->transform.position = glm::vec3(-3, 0, 0);
-    // obj3.mesh = Mesh::createSierpinskiPyramid(12.0f, 8);
-    // obj3.materialID = 2;
-    gameObjects.push_back(std::move(skybox));
-    gameObjects.push_back(std::move(obj));
-    gameObjects.push_back(std::move(obj2));
-    gameObjects.push_back(std::move(obj3));
-    std::cout << "Loaded game objects" << std::endl;
 }
 
 } // namespace core

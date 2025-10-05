@@ -1,6 +1,7 @@
 module shading_models;
 
 import constants;
+import colorspace;
 
 // Diffuse Models
 public float DiffLambertian(float3 normal, float3 lightDir)
@@ -165,4 +166,36 @@ public float3 pbrAmbient(
     float3 ambientSpecular = reflectSample * F_ambient;
 
     return ambientDiffuse + ambientSpecular;
+}
+
+public float3 goochBRDF(
+    float3 cool,
+    float3 warm,
+    float3 outline,
+    float outlinePower,
+    float roughness,
+    float3 F0,
+
+    float3 lightColor,
+
+    float3 normal,
+    float3 lightDir,
+    float3 viewDir)
+{
+    // float3 F0 = (ior - 1.0) * (ior - 1.0) / ((ior + 1.0) * (ior + 1.0));
+    float NdotL = dot(normal, lightDir) * 0.5 + 0.5;
+    float alpha = roughness * roughness;
+    float3 reflDir = reflect(viewDir, normal);
+
+    // float3 F_V = saturate(SchlickFresnel(float3(length(F0)), normal, -viewDir));
+    float3 F_V = saturate(dot(normal, viewDir) + 1);
+
+    float3 specular = SpecCookTorrance(normal, lightDir, viewDir, roughness, F0);
+    float3 coolOKLab = LinearToOklab(cool);
+    float3 warmOKLab = LinearToOklab(warm);
+    float3 diffuse = lerp(coolOKLab, warmOKLab, NdotL);
+    diffuse = OklabToLinear(diffuse);
+    F_V = pow(F_V, outlinePower);
+
+    return lerp((lightColor * specular + diffuse), outline, F_V);
 }

@@ -25,6 +25,7 @@
 #include "shader_resource.hpp"
 #include "material.hpp"
 #include "../core/game_object.hpp"
+#include "../core/scene.hpp"
 #include "containers.hpp"
 
 
@@ -47,14 +48,14 @@ public:
     void cleanup();
     bool isOpen() const { return window.isOpen(); }
 
-    void drawFrame(std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects);
+    void drawFrame(core::Scene &scene);
     void setCamera(Camera* _camera) { camera = _camera; }
 
     void waitForDevice() { vkDeviceWaitIdle(device.device()); }
 
     Window *getWindow() { return &window; }
     Device *getDevice() { return &device; }
-    void renderGameObjects(FrameInfo& frameInfo, std::vector<std::unique_ptr<core::GameObject_t>> &gameObjects);
+    void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects);
 
     void graphicsInitImgui();
 
@@ -85,7 +86,13 @@ private:
     Camera* camera;
 
     std::unique_ptr<RenderPass> sceneRenderPass;
+    std::unique_ptr<RenderPass> imguiRenderPass;
+    std::unique_ptr<RenderPass> finalRenderPass;
     std::unique_ptr<Material> ppMaterial;
+    std::unique_ptr<Material> imguiMaterial;
+    std::unique_ptr<Material> outputMaterial;
+
+    glm::vec4 defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
 };
 
 } // namespace graphics

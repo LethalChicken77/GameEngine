@@ -12,6 +12,7 @@
 #include "utils/debug.hpp"
 #include "core/random.hpp"
 #include "core/console.hpp"
+#include "core/scene.hpp"
 
 namespace core
 {
@@ -35,9 +36,6 @@ public:
     void run();
 
 private:
-    void loadGameObjects();
-    void createPipelineLayout();
-    void createPipeline();
 
     void update(double deltaTime);
 
@@ -48,8 +46,9 @@ private:
 
     graphics::Graphics& graphics;
 
+    Scene scene; // Something else should own this
+
     graphics::Camera camera;
-    std::vector<std::unique_ptr<core::GameObject_t>> gameObjects;
 };
 
 } // namespace core

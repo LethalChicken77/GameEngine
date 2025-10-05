@@ -9,8 +9,10 @@ namespace graphics
         Color();
         Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
         Color(float r, float g, float b, float a = 1.0f);
+        Color(double r, double g, double b, double a = 1.0f);
         Color(const glm::vec3 &color);
         Color(const glm::vec4 &color);
+        Color(const std::string &hex);
         
         // Values
         float r{0.0f}, g{0.0f}, b{0.0f};
@@ -39,6 +41,12 @@ namespace graphics
         glm::vec3 getRGB() const;
         glm::vec3 getHSV() const;
         glm::vec3 getHSL() const;
+
+        std::string getHexString() const;
+
+        // Colorspace Conversions
+        static Color sRGBToLinear(Color color);
+        static Color linearToSRGB(Color color);
         
         // Hardcoded colors
         static Color white;
@@ -73,5 +81,5 @@ namespace graphics
         Color& operator=(const glm::vec3 &color) { r = color.r; g = color.g; b = color.b; a = 1.0f; return *this; }
         Color& operator=(const glm::vec4 &color) { r = color.r; g = color.g; b = color.b; a = color.a; return *this; }
     };
-
+    using Colour = Color; // Alias for Br*tish English
 } // namespace graphics

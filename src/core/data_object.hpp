@@ -1,10 +1,11 @@
 #pragma once
-
+#include "object.hpp"
 
 namespace core
 {
-    class DataObject
+    // Data storage object with no built-in components like transform
+    class DataObject : Object
     {
-        // I'll figure it out
+        // TODO: Implement
     };
 } // namespace core

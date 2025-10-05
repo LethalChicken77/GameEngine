@@ -57,7 +57,7 @@ float4 fsMain(VOut input)
     float3 cameraPos = cameraData.view[3].xyz;
     float3 viewDir = normalize(input.Position.xyz - cameraPos);
     // float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
-    float3 ambientColor = globalData.ambientLight;// = invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
+    float3 ambientColor = globalData.ambientLight;// = invLinearToSRGB(float3(0.04f, 0.08f, 0.2f));
 
     float3 albedo = input.Color * materialInfo.color.xyz;
     float3 F0 = float3(0.04f); // Typical for dielectrics
@@ -88,7 +88,7 @@ float4 fsMain(VOut input)
     // outColor = OklabToLinear(outColor);
     // outColor = pow(outColor, 2.0);
     // outColor = ACEScgToLinear(outColor);
-    // outColor = gamma_srgb(outColor); // Gamma correction
+    // outColor = LinearToSRGB(outColor); // Gamma correction
     // outColor *= 0.5;
     // outColor = ACESFilmCurve(outColor);
     return float4(outColor, 1.0);

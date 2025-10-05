@@ -69,10 +69,10 @@ float4 fsMain(VOut input)
     float3 viewDir = normalize(input.Position.xyz - cameraPos);
     float3 halfDir = 0.5 * (lightDir - viewDir);
     float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
-    float3 ambientColor = globalData.ambientLight;//invGamma_srgb(float3(0.04f, 0.08f, 0.2f));
+    float3 ambientColor = globalData.ambientLight;//invLinearToSRGB(float3(0.04f, 0.08f, 0.2f));
     float2 UV = input.UV * 10;
 
-    float3 albedo = invGamma_srgb(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
+    float3 albedo = SRGBToLinear(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
     float roughness = roughnessMap.Sample(UV).x;
     float metallic = saturate(metallicMap.Sample(UV).x * 1.2);
     float specular = 0.1;//specularMap.Sample(UV).x;
