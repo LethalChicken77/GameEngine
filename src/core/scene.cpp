@@ -29,6 +29,7 @@ void Scene_t::loadScene()
     obj->mesh->createBuffers();
     obj->materialID = 4;
     obj->transform.scale = glm::vec3(0.01f);
+    // obj->transform.scale = glm::vec3(-0.01f, 0.01f, 0.01f); // TODO: Make sure negative scaling doesn't turn models inside out
     obj->transform.rotation.x = glm::radians(-90.0f);
 
     // obj2.mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
