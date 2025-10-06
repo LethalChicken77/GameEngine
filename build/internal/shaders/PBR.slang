@@ -11,12 +11,12 @@ struct MaterialInfo
     float normalMapStrength;
 };
 [[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
-[[vk::binding(1, 2)]] Sampler2D albedoMap;
-[[vk::binding(2, 2)]] Sampler2D roughnessMap;
-[[vk::binding(3, 2)]] Sampler2D metallicMap;
-[[vk::binding(4, 2)]] Sampler2D specularMap;
-[[vk::binding(5, 2)]] Sampler2D normalMap;
-[[vk::binding(6, 2)]] Sampler2D skyboxTexture;
+[[vk::binding(1, 2)]] Sampler2D albedoMap; // SRGB
+[[vk::binding(2, 2)]] Sampler2D roughnessMap; // Linear
+[[vk::binding(3, 2)]] Sampler2D metallicMap; // Linear
+[[vk::binding(4, 2)]] Sampler2D specularMap; // Linear
+[[vk::binding(5, 2)]] Sampler2D normalMap; // Linear
+[[vk::binding(6, 2)]] Sampler2D skyboxTexture; // SRGB (Temporary)
 
 struct Vertex
 {
@@ -73,7 +73,7 @@ float4 fsMain(VOut input)
     float2 UV = input.UV * 10;
 
     float3 albedo = SRGBToLinear(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
-    float roughness = roughnessMap.Sample(UV).x;
+    float roughness = roughnessMap.Sample(UV).x; // Assume linear texture
     float metallic = saturate(metallicMap.Sample(UV).x * 1.2);
     float specular = 0.1;//specularMap.Sample(UV).x;
     float3 normalMapSample = normalMap.Sample(UV).xyz * 2.0 - 1.0;

@@ -44,6 +44,13 @@ VOut vsMain(Vertex input)
 
     float3x3 normalMatrix = transpose(inverse(float3x3(model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
+
+    float3 cameraPos = cameraData.view[3].xyz;
+    float3 viewDir = normalize(input.Position.xyz - cameraPos);
+    if (dot(output.Normal, viewDir) > 0)
+    {
+        output.Normal = normalize(output.Normal - viewDir * dot(output.Normal, viewDir));
+    }
     output.Color = input.Color;
     output.UV = input.UV;
 
@@ -68,9 +75,9 @@ float4 fsMain(VOut input)
     float3 halfDir = 0.5 * (lightDir - viewDir);
 
     float3 lightColor = currentLight.color * currentLight.intensity;
-    float3 coolColor = LinearToSRGB(materialInfo.coolColor.xyz);
-    float3 warmColor = LinearToSRGB(materialInfo.warmColor.xyz);
-    float3 outlineColor = LinearToSRGB(materialInfo.outlineColor.xyz);//float3(1.0, 0.6, 0.1);
+    float3 coolColor = SRGBToLinear(materialInfo.coolColor.xyz);
+    float3 warmColor = SRGBToLinear(materialInfo.warmColor.xyz);
+    float4 outlineColor = float4(SRGBToLinear(materialInfo.outlineColor.xyz), materialInfo.outlineColor.w);//float3(1.0, 0.6, 0.1);
     float outlinePower = materialInfo.outlinePower;
     float3 outColor = goochBRDF(coolColor, warmColor, outlineColor, outlinePower, materialInfo.roughness, F0, lightColor, normal, lightDir, viewDir);
     // float3 outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
