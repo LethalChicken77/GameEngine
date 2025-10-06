@@ -61,7 +61,7 @@ float4 fsMain(VOut input)
     // float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
     float3 ambientColor = globalData.ambientLight;// = invLinearToSRGB(float3(0.04f, 0.08f, 0.2f));
 
-    float3 F0 = float3(0.1f);
+    float3 F0 = float3(0.05f);
 
     Light currentLight = globalData.lights[0];
     float3 lightDir = normalize(currentLight.position);

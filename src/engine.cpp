@@ -82,12 +82,21 @@ void Engine::update(double deltaTime)
         camera.transform.position.y -= 10.f * deltaTime;
     }
 
+    if(core::Input::getButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
+    {
+        glfwSetInputMode(graphics.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
     if(core::Input::getButton(GLFW_MOUSE_BUTTON_RIGHT))
     {
         // std::cout << "Mouse position: " << core::Input::getMousePosition().x << ", " << core::Input::getMousePosition().y << std::endl;
         glm::vec2 mouseDelta = -core::Input::getMouseDelta();
-        camera.transform.rotation.y += -mouseDelta.x * 0.016f;
-        camera.transform.rotation.x += -mouseDelta.y * 0.016f;
+        mouseDelta = glm::pow(glm::abs(mouseDelta), glm::vec2(1.1f)) * glm::vec2(glm::sign(mouseDelta.x), glm::sign(mouseDelta.y));
+        camera.transform.rotation.y += -mouseDelta.x * 0.016f * 0.1f;
+        camera.transform.rotation.x += -mouseDelta.y * 0.016f * 0.1f;
+    }
+    if(core::Input::getButtonUp(GLFW_MOUSE_BUTTON_RIGHT))
+    {
+        glfwSetInputMode(graphics.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     scene->update(deltaTime);

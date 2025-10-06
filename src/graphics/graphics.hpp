@@ -55,6 +55,8 @@ public:
 
     Window *getWindow() { return &window; }
     Device *getDevice() { return &device; }
+    void bindGlobalDescriptors(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
+    void renderSkybox(FrameInfo& frameInfo);
     void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects);
 
     void graphicsInitImgui();
@@ -91,6 +93,8 @@ private:
     std::unique_ptr<Material> ppMaterial;
     std::unique_ptr<Material> imguiMaterial;
     std::unique_ptr<Material> outputMaterial;
+    std::unique_ptr<Material> skyboxMaterial;
+    std::shared_ptr<Mesh> skyboxMesh{};
 
     glm::vec4 defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
 };

@@ -110,6 +110,7 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     loadTextures();
     loadShaders();
     loadMaterials();
+    skyboxMesh = Mesh::createSkybox(100);
     pipelineManager = std::make_unique<PipelineManager>(renderer);
     // pipelineManager->createPipelines();
 
@@ -149,7 +150,7 @@ void Graphics::drawFrame(core::Scene &scene)
     }
     
     // std::cout << "Drawing Frame" << std::endl;
-
+    std::vector<VkDescriptorSet> localDescriptorSets;
     if(VkCommandBuffer commandBuffer = renderer.startFrame())
     {
         uint32_t frameIndex = renderer.getFrameIndex();
@@ -192,6 +193,7 @@ void Graphics::drawFrame(core::Scene &scene)
         }
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
+        renderSkybox(frameInfo);
         renderGameObjects(frameInfo, scene->getGameObjects());
         renderer.endRenderPass();
         
@@ -215,7 +217,7 @@ void Graphics::drawFrame(core::Scene &scene)
         renderer.beginRenderPass(finalRenderPass->getRenderPass(), finalRenderPass->getFrameBuffer(), finalRenderPass->getExtent(), defaultClearColor);
         pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
 
-        std::vector<VkDescriptorSet> localDescriptorSets = { ppMaterial->getDescriptorSet() };
+        localDescriptorSets = { ppMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
             commandBuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS, 
@@ -252,12 +254,12 @@ void Graphics::drawFrame(core::Scene &scene)
         outputMaterial->createDescriptorSet();
 
         renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), extent, defaultClearColor);
-        pipelineManager->getPipeline(1)->bind(commandBuffer); // Post-processing pipeline
+        outputMaterial->getShader()->getPipeline()->bind(commandBuffer); // Post-processing pipeline
         localDescriptorSets = { outputMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
             commandBuffer, 
             VK_PIPELINE_BIND_POINT_GRAPHICS, 
-            pipelineManager->getPipeline(1)->getPipelineLayout(), 
+            outputMaterial->getShader()->getPipeline()->getPipelineLayout(), 
             0,
             1,
             localDescriptorSets.data(), 
@@ -459,12 +461,12 @@ void Graphics::loadMaterials()
     _outputMaterial.createDescriptorSet();
     outputMaterial = std::make_unique<Material>(std::move(_outputMaterial));
     
-    Material skybox = Material::instantiate(Shared::shaders[2].get());
+    Material _skybox = Material::instantiate(Shared::shaders[2].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
-    skybox.setValue("color", Color(0.f, 0.f, 0.f));
-    skybox.createShaderInputBuffer();
-    skybox.createDescriptorSet();
-    Shared::materials.emplace_back(std::move(skybox));
+    _skybox.setValue("color", Color(0.f, 0.f, 0.f));
+    _skybox.createShaderInputBuffer();
+    _skybox.createDescriptorSet();
+    skyboxMaterial = std::make_unique<Material>(std::move(_skybox));
 
     Material m1 = Material::instantiate(Shared::shaders[3].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
@@ -496,14 +498,84 @@ void Graphics::loadMaterials()
     Shared::materials.emplace_back(std::move(m4));
 
     Material m2 = Material::instantiate(Shared::shaders[6].get());
-    m2.setValue("coolColor", Color("#2E257BFF"));
-    m2.setValue("warmColor", Color("#FFD200FF"));
-    m2.setValue("outlineColor", Color(0.f,0.f,0.f));
-    m2.setValue("outlinePower", 1.5f);
-    m2.setValue("roughness", 0.2f);
+    m2.setValue("coolColor", Color("#47376FFF"));
+    m2.setValue("warmColor", Color("#FFCC3DFF"));
+    m2.setValue("outlineColor", Color("#424242FF"));
+    m2.setValue("outlinePower", 4.0f);
+    m2.setValue("roughness", 0.6f);
     m2.createShaderInputBuffer();
     m2.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
+}
+
+void Graphics::bindGlobalDescriptors(FrameInfo& frameInfo, GraphicsPipeline* pipeline)
+{
+    pipeline->bind(frameInfo.commandBuffer);
+    VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
+
+    std::vector<VkDescriptorSet> descriptorSets = { frameInfo.cameraDescriptorSet };
+
+    vkCmdBindDescriptorSets(
+        frameInfo.commandBuffer, 
+        VK_PIPELINE_BIND_POINT_GRAPHICS, 
+        pipelineLayout, 
+        0,
+        static_cast<uint32_t>(descriptorSets.size()),
+        descriptorSets.data(), 
+        0,
+        nullptr
+    );
+
+    descriptorSets = { frameInfo.globalDescriptorSet };
+
+    vkCmdBindDescriptorSets(
+        frameInfo.commandBuffer, 
+        VK_PIPELINE_BIND_POINT_GRAPHICS, 
+        pipelineLayout, 
+        1,
+        static_cast<uint32_t>(descriptorSets.size()),
+        descriptorSets.data(), 
+        0,
+        nullptr
+    );
+}
+
+void Graphics::renderSkybox(FrameInfo& frameInfo)
+{
+    const Shader* shader = skyboxMaterial->getShader();
+    GraphicsPipeline* pipeline = shader->getPipeline();
+    // std::unique_ptr<GraphicsPipeline>& pipeline = pipelineManager->getPipeline(2);
+    uint32_t setIndex = pipeline->getID() + 1;
+    bindGlobalDescriptors(frameInfo, pipeline);
+
+    std::vector<VkDescriptorSet> localDescriptorSets = { skyboxMaterial->getDescriptorSet() };
+
+    vkCmdBindDescriptorSets(
+        frameInfo.commandBuffer, 
+        VK_PIPELINE_BIND_POINT_GRAPHICS, 
+        pipeline->getPipelineLayout(), 
+        2,
+        1,
+        localDescriptorSets.data(), 
+        0,
+        nullptr
+    );
+
+    PushConstants push{};
+    core::Transform transform{};
+    transform.position = camera->transform.position;
+    push.model = transform.getTransform();
+    vkCmdPushConstants(
+        frameInfo.commandBuffer, 
+        pipeline->getPipelineLayout(), 
+        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+        0, 
+        sizeof(PushConstants), 
+        &push
+    );
+
+    skyboxMesh->bind(frameInfo.commandBuffer);
+    skyboxMesh->draw(frameInfo.commandBuffer);
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
@@ -513,7 +585,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
     // pipelineManager.renderObjects(frameInfo, gameObjects, commandBuffer);
     GraphicsPipeline* prevPipeline = nullptr;
     std::vector<VkDescriptorSet> localDescriptorSets;
-    VkPipelineLayout pipelineLayout;
+    VkPipelineLayout pipelineLayout = nullptr;
     Material::id_t prevMaterial = UINT64_MAX;
     for(core::GameObject &obj : gameObjects)
     {
@@ -522,36 +594,8 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         uint32_t setIndex = pipeline->getID() + 1;
         if(pipeline != prevPipeline) // Bind camera and global data
         {
-            pipeline->bind(commandBuffer);
+            bindGlobalDescriptors(frameInfo, pipeline);
             pipelineLayout = pipeline->getPipelineLayout();
-
-            std::vector<VkDescriptorSet> descriptorSets = { frameInfo.cameraDescriptorSet };
-
-            vkCmdBindDescriptorSets(
-                commandBuffer, 
-                VK_PIPELINE_BIND_POINT_GRAPHICS, 
-                pipelineLayout, 
-                0,
-                static_cast<uint32_t>(descriptorSets.size()),
-                descriptorSets.data(), 
-                0,
-                nullptr
-            );
-
-
-            descriptorSets = { frameInfo.globalDescriptorSet };
-
-            vkCmdBindDescriptorSets(
-                commandBuffer, 
-                VK_PIPELINE_BIND_POINT_GRAPHICS, 
-                pipelineLayout, 
-                1,
-                static_cast<uint32_t>(descriptorSets.size()),
-                descriptorSets.data(), 
-                0,
-                nullptr
-            );
-
             prevPipeline = pipeline;
         }
         localDescriptorSets = { Shared::materials[obj->materialID].getDescriptorSet() };
