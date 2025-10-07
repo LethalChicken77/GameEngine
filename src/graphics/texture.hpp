@@ -102,10 +102,24 @@ namespace graphics
             memcpy(&result, &data[dataIndex], sizeof(float));
             return result;
         }
+        int getPixelInt(uint32_t x, uint32_t y) const
+        {
+            if(properties.format != VK_FORMAT_R32_SINT)
+            {
+                throw std::runtime_error("Cannot get pixel on non-int texture");
+            }
+            x = glm::clamp(x, 0u, width - 1);
+            y = glm::clamp(y, 0u, height - 1);
+
+            int dataIndex = (y * width + x) * sizeof(int);
+            int result = 0;
+            memcpy(&result, &data[dataIndex], sizeof(int));
+            return result;
+        }
         void createTexture();
         void createTextureUninitialized();
-        void updateOnGPU();
-        void updateOnCPU();
+        void updateOnGPU(); // Update the GPU texture data from the CPU
+        void updateOnCPU(); // Update the CPU texture data from the GPU
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
         // Need this public
@@ -139,6 +153,7 @@ namespace graphics
 
         VkDescriptorImageInfo descriptorInfo;
 
+        VkImageLayout prevLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 

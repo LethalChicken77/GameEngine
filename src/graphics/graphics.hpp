@@ -65,6 +65,8 @@ public:
 
     void reloadShaders();
 
+    int getClickedObjID(uint32_t x, uint32_t y);
+
 private:
     void createRenderPasses();
     void loadTextures();
@@ -99,7 +101,7 @@ private:
     std::unique_ptr<Material> skyboxMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
     std::shared_ptr<Mesh> skyboxMesh{};
-    std::unique_ptr<Texture> idBufferTexture{};
+    Texture *idTexture = nullptr;
 
     VkClearColorValue defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
 };

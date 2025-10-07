@@ -157,7 +157,7 @@ void Graphics::drawFrame(core::Scene &scene)
         FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSet, Descriptors::cameraDescriptorSets[frameIndex]};
 
         GlobalUbo globalUbo{};
-        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 0.0};
+        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 6.0};
         globalUbo.lights[1] = {glm::vec3(4, 0, 0), LightType::POINT, glm::vec3(1.0, 0.8, 0.1), 30.0};
         globalUbo.lights[2] = {glm::vec3(0, 4, -4), LightType::POINT, glm::vec3(0.5, 1.0, 0.1), 10.0};
         globalUbo.lights[3] = {glm::vec3(-4, 0, 2), LightType::POINT, glm::vec3(0.9, 0.2, 1.0), 10.0};
@@ -198,8 +198,8 @@ void Graphics::drawFrame(core::Scene &scene)
         renderGameObjectIDs(frameInfo, scene->getGameObjects());
         renderer.endRenderPass();
         
-        std::unique_ptr<Texture> &idTexture = idBufferRenderPass->getColorTexture();
-        idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        idTexture = idBufferRenderPass->getColorTexture().get();
+        // idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
         renderSkybox(frameInfo);
@@ -388,6 +388,7 @@ void Graphics::loadShaders()
 
     PipelineConfigInfo idBufferConfigInfo = Shader::getDefaultConfigInfo();
     idBufferConfigInfo.pipelineType = ID_BUFFER;
+    idBufferConfigInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE; // Allow selecting meshes via backfaces
     idBufferConfigInfo.renderPass = &idBufferRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/id_buffer.slang", 
@@ -757,6 +758,18 @@ void Graphics::reloadShaders()
     }
 
     pipelineManager->reloadPipelines();
+}
+
+int Graphics::getClickedObjID(uint32_t x, uint32_t y)
+{
+    if(!idTexture)
+    {
+        return -1;
+    }
+
+    idTexture->updateOnCPU();
+
+    return idTexture->getPixelInt(x, y);
 }
 
 } // namespace graphics

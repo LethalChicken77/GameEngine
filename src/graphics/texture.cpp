@@ -357,16 +357,16 @@ namespace graphics
 
     void Texture::updateOnGPU()
     {
-        transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        transitionImageLayout(prevLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         copyDataToImage();
-        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, properties.finalLayout);
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, prevLayout);
     }
 
     void Texture::updateOnCPU()
     {
-        transitionImageLayout(properties.finalLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        transitionImageLayout(prevLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         copyDataFromImage();
-        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, properties.finalLayout);
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, prevLayout);
     }
 
     void Texture::allocateMemory()
@@ -477,6 +477,7 @@ namespace graphics
 
     void Texture::transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer)
     {
+        prevLayout = oldLayout;
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout = oldLayout;

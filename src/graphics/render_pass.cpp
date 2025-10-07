@@ -28,7 +28,7 @@ void RenderPass::addColorAttachment(VkFormat imageFormat, VkImageLayout imageLay
 {
     TextureProperties props = TextureProperties::getDefaultProperties();
     props.format = imageFormat;
-    props.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    props.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     props.finalLayout = imageLayout;
 
     SamplerProperties sprops = SamplerProperties::getDefaultProperties();
@@ -45,7 +45,7 @@ void RenderPass::addDepthAttachment(VkImageLayout imageLayout)
 {
     TextureProperties props = TextureProperties::getDefaultProperties();
     props.format = findDepthFormat();
-    props.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    props.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     props.imageSubResourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     props.finalLayout = imageLayout;
 
