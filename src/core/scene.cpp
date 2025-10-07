@@ -24,7 +24,7 @@ void Scene_t::loadScene()
     // obj->mesh = graphics::Mesh::loadObj("internal/models/Nefertiti.obj");
     // obj->mesh->generateNormals();
     // obj->mesh->createBuffers();
-    obj->materialID = 3;
+    obj->materialID = 0;
     // obj->transform.scale = glm::vec3(0.01f);
     // obj->transform.scale = glm::vec3(-0.01f, 0.01f, 0.01f); // TODO: Make sure negative scaling doesn't turn models inside out
     // obj->transform.rotation.x = glm::radians(-90.0f);

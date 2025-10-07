@@ -50,7 +50,7 @@ float4 fsMain(VOut input)
     // outColor = (round(outColor) + round(outColor - 0.25) + round(outColor + 0.25)) / 4;
     float3 outColor = sample.xyz;
     if (materialInfo.doSRGBTransform)
-        outColor = LinearToSRGB(outColor);
+        outColor = SRGBToLinear(outColor);
     return float4(outColor, sample.w);
     // return float4(input.UV.xy, 0.0, 1.0);
 }

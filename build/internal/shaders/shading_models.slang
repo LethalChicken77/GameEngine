@@ -171,7 +171,7 @@ public float3 pbrAmbient(
 public float3 goochBRDF(
     float3 cool,
     float3 warm,
-    float3 outline,
+    float4 outline,
     float outlinePower,
     float roughness,
     float3 F0,
@@ -197,5 +197,5 @@ public float3 goochBRDF(
     diffuse = OklabToLinear(diffuse);
     F_V = pow(F_V, outlinePower);
 
-    return lerp((lightColor * specular + diffuse), outline, F_V);
+    return lerp((lightColor * specular + diffuse), outline.xyz, F_V * outline.w);
 }

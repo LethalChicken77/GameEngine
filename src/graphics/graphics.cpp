@@ -157,7 +157,7 @@ void Graphics::drawFrame(core::Scene &scene)
         FrameInfo frameInfo{frameIndex, 0.0, commandBuffer, Descriptors::globalDescriptorSet, Descriptors::cameraDescriptorSets[frameIndex]};
 
         GlobalUbo globalUbo{};
-        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 9.0};
+        globalUbo.lights[0] = {glm::vec3(1, 1, 1), LightType::DIRECTIONAL, glm::vec3(1.0, 1.0, 1.0), 0.0};
         globalUbo.lights[1] = {glm::vec3(4, 0, 0), LightType::POINT, glm::vec3(1.0, 0.8, 0.1), 30.0};
         globalUbo.lights[2] = {glm::vec3(0, 4, -4), LightType::POINT, glm::vec3(0.5, 1.0, 0.1), 10.0};
         globalUbo.lights[3] = {glm::vec3(-4, 0, 2), LightType::POINT, glm::vec3(0.9, 0.2, 1.0), 10.0};
@@ -179,7 +179,7 @@ void Graphics::drawFrame(core::Scene &scene)
         sceneRenderPass->resetLayouts();
         imguiRenderPass->resetLayouts();
         finalRenderPass->resetLayouts();
-        float frameScale = 2.0;
+        float frameScale = 1.0;
         VkExtent2D scaledExtent{
             static_cast<uint32_t>(extent.width * frameScale), 
             static_cast<uint32_t>(extent.height * frameScale)};

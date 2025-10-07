@@ -1,28 +1,11 @@
 module colorspace;
 
-float LinearToSRGB(float value)
+float SRGBToLinear(float value)
 {
     if (value <= 0.04045)
         return value / 12.92;
     else
         return pow((value + 0.055) / 1.055, 2.4);
-}
-
-public float3 LinearToSRGB(float3 color)
-{
-    float3 outColor;
-    outColor.x = LinearToSRGB(color.x);
-    outColor.y = LinearToSRGB(color.y);
-    outColor.z = LinearToSRGB(color.z);
-    return outColor;
-}
-
-float SRGBToLinear(float value)
-{
-    if (value <= 0.0031308)
-        return 12.92 * value;
-    else
-        return 1.055 * pow(value, 1 / 2.4) - 0.055;
 }
 
 public float3 SRGBToLinear(float3 color)
@@ -31,6 +14,23 @@ public float3 SRGBToLinear(float3 color)
     outColor.x = SRGBToLinear(color.x);
     outColor.y = SRGBToLinear(color.y);
     outColor.z = SRGBToLinear(color.z);
+    return outColor;
+}
+
+float LinearToSRGB(float value)
+{
+    if (value <= 0.0031308)
+        return 12.92 * value;
+    else
+        return 1.055 * pow(value, 1 / 2.4) - 0.055;
+}
+
+public float3 LinearToSRGB(float3 color)
+{
+    float3 outColor;
+    outColor.x = LinearToSRGB(color.x);
+    outColor.y = LinearToSRGB(color.y);
+    outColor.z = LinearToSRGB(color.z);
     return outColor;
 }
 
