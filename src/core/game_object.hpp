@@ -24,6 +24,7 @@ namespace core
             return std::move(parent); // TODO: Put somewhere
         }
 
+        id_t get_instance_id() const { return instanceID; }
         id_t get_id() const { return localID; }
         std::shared_ptr<graphics::Mesh> mesh{};
 

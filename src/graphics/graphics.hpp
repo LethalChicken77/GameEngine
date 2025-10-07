@@ -55,9 +55,11 @@ public:
 
     Window *getWindow() { return &window; }
     Device *getDevice() { return &device; }
-    void bindGlobalDescriptors(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
+    void bindCameraDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
+    void bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
     void renderSkybox(FrameInfo& frameInfo);
     void renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects);
+    void renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects);
 
     void graphicsInitImgui();
 
@@ -85,18 +87,21 @@ private:
     std::vector<std::unique_ptr<Buffer>> cameraUboBuffers;
     std::vector<std::shared_ptr<Texture>> textures;
 
-    Camera* camera;
+    Camera* camera = nullptr;
 
-    std::unique_ptr<RenderPass> sceneRenderPass;
-    std::unique_ptr<RenderPass> imguiRenderPass;
-    std::unique_ptr<RenderPass> finalRenderPass;
-    std::unique_ptr<Material> ppMaterial;
-    std::unique_ptr<Material> imguiMaterial;
-    std::unique_ptr<Material> outputMaterial;
-    std::unique_ptr<Material> skyboxMaterial;
+    std::unique_ptr<RenderPass> idBufferRenderPass{};
+    std::unique_ptr<RenderPass> sceneRenderPass{};
+    std::unique_ptr<RenderPass> imguiRenderPass{};
+    std::unique_ptr<RenderPass> finalRenderPass{};
+    std::unique_ptr<Material> ppMaterial{};
+    std::unique_ptr<Material> imguiMaterial{};
+    std::unique_ptr<Material> outputMaterial{};
+    std::unique_ptr<Material> skyboxMaterial{};
+    std::unique_ptr<Material> idBufferMaterial{};
     std::shared_ptr<Mesh> skyboxMesh{};
+    std::unique_ptr<Texture> idBufferTexture{};
 
-    glm::vec4 defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
+    VkClearColorValue defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
 };
 
 } // namespace graphics

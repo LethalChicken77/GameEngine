@@ -1,6 +1,7 @@
 struct PushConstants
 {
     float4x4 model;
+    int objectID;
 };
 [[vk::push_constant]]
 PushConstants pushConstants;

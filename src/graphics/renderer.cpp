@@ -80,7 +80,7 @@ void Renderer::endFrame()
     currentCommandBuffer = nullptr; // Clear current command buffer pointer, still tracked in vector
 }
 
-void Renderer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent, glm::vec4 clearColor)
+void Renderer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent, VkClearColorValue clearColor)
 {
     assert(frameInProgress && "Can't begin render pass when frame is not in progress");
     assert(currentCommandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer that isn't current");
@@ -95,7 +95,7 @@ void Renderer::beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffe
 
     std::array<VkClearValue, 2> clearValues{};
     // clearValues[0].color = {0.1f, 0.2f, 0.4f, 1.0f};
-    clearValues[0].color = {clearColor.r, clearColor.g, clearColor.b, clearColor.a};
+    clearValues[0].color = clearColor;
     clearValues[1].depthStencil = {1.0f, 0};
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();

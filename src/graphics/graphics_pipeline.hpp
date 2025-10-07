@@ -11,7 +11,8 @@ namespace graphics
 {
     struct PushConstants
     {
-        alignas(64) glm::mat4 model;
+        alignas(64) glm::mat4 model; // 64 bytes
+        int objectID = -2; // 68 bytes
         // alignas(4) float time;
     };
     
@@ -33,9 +34,11 @@ namespace graphics
     protected:
         void createStandardPipeline(VkPipelineCache cache);
         void createPostProcessingPipeline(VkPipelineCache cache);
+        void createIDBufferPipeline(VkPipelineCache cache);
         // void createGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfigInfo& configInfo, VkPipelineLayout layout);
         void createStandardLayout();
         void createPostProcessingLayout();
+        void createIDBufferLayout();
 
         VkPipeline m_graphicsPipeline;
         VkPipelineLayout pipelineLayout;

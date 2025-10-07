@@ -175,6 +175,7 @@ void Graphics::drawFrame(core::Scene &scene)
         // std::cout << "Proj: " << glm::to_string(cameraUbo.proj) << std::endl;
         cameraUboBuffers[frameIndex]->writeToBuffer(&cameraUbo);
 
+        idBufferRenderPass->resetLayouts();
         sceneRenderPass->resetLayouts();
         imguiRenderPass->resetLayouts();
         finalRenderPass->resetLayouts();
@@ -188,9 +189,17 @@ void Graphics::drawFrame(core::Scene &scene)
         }
         if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
         {
+            idBufferRenderPass->create(extent); // Maybe render at low resolution
             imguiRenderPass->create(extent);
             finalRenderPass->create(extent);
         }
+        // Object IDs render pass
+        renderer.beginRenderPass(idBufferRenderPass->getRenderPass(), idBufferRenderPass->getFrameBuffer(), idBufferRenderPass->getExtent(), VkClearColorValue{-1, 0, 0, 0});
+        renderGameObjectIDs(frameInfo, scene->getGameObjects());
+        renderer.endRenderPass();
+        
+        std::unique_ptr<Texture> &idTexture = idBufferRenderPass->getColorTexture();
+        idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
         renderSkybox(frameInfo);
@@ -205,7 +214,7 @@ void Graphics::drawFrame(core::Scene &scene)
         ppMaterial->setTexture(1, depthTexture.get());
         ppMaterial->createDescriptorSet();
 
-        renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), glm::vec4(0.0f));
+        renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), VkClearColorValue{0.0f, 0.0f, 0.0f, 0.0f});
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         renderer.endRenderPass();
 
@@ -276,18 +285,24 @@ void Graphics::drawFrame(core::Scene &scene)
 
 void Graphics::createRenderPasses()
 {
+    Console::log("Creating ID buffer render pass", "Graphics");
+    idBufferRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    idBufferRenderPass->addColorAttachment(VK_FORMAT_R32_SINT);
+    idBufferRenderPass->addDepthAttachment();
+    idBufferRenderPass->create(renderer.getExtent());
+
     Console::log("Creating scene render pass", "Graphics");
     sceneRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
     sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
     sceneRenderPass->addDepthAttachment();
     sceneRenderPass->create(renderer.getExtent());
-
+    
     Console::log("Creating ImGui render pass", "Graphics");
     imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
     imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
     imguiRenderPass->addDepthAttachment();
     imguiRenderPass->create(renderer.getExtent());
-
+    
     Console::log("Creating Final render pass", "Graphics");
     finalRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
     finalRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB); // Maybe change to UNORM
@@ -369,6 +384,19 @@ void Graphics::loadShaders()
         },
         1,
         imguiConfigInfo
+    ));
+
+    PipelineConfigInfo idBufferConfigInfo = Shader::getDefaultConfigInfo();
+    idBufferConfigInfo.pipelineType = ID_BUFFER;
+    idBufferConfigInfo.renderPass = &idBufferRenderPass->getRenderPass();
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/id_buffer.slang", 
+        "internal/shaders/id_buffer.slang", 
+        std::vector<ShaderInput>{
+            {"objectID", ShaderInput::DataType::INT}
+        },
+        0,
+        idBufferConfigInfo
     ));
 
     PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
@@ -460,15 +488,21 @@ void Graphics::loadMaterials()
     _outputMaterial.createShaderInputBuffer();
     _outputMaterial.createDescriptorSet();
     outputMaterial = std::make_unique<Material>(std::move(_outputMaterial));
+
+    Material _idBufferMaterial = Material::instantiate(Shared::shaders[2].get());
+    _idBufferMaterial.setValue("objectID", -2);
+    _idBufferMaterial.createShaderInputBuffer();
+    _idBufferMaterial.createDescriptorSet();
+    idBufferMaterial = std::make_unique<Material>(std::move(_idBufferMaterial));
     
-    Material _skybox = Material::instantiate(Shared::shaders[2].get());
+    Material _skybox = Material::instantiate(Shared::shaders[3].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     _skybox.setValue("color", Color(0.f, 0.f, 0.f));
     _skybox.createShaderInputBuffer();
     _skybox.createDescriptorSet();
     skyboxMaterial = std::make_unique<Material>(std::move(_skybox));
 
-    Material m1 = Material::instantiate(Shared::shaders[3].get());
+    Material m1 = Material::instantiate(Shared::shaders[4].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
@@ -477,14 +511,14 @@ void Graphics::loadMaterials()
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m3 = Material::instantiate(Shared::shaders[4].get());
+    Material m3 = Material::instantiate(Shared::shaders[5].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
-    Material m4 = Material::instantiate(Shared::shaders[5].get());
+    Material m4 = Material::instantiate(Shared::shaders[6].get());
     m4.setValue("color", Color(1.f, 1.f, 1.f));
     m4.setValue("normalMapStrength", 1.0f);
     m4.setTexture(0, textures[0].get()); // Albedo
@@ -497,7 +531,7 @@ void Graphics::loadMaterials()
     m4.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m4));
 
-    Material m2 = Material::instantiate(Shared::shaders[6].get());
+    Material m2 = Material::instantiate(Shared::shaders[7].get());
     m2.setValue("coolColor", Color("#47376FFF"));
     m2.setValue("warmColor", Color("#FFCC3DFF"));
     m2.setValue("outlineColor", Color("#424242FF"));
@@ -508,30 +542,31 @@ void Graphics::loadMaterials()
     Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
 }
 
-void Graphics::bindGlobalDescriptors(FrameInfo& frameInfo, GraphicsPipeline* pipeline)
+void Graphics::bindCameraDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline)
 {
-    pipeline->bind(frameInfo.commandBuffer);
-    VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
-
     std::vector<VkDescriptorSet> descriptorSets = { frameInfo.cameraDescriptorSet };
 
     vkCmdBindDescriptorSets(
         frameInfo.commandBuffer, 
         VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        pipelineLayout, 
+        pipeline->getPipelineLayout(), 
         0,
         static_cast<uint32_t>(descriptorSets.size()),
         descriptorSets.data(), 
         0,
         nullptr
     );
+}
 
-    descriptorSets = { frameInfo.globalDescriptorSet };
+void Graphics::bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline)
+{
+
+    std::vector<VkDescriptorSet> descriptorSets = { frameInfo.globalDescriptorSet };
 
     vkCmdBindDescriptorSets(
         frameInfo.commandBuffer, 
         VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        pipelineLayout, 
+        pipeline->getPipelineLayout(), 
         1,
         static_cast<uint32_t>(descriptorSets.size()),
         descriptorSets.data(), 
@@ -546,7 +581,11 @@ void Graphics::renderSkybox(FrameInfo& frameInfo)
     GraphicsPipeline* pipeline = shader->getPipeline();
     // std::unique_ptr<GraphicsPipeline>& pipeline = pipelineManager->getPipeline(2);
     uint32_t setIndex = pipeline->getID() + 1;
-    bindGlobalDescriptors(frameInfo, pipeline);
+
+    pipeline->bind(frameInfo.commandBuffer);
+    VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
+    bindCameraDescriptor(frameInfo, pipeline);
+    bindGlobalDescriptor(frameInfo, pipeline);
 
     std::vector<VkDescriptorSet> localDescriptorSets = { skyboxMaterial->getDescriptorSet() };
 
@@ -594,8 +633,10 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
         uint32_t setIndex = pipeline->getID() + 1;
         if(pipeline != prevPipeline) // Bind camera and global data
         {
-            bindGlobalDescriptors(frameInfo, pipeline);
+            pipeline->bind(frameInfo.commandBuffer);
             pipelineLayout = pipeline->getPipelineLayout();
+            bindCameraDescriptor(frameInfo, pipeline);
+            bindGlobalDescriptor(frameInfo, pipeline);
             prevPipeline = pipeline;
         }
         localDescriptorSets = { Shared::materials[obj->materialID].getDescriptorSet() };
@@ -617,9 +658,46 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
 
         PushConstants push{};
         push.model = obj->transform.getTransform();
+        push.objectID = obj->get_instance_id(); // TODO: Change to scene ID
         vkCmdPushConstants(
             commandBuffer, 
             pipeline->getPipelineLayout(), 
+            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
+            0, 
+            sizeof(PushConstants), 
+            &push
+        );
+
+        obj->mesh->bind(commandBuffer);
+        obj->mesh->draw(commandBuffer);
+    }
+}
+
+void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
+{
+    VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
+
+    // pipelineManager.renderObjects(frameInfo, gameObjects, commandBuffer);
+    std::vector<VkDescriptorSet> localDescriptorSets;
+    const Shader* shader = Shared::shaders[2].get();
+    GraphicsPipeline* pipeline = shader->getPipeline();
+    VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
+    uint32_t setIndex = pipeline->getID() + 1;
+
+    pipeline->bind(frameInfo.commandBuffer);
+    bindCameraDescriptor(frameInfo, pipeline);
+
+
+    for(core::GameObject &obj : gameObjects)
+    {
+        PushConstants push{};
+
+        push.model = obj->transform.getTransform();
+        push.objectID = obj->get_instance_id(); // TODO: Change to scene ID
+        // Console::debug(std::to_string(push.objectID), "Graphics");
+        vkCmdPushConstants(
+            commandBuffer, 
+            pipelineLayout, 
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
             0, 
             sizeof(PushConstants), 

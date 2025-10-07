@@ -55,7 +55,7 @@ public:
     VkCommandBuffer startFrame();
     void endFrame();
 
-    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent, glm::vec4 clearColor);
+    void beginRenderPass(VkRenderPass renderPass, VkFramebuffer frameBuffer, VkExtent2D extent, VkClearColorValue clearColor);
     void endRenderPass();
 
     void waitForDevice() { vkDeviceWaitIdle(device.device()); }

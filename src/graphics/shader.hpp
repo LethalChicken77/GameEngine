@@ -19,7 +19,8 @@ namespace graphics
     enum PipelineType
     {
         STANDARD = 0,
-        POST_PROCESSING = 1
+        POST_PROCESSING = 1,
+        ID_BUFFER = 2
     };
 
     struct PipelineConfigInfo {
