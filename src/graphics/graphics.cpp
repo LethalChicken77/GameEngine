@@ -28,7 +28,13 @@ namespace graphics
 
 // };
 
-Graphics::Graphics(const std::string& name, const std::string& engine_name)
+
+Graphics::~Graphics()
+{
+    // cleanup();
+}
+
+void Graphics::init(const std::string& name, const std::string& engine_name)
 {
     Descriptors::globalPool = DescriptorPool::Builder(device)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1)
@@ -38,17 +44,6 @@ Graphics::Graphics(const std::string& name, const std::string& engine_name)
         .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
         .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
         .build();
-    
-    init(name, engine_name);
-}
-
-Graphics::~Graphics()
-{
-    cleanup();
-}
-
-void Graphics::init(const std::string& name, const std::string& engine_name)
-{
     Console::log("Initializing graphics module", "Graphics");
     Shared::device = &device;
     if(!window.open)
@@ -141,7 +136,7 @@ void Graphics::cleanup()
 }
 
 
-void Graphics::drawFrame(core::Scene &scene)
+void Graphics::drawFrame()
 {
     VkExtent2D extent = renderer.getExtent();
     if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
@@ -196,7 +191,7 @@ void Graphics::drawFrame(core::Scene &scene)
         }
         // Object IDs render pass
         renderer.beginRenderPass(idBufferRenderPass->getRenderPass(), idBufferRenderPass->getFrameBuffer(), idBufferRenderPass->getExtent(), VkClearColorValue{-1, 0, 0, 0});
-        renderGameObjectIDs(frameInfo, scene->getGameObjects());
+        renderGameObjectIDs(frameInfo);
         renderer.endRenderPass();
         
         idTexture = idBufferRenderPass->getColorTexture().get();
@@ -204,7 +199,7 @@ void Graphics::drawFrame(core::Scene &scene)
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
         renderSkybox(frameInfo);
-        renderGameObjects(frameInfo, scene->getGameObjects());
+        renderGameObjects(frameInfo);
         renderer.endRenderPass();
         
         std::unique_ptr<Texture> &colorTexture = sceneRenderPass->getColorTexture();
@@ -282,6 +277,7 @@ void Graphics::drawFrame(core::Scene &scene)
 
         renderer.endFrame();
     }
+    sceneRenderQueue.clear();
 }
 
 void Graphics::createRenderPasses()
@@ -619,7 +615,7 @@ void Graphics::renderSkybox(FrameInfo& frameInfo)
     skyboxGraphicsMesh->draw(frameInfo.commandBuffer);
 }
 
-void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
+void Graphics::renderGameObjects(FrameInfo& frameInfo)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
 
@@ -628,9 +624,9 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
     std::vector<VkDescriptorSet> localDescriptorSets;
     VkPipelineLayout pipelineLayout = nullptr;
     Material::id_t prevMaterial = UINT64_MAX;
-    for(core::GameObject &obj : gameObjects)
+    for(MeshRenderData &renderData : sceneRenderQueue)
     {
-        const Shader* shader = Shared::materials[obj->materialID].getShader();
+        const Shader* shader = Shared::materials[renderData.materialIndex].getShader();
         GraphicsPipeline* pipeline = shader->getPipeline();
         uint32_t setIndex = pipeline->getID() + 1;
         if(pipeline != prevPipeline) // Bind camera and global data
@@ -641,9 +637,9 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
             bindGlobalDescriptor(frameInfo, pipeline);
             prevPipeline = pipeline;
         }
-        localDescriptorSets = { Shared::materials[obj->materialID].getDescriptorSet() };
+        localDescriptorSets = { Shared::materials[renderData.materialIndex].getDescriptorSet() };
 
-        if(prevMaterial != obj->materialID) // Bind material info if changed
+        if(prevMaterial != renderData.materialIndex) // Bind material info if changed
         {
             vkCmdBindDescriptorSets(
                 commandBuffer, 
@@ -655,12 +651,12 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
                 0,
                 nullptr
             );
-            prevMaterial = obj->materialID;
+            prevMaterial = renderData.materialIndex;
         }
 
-        PushConstants push{};
-        push.model = obj->transform.getTransform();
-        push.objectID = obj->getInstanceID(); // TODO: Change to scene ID
+        PushConstants push{}; // TODO: Instance specific data
+        push.model = renderData.transforms[0];
+        push.objectID = renderData.meshID; // TODO: Change to scene local ID
         vkCmdPushConstants(
             commandBuffer, 
             pipeline->getPipelineLayout(), 
@@ -670,12 +666,16 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
             &push
         );
 
-        obj->graphicsMesh->bind(commandBuffer);
-        obj->graphicsMesh->draw(commandBuffer);
+        std::unique_ptr<GraphicsMesh> &graphicsMesh = graphicsMeshes[renderData.meshID];
+        if(graphicsMesh != nullptr)
+        {
+            graphicsMesh->bind(commandBuffer);
+            graphicsMesh->draw(commandBuffer);
+        }
     }
 }
 
-void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
+void Graphics::renderGameObjectIDs(FrameInfo& frameInfo)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
 
@@ -690,12 +690,12 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameO
     bindCameraDescriptor(frameInfo, pipeline);
 
 
-    for(core::GameObject &obj : gameObjects)
+    for(MeshRenderData &renderData : sceneRenderQueue)
     {
         PushConstants push{};
 
-        push.model = obj->transform.getTransform();
-        push.objectID = obj->getInstanceID(); // TODO: Change to scene ID
+        push.model = renderData.transforms[0];
+        push.objectID = renderData.meshID; // TODO: Change to scene local ID
         // Console::debug(std::to_string(push.objectID), "Graphics");
         vkCmdPushConstants(
             commandBuffer, 
@@ -706,8 +706,12 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameO
             &push
         );
 
-        obj->graphicsMesh->bind(commandBuffer);
-        obj->graphicsMesh->draw(commandBuffer);
+        std::unique_ptr<GraphicsMesh> &graphicsMesh = graphicsMeshes[renderData.meshID];
+        if(graphicsMesh != nullptr)
+        {
+            graphicsMesh->bind(commandBuffer);
+            graphicsMesh->draw(commandBuffer);
+        }
     }
 }
 
@@ -771,6 +775,29 @@ int Graphics::getClickedObjID(uint32_t x, uint32_t y)
     idTexture->updateOnCPU();
 
     return idTexture->getPixelInt(x, y);
+}
+
+// Mesh management
+void Graphics::setGraphicsMesh(const core::Mesh& mesh)
+{
+    graphicsMeshes[mesh->getInstanceID()] = std::make_unique<GraphicsMesh>(mesh.get());
+}
+
+void Graphics::destroyGraphicsMeshes()
+{
+    graphicsMeshes.clear(); // Destroy all graphicsmeshes
+    sceneRenderQueue.clear(); // Ensure no meshes are queued for drawing
+}
+
+void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4& transform)
+{
+    if(!graphicsMeshes.contains(mesh->getInstanceID()))
+    {
+        Console::log("Mesh " + std::to_string(mesh->getInstanceID()) + " has no GraphicsMesh. Creating one now...", "Graphics");
+        setGraphicsMesh(mesh);
+    }
+
+    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), materialIndex, transform));
 }
 
 } // namespace graphics

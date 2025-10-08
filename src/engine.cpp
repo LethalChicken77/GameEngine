@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "engine.hpp"
+#include "modules.hpp"
 #include "core/input.hpp"
 #include "graphics/graphics_mesh.hpp"
 
@@ -27,7 +28,7 @@ namespace core
 
 // };
 
-Engine::Engine(graphics::Graphics& _graphics) : graphics(_graphics)
+Engine::Engine()
 {
     init();
 }
@@ -39,13 +40,13 @@ Engine::~Engine()
 
 void Engine::init()
 {
-    scene = Scene(ObjectManager::Instantiate<Scene_t>());
+    scene = Scene("Test");
     scene->loadScene();
 }
 
 void Engine::close()
 {
-    // graphics->cleanup();
+    // graphicsModule.cleanup();
 }
 
 void Engine::update(double deltaTime)
@@ -88,12 +89,12 @@ void Engine::update(double deltaTime)
         int mouseXPos = mousePos.x;
         int mouseYPos = mousePos.y;
         Console::debug(std::to_string(mouseXPos) + " " + std::to_string(mouseYPos));
-        Console::debug(std::to_string(graphics.getClickedObjID(mouseXPos, mouseYPos)));
+        Console::debug(std::to_string(graphicsModule.getClickedObjID(mouseXPos, mouseYPos)));
     }
 
     if(core::Input::getButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
     {
-        glfwSetInputMode(graphics.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(graphicsModule.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     if(core::Input::getButton(GLFW_MOUSE_BUTTON_RIGHT))
     {
@@ -105,7 +106,7 @@ void Engine::update(double deltaTime)
     }
     if(core::Input::getButtonUp(GLFW_MOUSE_BUTTON_RIGHT))
     {
-        glfwSetInputMode(graphics.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(graphicsModule.getWindow()->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
     scene->update(deltaTime);
@@ -138,8 +139,8 @@ void Engine::run()
     // StyleColorsDarkLinear(&style); // Done in post processing now
 
 
-    ImGui_ImplGlfw_InitForVulkan(graphics.getWindow()->getWindow(), true);
-    graphics.graphicsInitImgui();
+    ImGui_ImplGlfw_InitForVulkan(graphicsModule.getWindow()->getWindow(), true);
+    graphicsModule.graphicsInitImgui();
 
 
     Input::initializeKeys();
@@ -156,20 +157,20 @@ void Engine::run()
     camera.transform.position = glm::vec3(0.0f, 2.0f, -5.0f);
     camera.transform.rotation = glm::vec3(glm::radians(20.0f), 0.0f, 0.0f);
 
-    graphics.setCamera(&camera);
+    graphicsModule.setCamera(&camera);
 
 
     std::cout << "Entering main loop" << std::endl;
     double time = 0.0f;
     double deltaTime = 0.0f;
     // Main loop
-    while (graphics.isOpen()) {
+    while (graphicsModule.isOpen()) {
         // Poll for and process events
         glfwPollEvents();
         
         if(core::Input::getKeyDown(GLFW_KEY_R))
         {
-            graphics.reloadShaders();
+            graphicsModule.reloadShaders();
         }
 
         ImGui_ImplVulkan_NewFrame();
@@ -177,6 +178,7 @@ void Engine::run()
         ImGui::NewFrame();
 
         Console::drawImGui();
+        ObjectManager::drawImGui();
 
         ImGui::Begin("Material Properties");
 
@@ -190,7 +192,7 @@ void Engine::run()
         bool imguiHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
         ImGui::Render();
         // Input
-        Input::processInput(graphics.getWindow()->getWindow());
+        Input::processInput(graphicsModule.getWindow()->getWindow());
         
         if(core::Input::getKeyDown(GLFW_KEY_ESCAPE))
         {
@@ -199,8 +201,9 @@ void Engine::run()
 
         update(deltaTime);
 
+        scene->drawScene();
         // Render here
-        graphics.drawFrame(scene);
+        graphicsModule.drawFrame();
 
 
         // Update Time

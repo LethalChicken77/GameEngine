@@ -1,4 +1,5 @@
 #include "mesh.hpp"
+#include "graphics/graphics.hpp"
 
 #include <cassert>
 #include <cstring>
@@ -7,6 +8,8 @@
 #include <tiny_obj_loader.h>
 #include <unordered_map>
 #include <array>
+
+#include "modules.hpp"
 
 namespace core
 {
@@ -34,6 +37,27 @@ MeshData::~MeshData(){}
 float angleBetween(glm::vec3 v1, glm::vec3 v2)
 {
     return glm::acos(glm::clamp(glm::dot(v1, v2) / (glm::length(v1) * glm::length(v2)), -1.0f + 1e-6f, 1.0f - 1e-6f));
+}
+
+Mesh::Mesh(std::vector<Vertex> &vertices, const std::string& objectName)
+{
+    ptr = ObjectManager::Instantiate<MeshData>(objectName);
+    ptr->SetMesh(vertices, std::vector<uint32_t>{});
+    graphicsModule.setGraphicsMesh(*this);
+}
+
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<uint32_t> &indices, const std::string& objectName)
+{
+    ptr = ObjectManager::Instantiate<MeshData>(objectName);
+    ptr->SetMesh(vertices, indices);
+    graphicsModule.setGraphicsMesh(*this);
+}
+
+Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<Triangle> &triangles, const std::string& objectName)
+{
+    ptr = ObjectManager::Instantiate<MeshData>(objectName);
+    ptr->SetMesh(vertices, triangles);
+    graphicsModule.setGraphicsMesh(*this);
 }
 
 void Mesh::generateNormals()
@@ -165,7 +189,7 @@ void Mesh::generateTangents()
     }
 }
 
-Mesh Mesh::createCube(float edgeLength)
+Mesh Mesh::createCube(float edgeLength, const std::string& objectName)
 {
     edgeLength *= 0.5f;
     float inverseSqrt3 = 1.0f / glm::sqrt(3.0f);
@@ -196,7 +220,7 @@ Mesh Mesh::createCube(float edgeLength)
         6, 7, 3,
     };
 
-    return Mesh(vertices, indices);
+    return Mesh(vertices, indices, objectName);
 }
 
 std::vector<MeshData::Vertex> generateSierpinski(float edgeLength, int depth)
@@ -275,14 +299,14 @@ std::vector<MeshData::Vertex> generateSierpinski(float edgeLength, int depth)
     }
 }
 
-Mesh Mesh::createSierpinskiPyramid(float edgeLength, int depth)
+Mesh Mesh::createSierpinskiPyramid(float edgeLength, int depth, const std::string& objectName)
 {
     std::vector<Vertex> vertices = generateSierpinski(edgeLength, depth);
     
-    return Mesh(vertices);
+    return Mesh(vertices, objectName);
 }
 
-Mesh Mesh::createGrid(int width, int length, glm::vec2 dimensions)
+Mesh Mesh::createGrid(int width, int length, glm::vec2 dimensions, const std::string& objectName)
 {
     width = std::max(1, width);
     length = std::max(1, length);
@@ -322,12 +346,12 @@ Mesh Mesh::createGrid(int width, int length, glm::vec2 dimensions)
         }
     }
     
-    Mesh mesh = Mesh(vertices, triangles);
+    Mesh mesh = Mesh(vertices, triangles, objectName);
     mesh.generateNormals();
     return mesh;
 }
 
-Mesh Mesh::createSkybox(float size)
+Mesh Mesh::createSkybox(float size, const std::string& objectName)
 {
     std::vector<Vertex> vertices{8};
     float halfSize = size / 2.0f;
@@ -356,11 +380,11 @@ Mesh Mesh::createSkybox(float size)
         4, 1, 0
     };
 
-    Mesh mesh = Mesh(vertices, triangles);
+    Mesh mesh = Mesh(vertices, triangles, objectName);
     return mesh;
 }
 
-Mesh Mesh::loadObj(const std::string& filename)
+Mesh Mesh::loadObj(const std::string& filename, const std::string& objectName)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -463,29 +487,9 @@ Mesh Mesh::loadObj(const std::string& filename)
 
     std::cout << "Loaded " << vertices.size() << " vertices and " << triangles.size() << " triangles\n";
 
-    Mesh mesh(vertices, triangles);
+    Mesh mesh(vertices, triangles, objectName);
     mesh.generateTangents(); // Not included in OBJ, so we must generate them
     return mesh;
-}
-
-
-
-Mesh::Mesh(std::vector<Vertex> &vertices)
-{
-    ptr = ObjectManager::Instantiate<MeshData>();
-    ptr->SetMesh(vertices, std::vector<uint32_t>{});
-}
-
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<uint32_t> &indices)
-{
-    ptr = ObjectManager::Instantiate<MeshData>();
-    ptr->SetMesh(vertices, indices);
-}
-
-Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<Triangle> &triangles)
-{
-    ptr = ObjectManager::Instantiate<MeshData>();
-    ptr->SetMesh(vertices, triangles);
 }
 
 } // namespace core

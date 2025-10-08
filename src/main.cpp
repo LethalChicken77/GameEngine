@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <memory>
 
+#include "modules.hpp"
 #include "utils/console.hpp"
 #include "engine.hpp"
 #include "utils/debug.hpp"
@@ -89,29 +90,30 @@ void SetTitleBarColor(GLFWwindow* window, COLORREF titleBarColor, COLORREF borde
 
 int main() 
 {
-    graphics::Graphics graphics(APPLICATION_NAME, ENGINE_NAME);
+    graphicsModule.init(APPLICATION_NAME, ENGINE_NAME);
 
     // Set window icon
-    setWindowIcons(graphics.getWindow()->getWindow());
+    setWindowIcons(graphicsModule.getWindow()->getWindow());
     
 #ifdef WINDOWS_BUILD
     // Set title bar color
-    SetTitleBarColor(graphics.getWindow()->getWindow(), RGB(0x19, 0x15, 0x14), RGB(0x19, 0x15, 0x14));
+    SetTitleBarColor(graphicsModule.getWindow()->getWindow(), RGB(0x19, 0x15, 0x14), RGB(0x19, 0x15, 0x14));
 #endif
 
-    if(!graphics.isOpen())
+    if(!graphicsModule.isOpen())
     {
         Console::error("Failed to initialize graphics");
         return -1;
     }
 
-    Engine engine(graphics);
+    Engine engine{};
 
     // glm::vec3 test = {1, 2, 3};
 
     engine.run();
-
-    graphics.waitForDevice();
+    
+    graphicsModule.waitForDevice();
+    graphicsModule.cleanup();
 
     return 0;
 }

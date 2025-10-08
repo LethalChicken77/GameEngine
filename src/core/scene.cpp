@@ -1,11 +1,13 @@
 #include "scene.hpp"
 #include "graphics/graphics_mesh.hpp"
+#include "modules.hpp"
 
 namespace core
 {
 void Scene_t::loadScene()
 {
     std::cout << "Loading scene" << std::endl;
+    // Original vertex buffer testing code, must keep
     // Triangle
     // std::vector<GraphicsMesh::Vertex> vertices {
     //     {{0.0f, -0.5f, 0.0f}, {0.5f, 1.0f}},
@@ -13,15 +15,15 @@ void Scene_t::loadScene()
     //     {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f}}
     // };
 
+    Mesh monkeyMesh = Mesh::loadObj("internal/models/monkey_high_res.obj", "Monkey Mesh");
 
-    GameObject obj{ObjectManager::Instantiate<GameObject_t>()};
-    GameObject obj2{ObjectManager::Instantiate<GameObject_t>()};
-    GameObject obj3{ObjectManager::Instantiate<GameObject_t>()};
+    GameObject obj{ObjectManager::Instantiate<GameObject_t>("Basic Monkey")};
+    GameObject obj2{ObjectManager::Instantiate<GameObject_t>("Floor")};
+    GameObject obj3{ObjectManager::Instantiate<GameObject_t>("Wireframe Monkey")};
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = GraphicsMesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    obj->mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
-    obj->createGraphicsMesh();
+    obj->mesh = monkeyMesh;
     // obj->mesh = graphics::GraphicsMesh::loadObj("internal/models/Nefertiti.obj");
     // obj->mesh->generateNormals();
     // obj->mesh->createBuffers();
@@ -34,12 +36,10 @@ void Scene_t::loadScene()
     obj2->mesh = Mesh::createGrid(16,16, {50.0f, 50.0f});
     obj2->materialID = 2;
     obj2->transform.position = glm::vec3(0, -3, 0);
-    obj2->createGraphicsMesh();
 
-    obj3->mesh = Mesh::loadObj("internal/models/monkey_high_res.obj");
+    obj3->mesh = monkeyMesh;
     obj3->materialID = 1;
     obj3->transform.position = glm::vec3(-3, 0, 0);
-    obj3->createGraphicsMesh();
     // obj3.mesh = GraphicsMesh::createSierpinskiPyramid(12.0f, 8);
     // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
@@ -67,5 +67,18 @@ void Scene_t::update(double deltaTime)
         // obj.transform.rotation.x = glm::radians(-90.0f);
         counter++;
     }
+}
+
+void Scene_t::drawScene()
+{
+    for(const GameObject& obj : gameObjects)
+    {
+        graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform());
+    }
+}
+
+Scene::Scene(const std::string& sceneName)
+{
+    ptr = ObjectManager::Instantiate<Scene_t>(sceneName);
 }
 } // namespace core

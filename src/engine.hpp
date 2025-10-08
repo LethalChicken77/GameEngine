@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 
+#include "modules.hpp"
 #include "graphics/window.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/camera.hpp"
@@ -23,7 +24,7 @@ public:
     static constexpr int WIDTH = 800;
     static constexpr int HEIGHT = 600;
 
-    Engine(graphics::Graphics& _graphics);
+    Engine();
     ~Engine();
 
     Engine(const Engine&) = delete;
@@ -31,7 +32,7 @@ public:
 
     void init();
     void close();
-    bool isOpen() const { return graphics.getWindow()->isOpen(); }
+    bool isOpen() const { return graphicsModule.getWindow()->isOpen(); }
 
     void run();
 
@@ -43,8 +44,6 @@ private:
 
     VkInstance instance;
     VkApplicationInfo appInfo{};
-
-    graphics::Graphics& graphics;
 
     Scene scene;
 
