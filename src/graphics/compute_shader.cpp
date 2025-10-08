@@ -1,5 +1,5 @@
 #include "compute_shader.hpp"
-#include "../utils/file_util.hpp"
+#include "utils/file_util.hpp"
 #include "containers.hpp"
 
 #include <iostream>

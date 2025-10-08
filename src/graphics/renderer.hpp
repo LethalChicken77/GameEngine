@@ -8,7 +8,7 @@
 #include "window.hpp"
 #include "swap_chain.hpp"
 #include "device.hpp"
-#include "mesh.hpp"
+#include "graphics_mesh.hpp"
 #include "buffer.hpp"
 
 #include <cassert>

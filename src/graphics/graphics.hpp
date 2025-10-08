@@ -6,7 +6,7 @@
 #include <memory>
 #include <map>
 
-#include "../core/console.hpp"
+#include "utils/console.hpp"
 #include "window.hpp"
 #include "pipeline_manager.hpp"
 #include "graphics_pipeline.hpp"
@@ -18,14 +18,15 @@
 #include "frame_info.hpp"
 #include "render_pass.hpp"
 
-#include "mesh.hpp"
+#include "graphics_mesh.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
 #include "compute_shader.hpp"
 #include "shader_resource.hpp"
 #include "material.hpp"
-#include "../core/game_object.hpp"
-#include "../core/scene.hpp"
+#include "core/game_object.hpp" // TODO: Remove dependencies on core
+#include "core/scene.hpp"
+#include "core/mesh.hpp"
 #include "containers.hpp"
 
 
@@ -100,7 +101,8 @@ private:
     std::unique_ptr<Material> outputMaterial{};
     std::unique_ptr<Material> skyboxMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
-    std::shared_ptr<Mesh> skyboxMesh{};
+    core::Mesh skyboxMesh{};
+    std::shared_ptr<GraphicsMesh> skyboxGraphicsMesh{};
     Texture *idTexture = nullptr;
 
     VkClearColorValue defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};

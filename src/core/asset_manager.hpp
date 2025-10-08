@@ -14,9 +14,9 @@ namespace core
         AssetManager(const AssetManager&) = delete;
         AssetManager& operator=(const AssetManager&) = delete;
 
-        static void registerAsset(std::unique_ptr<Asset>);
+        static void registerAsset(std::unique_ptr<AssetData>);
 
     private:
-        static std::unordered_map<id_t, std::unique_ptr<Asset>> assets;
+        static std::unordered_map<id_t, std::unique_ptr<AssetData>> assets;
     };
 }

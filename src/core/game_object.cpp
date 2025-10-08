@@ -9,5 +9,9 @@ namespace core
 //     position = pos;
 // }
 
+void GameObject_t::createGraphicsMesh()
+{
+    graphicsMesh = std::make_shared<graphics::GraphicsMesh>(mesh.get());
+}
 
 } // namespace core

@@ -1,10 +1,10 @@
 #pragma once
-#include "../asset.hpp"
-#include "../../graphics/texture.hpp"
+#include "asset.hpp"
+#include "graphics/texture.hpp"
 
 namespace core
 {
-    class TextureAsset : public Asset
+    class TextureAsset : public AssetData
     {
     public:
         TextureAsset(const TextureAsset&) = delete;
@@ -19,7 +19,7 @@ namespace core
         }
         
     private:
-        TextureAsset(id_t newID) : Asset(newID) {}
+        TextureAsset(id_t newID) : AssetData(newID) {}
         friend std::unique_ptr<TextureAsset> Object::Instantiate<TextureAsset>(std::string);
 
         std::unique_ptr<graphics::Texture> texture;

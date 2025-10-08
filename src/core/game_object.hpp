@@ -1,40 +1,44 @@
 #pragma once
-#include "../graphics/mesh.hpp"
+#include "graphics/graphics_mesh.hpp"
 
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
 
 #include "object.hpp"
-#include "transform.hpp"
+#include "components/transform.hpp"
+#include "components/mesh_components.hpp"
+#include "utils/smart_reference.hpp"
 
 namespace core
 {
     class GameObject_t : public Object
     {
     public:
+        using Object::Object;
         GameObject_t(const GameObject_t&) = delete;
         GameObject_t& operator=(const GameObject_t&) = delete;
         GameObject_t(GameObject_t&&) = delete;
         GameObject_t& operator=(GameObject_t&&) = delete;
 
-        static std::unique_ptr<GameObject_t> Instantiate(std::string name = "New Game Object")
-        {
-            std::unique_ptr<GameObject_t> parent = Object::Instantiate<GameObject_t>(name);
-            return std::move(parent); // TODO: Put somewhere
-        }
-
-        id_t get_instance_id() const { return instanceID; }
         id_t get_id() const { return localID; }
-        std::shared_ptr<graphics::Mesh> mesh{};
+        Mesh mesh{};
+        std::shared_ptr<graphics::GraphicsMesh> graphicsMesh{}; // TODO: Remove dependence on graphics
+
+        void createGraphicsMesh();
 
         Transform transform;
+        // MeshRenderer meshRenderer;
 
         id_t materialID{};
     private:
-        GameObject_t(id_t newID) : Object(newID) {}
+        // GameObject_t(id_t newID) : Object(newID) {}
         id_t localID; // ID local to scene/prefab
-        friend std::unique_ptr<GameObject_t> Object::Instantiate<GameObject_t>(std::string);
     };
-    using GameObject = std::unique_ptr<GameObject_t>;
-}
+
+    class GameObject : public SmartRef<GameObject_t>
+    {
+        public:
+            using SmartRef<GameObject_t>::SmartRef;
+    };
+} // namespace core

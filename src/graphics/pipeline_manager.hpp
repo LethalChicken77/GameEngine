@@ -9,7 +9,7 @@
 #include "renderer.hpp"
 #include "shader.hpp"
 #include "graphics_pipeline.hpp"
-#include "../core/game_object.hpp"
+#include "core/game_object.hpp"
 
 namespace graphics{
 

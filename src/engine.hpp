@@ -11,7 +11,7 @@
 #include "core/game_object.hpp"
 #include "utils/debug.hpp"
 #include "core/random.hpp"
-#include "core/console.hpp"
+#include "utils/console.hpp"
 #include "core/scene.hpp"
 
 namespace core
@@ -46,7 +46,7 @@ private:
 
     graphics::Graphics& graphics;
 
-    Scene scene; // Something else should own this
+    Scene scene;
 
     graphics::Camera camera;
 };

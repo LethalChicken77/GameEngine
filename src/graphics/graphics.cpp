@@ -7,11 +7,11 @@
 #include "imgui_impl_glfw.h"
 
 #include "graphics.hpp"
-#include "mesh.hpp"
-#include "../core/input.hpp"
+#include "graphics_mesh.hpp"
+#include "core/input.hpp"
 #include "material.hpp"
-#include "../core/random.hpp"
-#include "../procedural/noise.hpp"
+#include "core/random.hpp"
+#include "procedural/noise.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -110,7 +110,8 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     loadTextures();
     loadShaders();
     loadMaterials();
-    skyboxMesh = Mesh::createSkybox(100);
+    skyboxMesh = core::Mesh::createSkybox(100);
+    skyboxGraphicsMesh = std::make_shared<GraphicsMesh>(skyboxMesh.get());
     pipelineManager = std::make_unique<PipelineManager>(renderer);
     // pipelineManager->createPipelines();
 
@@ -614,8 +615,8 @@ void Graphics::renderSkybox(FrameInfo& frameInfo)
         &push
     );
 
-    skyboxMesh->bind(frameInfo.commandBuffer);
-    skyboxMesh->draw(frameInfo.commandBuffer);
+    skyboxGraphicsMesh->bind(frameInfo.commandBuffer);
+    skyboxGraphicsMesh->draw(frameInfo.commandBuffer);
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObject> &gameObjects)
@@ -659,7 +660,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
 
         PushConstants push{};
         push.model = obj->transform.getTransform();
-        push.objectID = obj->get_instance_id(); // TODO: Change to scene ID
+        push.objectID = obj->getInstanceID(); // TODO: Change to scene ID
         vkCmdPushConstants(
             commandBuffer, 
             pipeline->getPipelineLayout(), 
@@ -669,8 +670,8 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo, std::vector<core::GameObj
             &push
         );
 
-        obj->mesh->bind(commandBuffer);
-        obj->mesh->draw(commandBuffer);
+        obj->graphicsMesh->bind(commandBuffer);
+        obj->graphicsMesh->draw(commandBuffer);
     }
 }
 
@@ -694,7 +695,7 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameO
         PushConstants push{};
 
         push.model = obj->transform.getTransform();
-        push.objectID = obj->get_instance_id(); // TODO: Change to scene ID
+        push.objectID = obj->getInstanceID(); // TODO: Change to scene ID
         // Console::debug(std::to_string(push.objectID), "Graphics");
         vkCmdPushConstants(
             commandBuffer, 
@@ -705,8 +706,8 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo, std::vector<core::GameO
             &push
         );
 
-        obj->mesh->bind(commandBuffer);
-        obj->mesh->draw(commandBuffer);
+        obj->graphicsMesh->bind(commandBuffer);
+        obj->graphicsMesh->draw(commandBuffer);
     }
 }
 

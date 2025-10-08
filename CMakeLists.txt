@@ -94,6 +94,7 @@ file(GLOB_RECURSE SOURCES
 
 # Add executable
 add_executable(GameEngine ${SOURCES} ${IMGUI_SOURCES} ${LIB_SOURCES} app.rc)
+target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/miniz-3.0.2")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyexr-1.0.12")

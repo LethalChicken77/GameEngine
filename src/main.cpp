@@ -6,7 +6,7 @@
 #include <vulkan/vulkan.h>
 #include <memory>
 
-#include "core/console.hpp"
+#include "utils/console.hpp"
 #include "engine.hpp"
 #include "utils/debug.hpp"
 #include "graphics/window.hpp"

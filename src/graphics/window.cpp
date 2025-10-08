@@ -1,6 +1,6 @@
 #include <iostream>
 #include "window.hpp"
-#include "../utils/debug.hpp"
+#include "utils/debug.hpp"
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <stdexcept>

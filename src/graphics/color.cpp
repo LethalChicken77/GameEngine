@@ -1,7 +1,7 @@
 #include "color.hpp"
 #include <algorithm>
 #include <cmath>
-#include "../core/console.hpp"
+#include "utils/console.hpp"
 
 namespace graphics
 {

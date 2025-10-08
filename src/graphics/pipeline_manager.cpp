@@ -1,5 +1,5 @@
 #include "pipeline_manager.hpp"
-#include "../core/console.hpp"
+#include "utils/console.hpp"
 
 namespace graphics{
 

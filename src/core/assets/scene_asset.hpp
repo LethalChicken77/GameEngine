@@ -1,10 +1,10 @@
 #pragma once
-#include "../asset.hpp"
-#include "../game_object.hpp"
+#include "asset.hpp"
+#include "game_object.hpp"
 
 namespace core
 {
-class SceneAsset : Asset
+class SceneAsset : AssetData
 {
     public:
         SceneAsset(const SceneAsset&) = delete;
@@ -21,7 +21,7 @@ class SceneAsset : Asset
         void drawScene();
         
     private:
-        SceneAsset(id_t newID) : Asset(newID) {}
+        SceneAsset(id_t newID) : AssetData(newID) {}
         friend std::unique_ptr<SceneAsset> Object::Instantiate<SceneAsset>(std::string);
 
         // std::vector<GameObject> gameObjects;

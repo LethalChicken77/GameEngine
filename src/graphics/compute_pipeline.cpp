@@ -5,8 +5,8 @@
 #include <cassert>
 
 #include "compute_pipeline.hpp"
-#include "../utils/file_util.hpp"
-#include "mesh.hpp"
+#include "utils/file_util.hpp"
+#include "graphics_mesh.hpp"
 
 using namespace std;
 

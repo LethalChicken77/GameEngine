@@ -5,7 +5,7 @@
 
 #include "engine.hpp"
 #include "core/input.hpp"
-#include "graphics/mesh.hpp"
+#include "graphics/graphics_mesh.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -39,7 +39,7 @@ Engine::~Engine()
 
 void Engine::init()
 {
-    scene = Scene_t::Instantiate();
+    scene = Scene(ObjectManager::Instantiate<Scene_t>());
     scene->loadScene();
 }
 

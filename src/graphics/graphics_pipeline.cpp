@@ -5,8 +5,8 @@
 #include <cassert>
 
 #include "graphics_pipeline.hpp"
-#include "../utils/file_util.hpp"
-#include "mesh.hpp"
+#include "utils/file_util.hpp"
+#include "graphics_mesh.hpp"
 
 using namespace std;
 
@@ -136,8 +136,8 @@ namespace graphics
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions = Mesh::Vertex::getBindingDescriptions();
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions = Mesh::Vertex::getAttributeDescriptions();
+        std::vector<VkVertexInputBindingDescription> bindingDescriptions = GraphicsMesh::getVertexBindingDescriptions();
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions = GraphicsMesh::getVertexAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -260,8 +260,8 @@ namespace graphics
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions = Mesh::Vertex::getBindingDescriptions();
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions = Mesh::Vertex::getAttributeDescriptions();
+        std::vector<VkVertexInputBindingDescription> bindingDescriptions = GraphicsMesh::getVertexBindingDescriptions();
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions = GraphicsMesh::getVertexAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
