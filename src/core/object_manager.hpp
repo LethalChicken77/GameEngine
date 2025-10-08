@@ -19,7 +19,7 @@ namespace core
             static T *Instantiate(const std::string& name = "New Object")
             {
                 static_assert(std::is_base_of<Object, T>::value, "Instantiated objects must derive from Object");
-                std::unique_ptr<T> t = std::make_unique<T>();
+                std::unique_ptr<T> t = std::make_unique<T>(currentID++);
                 objectList.push_back(std::unique_ptr<Object>(std::move(t)));
                 T* objPtr = static_cast<std::unique_ptr<T>>(objectList.back()).get(); // New object is always at the end of the vector
                 objPtr->name = name;
