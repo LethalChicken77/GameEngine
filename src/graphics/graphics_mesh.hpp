@@ -22,25 +22,18 @@ namespace graphics
         static std::vector<VkVertexInputBindingDescription> getVertexBindingDescriptions();
         static std::vector<VkVertexInputAttributeDescription> getVertexAttributeDescriptions();
 
-        // struct Builder
-        // {
-        //     std::vector<Vertex> vertices;
-        //     std::vector<Triangle> triangles;
-
-        //     void loadModelFromObj(const std::string& filename);
-        // };
-
         GraphicsMesh(core::MeshData* meshptr);
         ~GraphicsMesh();
 
         GraphicsMesh(const GraphicsMesh&) = delete;
         GraphicsMesh& operator=(const GraphicsMesh&) = delete;
 
-        void bind(VkCommandBuffer commandBuffer); // TODO: Remove in favor of graphics.draw(Mesh)
-        void draw(VkCommandBuffer commandBuffer);
-        void drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount);
+        void bind(VkCommandBuffer commandBuffer, const std::unique_ptr<Buffer> &instanceBuffer); // TODO: Remove in favor of graphics.draw(Mesh)
+        void draw(VkCommandBuffer commandBuffer, uint32_t instanceCount);
 
         void createBuffers();
+        void createInstanceBuffer(const std::vector<glm::mat4> &transforms);
+        void updateInstanceBuffer(const std::vector<glm::mat4> &transforms);
 
     private:
         std::unique_ptr<Buffer> vertexBuffer{};

@@ -59,31 +59,39 @@ public:
     Device *getDevice() { return &device; }
     void bindCameraDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
     void bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
-    void renderSkybox(FrameInfo& frameInfo);
+    
     void renderGameObjects(FrameInfo& frameInfo);
     void renderGameObjectIDs(FrameInfo& frameInfo);
-
+    
     void graphicsInitImgui();
-
+    
     void reloadShaders();
-
+    
     int getClickedObjID(uint32_t x, uint32_t y);
-
+    
     // Mesh management
     void setGraphicsMesh(const core::Mesh& mesh); // Create and update meshes
     void destroyGraphicsMeshes();
     void drawMesh(const core::Mesh& mesh, uint32_t materialIndex /* TODO: Pass material smart reference*/, const glm::mat4 &transform); // Draw to scene
+    
+    void drawSkybox();
 
 private:
     struct MeshRenderData
     {
-        MeshRenderData(id_t id, uint32_t materialID = 0, const glm::mat4& _transform = glm::mat4(1))
-            : meshID(id), transforms{_transform}, materialIndex{materialID} {}
+        MeshRenderData(id_t id, const glm::mat4& _transform, uint32_t materialID = 0)
+            : meshID(id), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
+        MeshRenderData(id_t id, const std::vector<glm::mat4>& _transform, uint32_t materialID = 0)
+            : meshID(id), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
+
         id_t meshID;
         uint32_t materialIndex;
         std::vector<glm::mat4> transforms{};
+        std::unique_ptr<Buffer> instanceBuffer{};
     };
     std::vector<MeshRenderData> sceneRenderQueue{};
+
+    static std::unique_ptr<Buffer> createInstanceBuffer(const std::vector<glm::mat4>& transforms);
 
     void createRenderPasses();
     void loadTextures();
@@ -118,7 +126,6 @@ private:
     std::unique_ptr<Material> skyboxMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
     core::Mesh skyboxMesh{};
-    std::shared_ptr<GraphicsMesh> skyboxGraphicsMesh{};
     Texture *idTexture = nullptr;
 
     // Store graphics meshes based on instance ID

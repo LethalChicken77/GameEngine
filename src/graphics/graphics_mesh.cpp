@@ -23,26 +23,17 @@ GraphicsMesh::GraphicsMesh(core::MeshData* mesh) : meshPtr(mesh)
 
 GraphicsMesh::~GraphicsMesh(){}
 
-void GraphicsMesh::bind(VkCommandBuffer commandBuffer)
+void GraphicsMesh::bind(VkCommandBuffer commandBuffer, const std::unique_ptr<Buffer> &instanceBuffer)
 {
-    VkBuffer buffers[] = {vertexBuffer->getBuffer()};
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+    VkBuffer buffers[] = {vertexBuffer->getBuffer(), instanceBuffer->getBuffer()};
+    VkDeviceSize offsets[] = {0, 0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
     if(useIndexBuffer)
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 }
 
-void GraphicsMesh::draw(VkCommandBuffer commandBuffer)
+void GraphicsMesh::draw(VkCommandBuffer commandBuffer, uint32_t instanceCount)
 {
-    if(useIndexBuffer)
-        vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
-    else
-        vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
-}
-
-void GraphicsMesh::drawInstanced(VkCommandBuffer commandBuffer, uint32_t instanceCount)
-{
-    // TODO: Implement
     if(useIndexBuffer)
         vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, 0, 0, 0);
     else
@@ -135,16 +126,21 @@ void GraphicsMesh::createBuffers()
 
 std::vector<VkVertexInputBindingDescription> GraphicsMesh::getVertexBindingDescriptions()
 {
-    std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
+    std::vector<VkVertexInputBindingDescription> bindingDescriptions(2);
     bindingDescriptions[0].binding = 0;
     bindingDescriptions[0].stride = sizeof(Vertex);
     bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    // Instance data
+    bindingDescriptions[1].binding = 1;
+    bindingDescriptions[1].stride = sizeof(glm::mat4);
+    bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
     return bindingDescriptions;
 }
 
 std::vector<VkVertexInputAttributeDescription> GraphicsMesh::getVertexAttributeDescriptions()
 {
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(6);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions(10);
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -157,7 +153,7 @@ std::vector<VkVertexInputAttributeDescription> GraphicsMesh::getVertexAttributeD
 
     attributeDescriptions[2].binding = 0;
     attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
     attributeDescriptions[2].offset = offsetof(Vertex, tangent);
 
     attributeDescriptions[3].binding = 0;
@@ -174,6 +170,15 @@ std::vector<VkVertexInputAttributeDescription> GraphicsMesh::getVertexAttributeD
     attributeDescriptions[5].location = 5;
     attributeDescriptions[5].format = VK_FORMAT_R32G32_SFLOAT;
     attributeDescriptions[5].offset = offsetof(Vertex, texCoord);
+
+    // Instance attributes
+    for(int i = 0; i < 4; i++)
+    {
+        attributeDescriptions[i + 6].binding = 1;
+        attributeDescriptions[i + 6].location = i + 6;
+        attributeDescriptions[i + 6].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDescriptions[i + 6].offset = sizeof(glm::vec4) * i;
+    }
 
     return attributeDescriptions;
 }

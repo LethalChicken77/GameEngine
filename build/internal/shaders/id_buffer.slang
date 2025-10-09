@@ -2,7 +2,6 @@ import utils;
 
 struct PushConstants
 {
-    float4x4 model;
     int objectID;
 };
 [[vk::push_constant]]
@@ -18,7 +17,7 @@ struct CameraUbo
 };
 [[vk::binding(0, 0)]] ConstantBuffer<CameraUbo> cameraData;
 
-struct Vertex
+struct VertexData
 {
     float3 Position : POSITION;
     float3 Normal : NORMAL;
@@ -26,19 +25,30 @@ struct Vertex
     float3 Bitangent : BITANGENT;
     float3 Color : COLOR;
     float2 UV : TEXCOORD0;
-}
+};
+
+struct InstanceData
+{
+    float4x4 Model;
+};
 
 struct VOut
 {
     float4 FragPosition : SV_POSITION;
-}
+    float3 Position : POSITION;
+    float3 Normal : NORMAL;
+    float4 Tangent : TANGENT;
+    float3 Bitangent : BITANGENT;
+    float3 Color : COLOR;
+    float2 UV : TEXCOORD0;
+};
 
 [shader("vertex")]
-VOut vsMain(Vertex input)
+VOut vsMain(VertexData vertex, InstanceData instance)
 {
     VOut output;
-    float4x4 model = transpose(pushConstants.model);
-    output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(input.Position, 1.0)));
+    float4x4 model = transpose(instance.Model);
+    output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(vertex.Position, 1.0)));
 
     return output;
 }

@@ -11,8 +11,8 @@ namespace graphics
 {
     struct PushConstants
     {
-        alignas(64) glm::mat4 model; // 64 bytes
-        int objectID = -2; // 68 bytes
+        // alignas(64) glm::mat4 model; // 64 bytes
+        int objectID = -2; // 4 bytes
         // alignas(4) float time;
     };
     

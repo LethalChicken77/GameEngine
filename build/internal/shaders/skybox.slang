@@ -11,31 +11,12 @@ struct MaterialInfo
 };
 [[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
 
-
-struct Vertex
-{
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float4 Tangent : TANGENT;
-    float3 Bitangent : BITANGENT;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-}
-
-struct VOut
-{
-    float4 FragPosition : SV_POSITION;
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-}
-
 [shader("vertex")]
-VOut vsMain(Vertex input)
+VOut vsMain(VertexData input, InstanceData instance)
 {
     VOut output;
-    output.FragPosition = mul(transpose(cameraData.viewProj), mul(transpose(pushConstants.model), float4(input.Position, 1.0)));
+    float4x4 model = transpose(float4x4(instance.Model0, instance.Model1, instance.Model2, instance.Model3));
+    output.FragPosition = mul(cameraData.viewProj, mul(model, float4(input.Position, 1.0)));
     output.Position = input.Position.xyz;
 
     // float3x3 normalMatrix = inverse(transpose(float3x3(pushConstants.model)));

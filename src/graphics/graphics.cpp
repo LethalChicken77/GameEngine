@@ -106,7 +106,6 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     loadShaders();
     loadMaterials();
     skyboxMesh = core::Mesh::createSkybox(100);
-    skyboxGraphicsMesh = std::make_shared<GraphicsMesh>(skyboxMesh.get());
     pipelineManager = std::make_unique<PipelineManager>(renderer);
     // pipelineManager->createPipelines();
 
@@ -198,7 +197,6 @@ void Graphics::drawFrame()
         // idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
-        renderSkybox(frameInfo);
         renderGameObjects(frameInfo);
         renderer.endRenderPass();
         
@@ -277,6 +275,7 @@ void Graphics::drawFrame()
 
         renderer.endFrame();
     }
+    vkDeviceWaitIdle(Shared::device->device());
     sceneRenderQueue.clear();
 }
 
@@ -398,7 +397,8 @@ void Graphics::loadShaders()
     ));
 
     PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
-    skyboxConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    skyboxConfigInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
+    skyboxConfigInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
     skyboxConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     skyboxConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
@@ -573,46 +573,11 @@ void Graphics::bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipe
     );
 }
 
-void Graphics::renderSkybox(FrameInfo& frameInfo)
+void Graphics::drawSkybox()
 {
-    const Shader* shader = skyboxMaterial->getShader();
-    GraphicsPipeline* pipeline = shader->getPipeline();
-    // std::unique_ptr<GraphicsPipeline>& pipeline = pipelineManager->getPipeline(2);
-    uint32_t setIndex = pipeline->getID() + 1;
-
-    pipeline->bind(frameInfo.commandBuffer);
-    VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
-    bindCameraDescriptor(frameInfo, pipeline);
-    bindGlobalDescriptor(frameInfo, pipeline);
-
-    std::vector<VkDescriptorSet> localDescriptorSets = { skyboxMaterial->getDescriptorSet() };
-
-    vkCmdBindDescriptorSets(
-        frameInfo.commandBuffer, 
-        VK_PIPELINE_BIND_POINT_GRAPHICS, 
-        pipeline->getPipelineLayout(), 
-        2,
-        1,
-        localDescriptorSets.data(), 
-        0,
-        nullptr
-    );
-
-    PushConstants push{};
     core::Transform transform{};
     transform.position = camera->transform.position;
-    push.model = transform.getTransform();
-    vkCmdPushConstants(
-        frameInfo.commandBuffer, 
-        pipeline->getPipelineLayout(), 
-        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
-        0, 
-        sizeof(PushConstants), 
-        &push
-    );
-
-    skyboxGraphicsMesh->bind(frameInfo.commandBuffer);
-    skyboxGraphicsMesh->draw(frameInfo.commandBuffer);
+    drawMesh(skyboxMesh, 0, transform.getTransform());
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo)
@@ -655,7 +620,6 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo)
         }
 
         PushConstants push{}; // TODO: Instance specific data
-        push.model = renderData.transforms[0];
         push.objectID = renderData.meshID; // TODO: Change to scene local ID
         vkCmdPushConstants(
             commandBuffer, 
@@ -669,8 +633,8 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo)
         std::unique_ptr<GraphicsMesh> &graphicsMesh = graphicsMeshes[renderData.meshID];
         if(graphicsMesh != nullptr)
         {
-            graphicsMesh->bind(commandBuffer);
-            graphicsMesh->draw(commandBuffer);
+            graphicsMesh->bind(commandBuffer, renderData.instanceBuffer);
+            graphicsMesh->draw(commandBuffer, renderData.transforms.size());
         }
     }
 }
@@ -694,7 +658,6 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo)
     {
         PushConstants push{};
 
-        push.model = renderData.transforms[0];
         push.objectID = renderData.meshID; // TODO: Change to scene local ID
         // Console::debug(std::to_string(push.objectID), "Graphics");
         vkCmdPushConstants(
@@ -709,8 +672,8 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo)
         std::unique_ptr<GraphicsMesh> &graphicsMesh = graphicsMeshes[renderData.meshID];
         if(graphicsMesh != nullptr)
         {
-            graphicsMesh->bind(commandBuffer);
-            graphicsMesh->draw(commandBuffer);
+            graphicsMesh->bind(commandBuffer, renderData.instanceBuffer);
+            graphicsMesh->draw(commandBuffer, renderData.transforms.size());
         }
     }
 }
@@ -797,7 +760,36 @@ void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const gl
         setGraphicsMesh(mesh);
     }
 
-    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), materialIndex, transform));
+    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transform, materialIndex));
+}
+
+std::unique_ptr<Buffer> Graphics::createInstanceBuffer(const std::vector<glm::mat4>& transforms)
+{
+    uint32_t instanceCount = transforms.size();
+    VkDeviceSize bufferSize = sizeof(transforms[0]) * instanceCount;
+    uint32_t instanceSize = sizeof(transforms[0]);
+
+    Buffer stagingBuffer{
+        *Shared::device,
+        instanceSize,
+        instanceCount,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    };
+
+    stagingBuffer.map();
+    stagingBuffer.writeToBuffer((void *)transforms.data());
+
+    std::unique_ptr<Buffer> instanceBuffer = std::make_unique<Buffer>(
+        *Shared::device,
+        instanceSize,
+        instanceCount,
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+    );
+
+    Shared::device->copyBuffer(stagingBuffer.getBuffer(), instanceBuffer->getBuffer(), bufferSize);
+    return std::move(instanceBuffer);
 }
 
 } // namespace graphics

@@ -15,44 +15,25 @@ struct MaterialInfo
 };
 [[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
 
-struct Vertex
-{
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float4 Tangent : TANGENT;
-    float3 Bitangent : BITANGENT;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-}
-
-struct VOut
-{
-    float4 FragPosition : SV_POSITION;
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-}
-
 [shader("vertex")]
-VOut vsMain(Vertex input)
+VOut vsMain(VertexData vertex, InstanceData instance)
 {
     VOut output;
-    float4x4 model = transpose(pushConstants.model);
-    output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(input.Position, 1.0)));
-    output.Position = mul(model, float4(input.Position, 1.0)).xyz;
+    float4x4 model = float4x4(instance.Model0, instance.Model1, instance.Model2, instance.Model3);
+    output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(vertex.Position, 1.0)));
+    output.Position = mul(model, float4(vertex.Position, 1.0)).xyz;
 
     float3x3 normalMatrix = transpose(inverse(float3x3(model)));
-    output.Normal = normalize(mul(normalMatrix, input.Normal));
+    output.Normal = normalize(mul(normalMatrix, vertex.Normal));
 
     float3 cameraPos = cameraData.view[3].xyz;
-    float3 viewDir = normalize(input.Position.xyz - cameraPos);
+    float3 viewDir = normalize(vertex.Position.xyz - cameraPos);
     if (dot(output.Normal, viewDir) > 0)
     {
         output.Normal = normalize(output.Normal - viewDir * dot(output.Normal, viewDir));
     }
-    output.Color = input.Color;
-    output.UV = input.UV;
+    output.Color = vertex.Color;
+    output.UV = vertex.UV;
 
     return output;
 }

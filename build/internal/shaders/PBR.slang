@@ -18,35 +18,15 @@ struct MaterialInfo
 [[vk::binding(5, 2)]] Sampler2D normalMap; // Linear
 [[vk::binding(6, 2)]] Sampler2D skyboxTexture; // SRGB (Temporary)
 
-struct Vertex
-{
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float4 Tangent : TANGENT;
-    float3 Bitangent : BITANGENT;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-};
-
-struct VOut
-{
-    float4 FragPosition : SV_POSITION;
-    float3 Position : POSITION;
-    float3 Normal : NORMAL;
-    float4 Tangent : TANGENT;
-    float3 Bitangent : BITANGENT;
-    float3 Color : COLOR;
-    float2 UV : TEXCOORD0;
-};
-
 [shader("vertex")]
-VOut vsMain(Vertex input)
+VOut vsMain(VertexData input, InstanceData instance)
 {
     VOut output;
-    output.FragPosition = mul(transpose(cameraData.viewProj), mul(transpose(pushConstants.model), float4(input.Position, 1.0)));
-    output.Position = mul(transpose(pushConstants.model), float4(input.Position, 1.0)).xyz;
-    
-    float3x3 normalMatrix = transpose(inverse(float3x3(pushConstants.model)));
+    float4x4 model = transpose(float4x4(instance.Model0, instance.Model1, instance.Model2, instance.Model3));
+    output.FragPosition = mul(cameraData.viewProj, mul(model, float4(input.Position, 1.0)));
+    output.Position = mul(model, float4(input.Position, 1.0)).xyz;
+
+    float3x3 normalMatrix = transpose(inverse(float3x3(model)));
     output.Normal = normalize(mul(normalMatrix, input.Normal));
     output.Tangent = float4(normalize(mul(normalMatrix, input.Tangent.xyz)), input.Tangent.w);
     output.Bitangent = normalize(mul(normalMatrix, input.Bitangent));

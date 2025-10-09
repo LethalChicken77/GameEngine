@@ -154,8 +154,10 @@ void Engine::run()
     //     {0.01f, 100.0f, 20.0f},
     //     true
     // );
-    camera.transform.position = glm::vec3(0.0f, 2.0f, -5.0f);
-    camera.transform.rotation = glm::vec3(glm::radians(20.0f), 0.0f, 0.0f);
+    camera.transform.position = glm::vec3(0.0f, 0.0f, -5.0f);
+    camera.transform.rotation = glm::vec3(glm::radians(0.0f), 0.0f, 0.0f);
+    // camera.transform.position = glm::vec3(0.0f, 2.0f, -5.0f);
+    // camera.transform.rotation = glm::vec3(glm::radians(20.0f), 0.0f, 0.0f);
 
     graphicsModule.setCamera(&camera);
 
@@ -201,6 +203,7 @@ void Engine::run()
 
         update(deltaTime);
 
+        graphicsModule.drawSkybox();
         scene->drawScene();
         // Render here
         graphicsModule.drawFrame();
