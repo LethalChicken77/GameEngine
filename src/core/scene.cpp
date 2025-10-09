@@ -16,6 +16,7 @@ void Scene_t::loadScene()
     // };
 
     Mesh monkeyMesh = Mesh::loadObj("internal/models/monkey_high_res.obj", "Monkey Mesh");
+    Mesh cubeMesh = Mesh::createCube(0.1f, "Cube");
 
     GameObject obj{ObjectManager::Instantiate<GameObject_t>("Basic Monkey")};
     GameObject obj2{ObjectManager::Instantiate<GameObject_t>("Floor")};
@@ -23,7 +24,7 @@ void Scene_t::loadScene()
     // std::cout << "Creating Grid" << std::endl;
     // obj.mesh = GraphicsMesh::createGrid(512, 512, {50.0f, 50.0f});
     // obj.materialID = 0;
-    obj->mesh = monkeyMesh;
+    obj->mesh = cubeMesh;
     // obj->mesh = graphics::GraphicsMesh::loadObj("internal/models/Nefertiti.obj");
     // obj->mesh->generateNormals();
     // obj->mesh->createBuffers();
@@ -44,8 +45,8 @@ void Scene_t::loadScene()
     // obj3.mesh = GraphicsMesh::createSierpinskiPyramid(12.0f, 8);
     // obj3.materialID = 2;
     gameObjects.push_back(std::move(obj));
-    gameObjects.push_back(std::move(obj2));
-    gameObjects.push_back(std::move(obj3));
+    // gameObjects.push_back(std::move(obj2));
+    // gameObjects.push_back(std::move(obj3));
     std::cout << "Loaded game objects" << std::endl;
 }
 
@@ -75,21 +76,22 @@ void Scene_t::drawScene()
     for(const GameObject& obj : gameObjects)
     {
         Transform baseTransform = obj->transform;
-        // std::vector<glm::mat4> transforms{};
-        // int gridSize = 5;
-        // for(int x = 0; x < gridSize; x++)
-        // {
-        // for(int y = 0; y < gridSize; y++)
-        // {
-        // for(int z = 0; z < gridSize; z++)
-        // {
-        //     Transform temp{};
-        //     temp.position = obj->transform.position + glm::vec3(x, y, z);
-        //     transforms.push_back(temp.getTransform());
-        // }
-        // }
-        // }
-        graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform());
+        std::vector<glm::mat4> transforms{};
+        int gridSize = 30;
+        for(int x = 0; x < gridSize; x++)
+        {
+        for(int y = 0; y < gridSize; y++)
+        {
+        for(int z = 0; z < gridSize; z++)
+        {
+            Transform temp{};
+            temp.position = obj->transform.position + glm::vec3(x, y, z);
+            transforms.push_back(temp.getTransform());
+        }
+        }
+        }
+        // graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform());
+        graphicsModule.drawMeshInstanced(obj->mesh, obj->materialID, transforms);
     }
 }
 
