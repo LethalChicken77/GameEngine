@@ -29,7 +29,10 @@ struct VertexData
 
 struct InstanceData
 {
-    float4x4 Model;
+    float4 Model0 : LOCATION6;
+    float4 Model1 : LOCATION7;
+    float4 Model2 : LOCATION8;
+    float4 Model3 : LOCATION9;
 };
 
 struct VOut
@@ -47,7 +50,7 @@ struct VOut
 VOut vsMain(VertexData vertex, InstanceData instance)
 {
     VOut output;
-    float4x4 model = transpose(instance.Model);
+    float4x4 model = transpose(float4x4(instance.Model0, instance.Model1, instance.Model2, instance.Model3));
     output.FragPosition = mul(transpose(cameraData.viewProj), mul(model, float4(vertex.Position, 1.0)));
 
     return output;

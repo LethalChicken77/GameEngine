@@ -74,6 +74,21 @@ void Scene_t::drawScene()
 {
     for(const GameObject& obj : gameObjects)
     {
+        Transform baseTransform = obj->transform;
+        // std::vector<glm::mat4> transforms{};
+        // int gridSize = 5;
+        // for(int x = 0; x < gridSize; x++)
+        // {
+        // for(int y = 0; y < gridSize; y++)
+        // {
+        // for(int z = 0; z < gridSize; z++)
+        // {
+        //     Transform temp{};
+        //     temp.position = obj->transform.position + glm::vec3(x, y, z);
+        //     transforms.push_back(temp.getTransform());
+        // }
+        // }
+        // }
         graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform());
     }
 }

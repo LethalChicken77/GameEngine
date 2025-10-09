@@ -73,6 +73,7 @@ public:
     void setGraphicsMesh(const core::Mesh& mesh); // Create and update meshes
     void destroyGraphicsMeshes();
     void drawMesh(const core::Mesh& mesh, uint32_t materialIndex /* TODO: Pass material smart reference*/, const glm::mat4 &transform); // Draw to scene
+    void drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex, const std::vector<glm::mat4> &transforms); // Draw to scene
     
     void drawSkybox();
 
@@ -123,7 +124,6 @@ private:
     std::unique_ptr<Material> ppMaterial{};
     std::unique_ptr<Material> imguiMaterial{};
     std::unique_ptr<Material> outputMaterial{};
-    std::unique_ptr<Material> skyboxMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
     core::Mesh skyboxMesh{};
     Texture *idTexture = nullptr;

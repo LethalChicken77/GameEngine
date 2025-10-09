@@ -397,8 +397,8 @@ void Graphics::loadShaders()
     ));
 
     PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
-    skyboxConfigInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
-    skyboxConfigInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
+    // skyboxConfigInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
+    // skyboxConfigInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_NEVER;
     skyboxConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     skyboxConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
@@ -498,7 +498,6 @@ void Graphics::loadMaterials()
     _skybox.setValue("color", Color(0.f, 0.f, 0.f));
     _skybox.createShaderInputBuffer();
     _skybox.createDescriptorSet();
-    skyboxMaterial = std::make_unique<Material>(std::move(_skybox));
 
     Material m1 = Material::instantiate(Shared::shaders[4].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
@@ -538,6 +537,7 @@ void Graphics::loadMaterials()
     m2.createShaderInputBuffer();
     m2.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m2)); // Should probably be done in instantiate
+    Shared::materials.emplace_back(std::move(_skybox));
 }
 
 void Graphics::bindCameraDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline)
@@ -575,9 +575,9 @@ void Graphics::bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipe
 
 void Graphics::drawSkybox()
 {
-    core::Transform transform{};
-    transform.position = camera->transform.position;
-    drawMesh(skyboxMesh, 0, transform.getTransform());
+    core::Transform tempTransform{};
+    tempTransform.position = camera->transform.position;
+    drawMesh(skyboxMesh, 4, tempTransform.getTransform());
 }
 
 void Graphics::renderGameObjects(FrameInfo& frameInfo)
@@ -761,6 +761,18 @@ void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const gl
     }
 
     sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transform, materialIndex));
+}
+
+void Graphics::drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex, const std::vector<glm::mat4> &transforms)
+{
+    if(!graphicsMeshes.contains(mesh->getInstanceID()))
+    {
+        Console::log("Mesh " + std::to_string(mesh->getInstanceID()) + " has no GraphicsMesh. Creating one now...", "Graphics");
+        setGraphicsMesh(mesh);
+    }
+    if(transforms.size() == 0) return; // No work to do with no transforms
+
+    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transforms, materialIndex));
 }
 
 std::unique_ptr<Buffer> Graphics::createInstanceBuffer(const std::vector<glm::mat4>& transforms)

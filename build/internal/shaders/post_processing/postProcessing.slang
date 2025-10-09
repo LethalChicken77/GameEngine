@@ -54,7 +54,6 @@ float4 fsMain(VOut input)
     // outColor = (round(outColor) + round(outColor - 0.25) + round(outColor + 0.25)) / 4;
     outColor = LinearToACEScg(outColor);
     outColor = ACESFilmCurve(outColor);
-    // outColor = LinearToSRGB(outColor);
     float gamma = materialInfo.gamma;
     outColor = pow(outColor, gamma);
     return float4(outColor, 1.0);

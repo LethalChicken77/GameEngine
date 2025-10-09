@@ -12,16 +12,16 @@ struct MaterialInfo
 [[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
 
 [shader("vertex")]
-VOut vsMain(VertexData input, InstanceData instance)
+VOut vsMain(VertexData vertex, InstanceData instance)
 {
     VOut output;
     float4x4 model = transpose(float4x4(instance.Model0, instance.Model1, instance.Model2, instance.Model3));
-    output.FragPosition = mul(cameraData.viewProj, mul(model, float4(input.Position, 1.0)));
-    output.Position = input.Position.xyz;
+    output.FragPosition = mul(cameraData.viewProj, mul(model, float4(vertex.Position, 1.0)));
+    output.Position = vertex.Position;
 
     // float3x3 normalMatrix = inverse(transpose(float3x3(pushConstants.model)));
     // output.Normal = normalize(mul(normalMatrix, input.Normal));
-    output.Color = input.Color;
+    output.Color = vertex.Color;
     // output.UV = input.UV;
 
     return output;
@@ -50,6 +50,6 @@ float4 fsMain(VOut input)
     float downToHorizon = saturate(pow((sphericalCoords.y - 0.5) * 2.0, 0.1)) + fudge;
     float3 result = lerp(lerp(lerp(zenithColor, horizonColor, zenithToHorizon), hazeColor, zenithToHorizonHaze) + sunGlow + float3(sunDisk), groundColor, downToHorizon);
 
-    float3 outColor = result;// LinearToACEScg(result);//gamma_srgb(result);
+    float3 outColor = result; // LinearToACEScg(result);//gamma_srgb(result);
     return float4(outColor, 1.0);
 }
