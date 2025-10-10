@@ -195,14 +195,14 @@ Mesh Mesh::createCube(float edgeLength, const std::string& objectName)
     float inverseSqrt3 = 1.0f / glm::sqrt(3.0f);
 
     std::vector<MeshData::Vertex> vertices {
-        {{-1, -1, -1}, {-inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
-        {{1, -1, -1}, {inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
-        {{-1, 1, -1}, {-inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
-        {{1, 1, -1}, {inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
-        {{-1, -1, 1}, {-inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
-        {{1, -1, 1}, {inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
-        {{-1, 1, 1}, {-inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
-        {{1, 1, 1}, {inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
+        {{-edgeLength, -edgeLength, -edgeLength}, {-inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
+        {{edgeLength, -edgeLength, -edgeLength}, {inverseSqrt3, -inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
+        {{-edgeLength, edgeLength, -edgeLength}, {-inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 0.0f}},
+        {{edgeLength, edgeLength, -edgeLength}, {inverseSqrt3, inverseSqrt3, -inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 0.0f}},
+        {{-edgeLength, -edgeLength, edgeLength}, {-inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
+        {{edgeLength, -edgeLength, edgeLength}, {inverseSqrt3, -inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
+        {{-edgeLength, edgeLength, edgeLength}, {-inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {0.0f, 1.0f}},
+        {{edgeLength, edgeLength, edgeLength}, {inverseSqrt3, inverseSqrt3, inverseSqrt3}, {0,0,0,1}, {0,0,0}, {1.f, 1.f, 1.f}, {1.0f, 1.0f}},
     };
 
     std::vector<uint32_t> indices{

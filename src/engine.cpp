@@ -59,28 +59,28 @@ void Engine::update(double deltaTime)
     float movementSpeed = 10.f;
     if(core::Input::getKey(GLFW_KEY_A))
     {
-        camera.transform.position -= movementSpeed * (float)deltaTime * right;
+        camera.transform.addPosition(-movementSpeed * (float)deltaTime * right);
     }
     if(core::Input::getKey(GLFW_KEY_D))
     {
-        camera.transform.position += movementSpeed * (float)deltaTime * right;
+        camera.transform.addPosition(movementSpeed * (float)deltaTime * right);
     }
     if(core::Input::getKey(GLFW_KEY_W))
     {
-        camera.transform.position += movementSpeed * (float)deltaTime * forward;
+        camera.transform.addPosition(movementSpeed * (float)deltaTime * forward);
     }
     if(core::Input::getKey(GLFW_KEY_S))
     {
-        camera.transform.position -= movementSpeed * (float)deltaTime * forward;
+        camera.transform.addPosition(-movementSpeed * (float)deltaTime * forward);
     }
 
     if(core::Input::getKey(GLFW_KEY_SPACE))
     {
-        camera.transform.position.y += 10.f * deltaTime;
+        camera.transform.addPosition(glm::vec3(0, 10.f * deltaTime, 0));
     }
     if(core::Input::getKey(GLFW_KEY_LEFT_SHIFT))
     {
-        camera.transform.position.y -= 10.f * deltaTime;
+        camera.transform.addPosition(glm::vec3(0, -10.f * deltaTime, 0));
     }
 
     if(core::Input::getButtonDown(GLFW_MOUSE_BUTTON_LEFT) && !core::Input::getButton(GLFW_MOUSE_BUTTON_RIGHT))
@@ -101,8 +101,8 @@ void Engine::update(double deltaTime)
         // std::cout << "Mouse position: " << core::Input::getMousePosition().x << ", " << core::Input::getMousePosition().y << std::endl;
         glm::vec2 mouseDelta = -core::Input::getMouseDelta();
         mouseDelta = glm::pow(glm::abs(mouseDelta), glm::vec2(1.1f)) * glm::vec2(glm::sign(mouseDelta.x), glm::sign(mouseDelta.y));
-        camera.transform.rotation.y += -mouseDelta.x * 0.016f * 0.1f;
-        camera.transform.rotation.x += -mouseDelta.y * 0.016f * 0.1f;
+        camera.transform.rotateYaw(-mouseDelta.x * 0.016f * 0.1f, false);
+        camera.transform.rotatePitch(-mouseDelta.y * 0.016f * 0.1f, true);
     }
     if(core::Input::getButtonUp(GLFW_MOUSE_BUTTON_RIGHT))
     {
@@ -154,10 +154,8 @@ void Engine::run()
     //     {0.01f, 100.0f, 20.0f},
     //     true
     // );
-    camera.transform.position = glm::vec3(0.0f, 0.0f, -5.0f);
-    camera.transform.rotation = glm::vec3(glm::radians(0.0f), 0.0f, 0.0f);
-    // camera.transform.position = glm::vec3(0.0f, 2.0f, -5.0f);
-    // camera.transform.rotation = glm::vec3(glm::radians(20.0f), 0.0f, 0.0f);
+    camera.transform.setPosition(glm::vec3(0.0f, 2.0f, -5.0f));
+    camera.transform.setPosition(glm::vec3(glm::radians(20.0f), 0.0f, 0.0f));
 
     graphicsModule.setCamera(&camera);
 

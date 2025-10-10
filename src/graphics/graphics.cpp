@@ -576,7 +576,7 @@ void Graphics::bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipe
 void Graphics::drawSkybox()
 {
     core::Transform tempTransform{};
-    tempTransform.position = camera->transform.position;
+    tempTransform.setPosition(camera->transform.getPosition());
     drawMesh(skyboxMesh, 4, tempTransform.getTransform());
 }
 

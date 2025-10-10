@@ -23,6 +23,8 @@ class Scene_t : public Object
         std::vector<GameObject> &getGameObjects() { return gameObjects; }
 
         void drawScene();
+
+        std::vector<glm::mat4> transforms{};
         
     protected:
         Scene_t(id_t newID) : Object(newID) {}
