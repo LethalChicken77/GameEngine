@@ -424,7 +424,7 @@ namespace graphics
         samplerInfo.addressModeW = samplerProperties.addressMode;
         samplerInfo.anisotropyEnable = VK_TRUE; // Add fields to properties
         samplerInfo.maxAnisotropy = 16;
-        samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+        samplerInfo.borderColor = samplerProperties.borderColor;
         samplerInfo.unnormalizedCoordinates = VK_FALSE;
         samplerInfo.compareEnable = VK_FALSE;
         samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;

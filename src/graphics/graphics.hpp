@@ -60,9 +60,6 @@ public:
     void bindCameraDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
     void bindGlobalDescriptor(FrameInfo& frameInfo, GraphicsPipeline* pipeline);
     
-    void renderGameObjects(FrameInfo& frameInfo);
-    void renderGameObjectIDs(FrameInfo& frameInfo);
-    
     void graphicsInitImgui();
     
     void reloadShaders();
@@ -74,7 +71,8 @@ public:
     void destroyGraphicsMeshes();
     void drawMesh(const core::Mesh& mesh, uint32_t materialIndex /* TODO: Pass material smart reference*/, const glm::mat4 &transform); // Draw to scene
     void drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex, const std::vector<glm::mat4> &transforms); // Draw to scene
-    
+    void drawMeshOutline(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4 &transform);
+
     void drawSkybox();
 
 private:
@@ -91,13 +89,18 @@ private:
         std::unique_ptr<Buffer> instanceBuffer{};
     };
     std::vector<MeshRenderData> sceneRenderQueue{};
+    std::vector<MeshRenderData> outlineRenderQueue{};
 
     static std::unique_ptr<Buffer> createInstanceBuffer(const std::vector<glm::mat4>& transforms);
 
     void createRenderPasses();
-    void loadTextures();
+    void loadTextures(); // TODO: Put in asset manager
     void loadShaders();
     void loadMaterials();
+
+
+    void renderMeshes(FrameInfo& frameInfo, const std::vector<MeshRenderData> &renderQueue);
+    void renderGameObjectIDs(FrameInfo& frameInfo);
 
     static void windowRefreshCallback(GLFWwindow *window);
 
@@ -119,12 +122,16 @@ private:
 
     std::unique_ptr<RenderPass> idBufferRenderPass{};
     std::unique_ptr<RenderPass> sceneRenderPass{};
+    std::unique_ptr<RenderPass> outlineBaseRenderPass{};
+    std::unique_ptr<RenderPass> outlineRenderPass{};
     std::unique_ptr<RenderPass> imguiRenderPass{};
     std::unique_ptr<RenderPass> finalRenderPass{};
     std::unique_ptr<Material> ppMaterial{};
     std::unique_ptr<Material> imguiMaterial{};
     std::unique_ptr<Material> outputMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
+    std::unique_ptr<Material> outlineBaseMaterial{};
+    std::unique_ptr<Material> outlineMaterial{};
     core::Mesh skyboxMesh{};
     Texture *idTexture = nullptr;
 

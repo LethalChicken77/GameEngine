@@ -28,7 +28,7 @@ void Scene_t::loadScene()
     // obj->mesh = graphics::GraphicsMesh::loadObj("internal/models/Nefertiti.obj");
     // obj->mesh->generateNormals();
     // obj->mesh->createBuffers();
-    obj->materialID = 0;
+    obj->materialID = 1;
     obj->transform.setPosition(glm::vec3(0, 1, 0));
     // obj->transform.scale = glm::vec3(0.01f);
     // obj->transform.scale = glm::vec3(-0.01f, 0.01f, 0.01f); // TODO: Make sure negative scaling doesn't turn models inside out
@@ -36,11 +36,11 @@ void Scene_t::loadScene()
 
     // obj2.mesh = GraphicsMesh::loadObj("internal/models/monkey_high_res.obj");
     obj2->mesh = Mesh::createGrid(16,16, {50.0f, 50.0f});
-    obj2->materialID = 2;
+    obj2->materialID = 3;
     obj2->transform.setPosition(glm::vec3(0, -3, 0));
 
     obj3->mesh = monkeyMesh;
-    obj3->materialID = 1;
+    obj3->materialID = 2;
     obj3->transform.setPosition(glm::vec3(-3, -1, 0));
     obj3->transform.parent = &obj->transform;
     // obj3.mesh = GraphicsMesh::createSierpinskiPyramid(12.0f, 8);

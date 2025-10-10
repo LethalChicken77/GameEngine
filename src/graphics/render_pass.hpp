@@ -22,6 +22,9 @@ class RenderPass
         const VkExtent2D getExtent() { return extent; }
 
         void addColorAttachment(VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        void addColorAttachment(TextureProperties textureProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        void addColorAttachment(SamplerProperties samplerProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        void addColorAttachment(TextureProperties textureProps, SamplerProperties samplerProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         void addDepthAttachment(VkImageLayout imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         // TODO: More attachments for other data
 

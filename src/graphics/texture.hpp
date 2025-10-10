@@ -52,13 +52,15 @@ namespace graphics
         VkFilter magFilter; // Filter when supersampling
         VkFilter minFilter; // Filter when subsampling
         VkSamplerAddressMode addressMode;
+        VkBorderColor borderColor;
 
         static SamplerProperties getDefaultProperties()
         {
             return {
                 VK_FILTER_LINEAR,
                 VK_FILTER_LINEAR,
-                VK_SAMPLER_ADDRESS_MODE_REPEAT
+                VK_SAMPLER_ADDRESS_MODE_REPEAT,
+                VK_BORDER_COLOR_INT_OPAQUE_BLACK
             };
         }
     };

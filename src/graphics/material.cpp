@@ -157,7 +157,7 @@ namespace graphics
                 return;
             }
         }
-        throw std::runtime_error("Shader input not found");
+        Console::warn("Shader input \"" + name + "\" not found", "Material");
     }
 
     template <class T>

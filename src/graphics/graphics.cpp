@@ -197,9 +197,9 @@ void Graphics::drawFrame()
         // idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
-        renderGameObjects(frameInfo);
+        renderMeshes(frameInfo, sceneRenderQueue);
         renderer.endRenderPass();
-        
+
         std::unique_ptr<Texture> &colorTexture = sceneRenderPass->getColorTexture();
         std::unique_ptr<Texture> &depthTexture = sceneRenderPass->getDepthTexture();
         colorTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
@@ -207,6 +207,11 @@ void Graphics::drawFrame()
         ppMaterial->setTexture(0, colorTexture.get());
         ppMaterial->setTexture(1, depthTexture.get());
         ppMaterial->createDescriptorSet();
+
+        
+        // renderer.beginRenderPass(outlineBaseRenderPass->getRenderPass(), outlineBaseRenderPass->getFrameBuffer(), outlineBaseRenderPass->getExtent(), {0,0,0,1});
+        // renderMeshes(frameInfo, outlineRenderQueue);
+        // renderer.endRenderPass();
 
         renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), VkClearColorValue{0.0f, 0.0f, 0.0f, 0.0f});
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
@@ -292,7 +297,21 @@ void Graphics::createRenderPasses()
     sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
     sceneRenderPass->addDepthAttachment();
     sceneRenderPass->create(renderer.getExtent());
+
+    Console::log("Creating outline base render pass", "Graphics");
+    outlineBaseRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    SamplerProperties outlineBaseSamplerProperties = SamplerProperties::getDefaultProperties();
+    outlineBaseSamplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+    outlineBaseRenderPass->addColorAttachment(outlineBaseSamplerProperties, VK_FORMAT_R16G16B16A16_SFLOAT);
+    // outlineRenderPass->addDepthAttachment(); 
+    outlineBaseRenderPass->create(renderer.getExtent());
     
+    Console::log("Creating outline render pass", "Graphics");
+    outlineRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    outlineRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
+    outlineRenderPass->addDepthAttachment();
+    outlineRenderPass->create(renderer.getExtent());
+
     Console::log("Creating ImGui render pass", "Graphics");
     imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
     imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
@@ -357,11 +376,11 @@ void Graphics::loadShaders()
     ppConfigInfo.pipelineType = POST_PROCESSING;
     ppConfigInfo.renderPass = &renderer.getSCRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/post_processing/postProcessing.slang", 
+        "internal/shaders/post_processing/postProcessing.slang", //0
         "internal/shaders/post_processing/postProcessing.slang", 
         std::vector<ShaderInput>{
             {"exposure", ShaderInput::DataType::FLOAT},
-            {"gamma", ShaderInput::DataType::FLOAT} // TODO: Allow shaders with no parameters (DUH)
+            {"gamma", ShaderInput::DataType::FLOAT}
         },
         2,
         ppConfigInfo
@@ -373,10 +392,25 @@ void Graphics::loadShaders()
     imguiConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     imguiConfigInfo.renderPass = &imguiRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/post_processing/overlay.slang", 
+        "internal/shaders/post_processing/overlay.slang", //1
         "internal/shaders/post_processing/overlay.slang", 
         std::vector<ShaderInput>{
-            {"doSRGBTransform", ShaderInput::DataType::BOOL} // TODO: Allow shaders with no parameters (DUH)
+            {"doSRGBTransform", ShaderInput::DataType::BOOL}
+        },
+        1,
+        imguiConfigInfo
+    ));
+
+    PipelineConfigInfo outlineConfigInfo = Shader::getDefaultTransparentConfigInfo();
+    outlineConfigInfo.pipelineType = POST_PROCESSING;
+    outlineConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    outlineConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    outlineConfigInfo.renderPass = &imguiRenderPass->getRenderPass();
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/post_processing/outline.slang", //2
+        "internal/shaders/post_processing/outline.slang", 
+        std::vector<ShaderInput>{
+            {"filler", ShaderInput::DataType::FLOAT} // TODO: Allow shaders with no parameters (DUH)
         },
         1,
         imguiConfigInfo
@@ -387,10 +421,27 @@ void Graphics::loadShaders()
     idBufferConfigInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE; // Allow selecting meshes via backfaces
     idBufferConfigInfo.renderPass = &idBufferRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/id_buffer.slang", 
+        "internal/shaders/id_buffer.slang", //3
         "internal/shaders/id_buffer.slang", 
         std::vector<ShaderInput>{
             {"objectID", ShaderInput::DataType::INT}
+        },
+        0,
+        idBufferConfigInfo
+    ));
+
+    PipelineConfigInfo outlineBaseConfigInfo = Shader::getDefaultConfigInfo();
+    outlineBaseConfigInfo.pipelineType = STANDARD;
+    outlineBaseConfigInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE; // Allow selecting meshes via backfaces
+    outlineBaseConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
+    outlineBaseConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    outlineBaseConfigInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
+    outlineBaseConfigInfo.renderPass = &outlineRenderPass->getRenderPass();
+    Shared::shaders.push_back(std::make_unique<Shader>(
+        "internal/shaders/outlineBase.slang", //4
+        "internal/shaders/outlineBase.slang", 
+        std::vector<ShaderInput>{
+            {"filler", ShaderInput::DataType::FLOAT}
         },
         0,
         idBufferConfigInfo
@@ -402,7 +453,7 @@ void Graphics::loadShaders()
     skyboxConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     skyboxConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/skybox.slang", 
+        "internal/shaders/skybox.slang", //5
         "internal/shaders/skybox.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR}
@@ -413,7 +464,7 @@ void Graphics::loadShaders()
     
 
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/basicShader.slang",
+        "internal/shaders/basicShader.slang", //6
         "internal/shaders/basicShader.slang",
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR},
@@ -429,7 +480,7 @@ void Graphics::loadShaders()
     wireframeConfigInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
     wireframeConfigInfo.renderPass = &sceneRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/wireframe.slang", 
+        "internal/shaders/wireframe.slang", //7
         "internal/shaders/wireframe.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR}
@@ -439,7 +490,7 @@ void Graphics::loadShaders()
     ));
 
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/PBR.slang", 
+        "internal/shaders/PBR.slang", //8
         "internal/shaders/PBR.slang", 
         std::vector<ShaderInput>{
             {"color", ShaderInput::DataType::COLOR},
@@ -449,7 +500,7 @@ void Graphics::loadShaders()
         &sceneRenderPass->getRenderPass()
     ));
     Shared::shaders.push_back(std::make_unique<Shader>(
-        "internal/shaders/goochShader.slang",
+        "internal/shaders/goochShader.slang", //9
         "internal/shaders/goochShader.slang",
         std::vector<ShaderInput>{
             {"coolColor", ShaderInput::DataType::COLOR},
@@ -487,19 +538,30 @@ void Graphics::loadMaterials()
     _outputMaterial.createDescriptorSet();
     outputMaterial = std::make_unique<Material>(std::move(_outputMaterial));
 
-    Material _idBufferMaterial = Material::instantiate(Shared::shaders[2].get());
+    Material _outlineMaterial = Material::instantiate(Shared::shaders[2].get());
+    _outlineMaterial.createShaderInputBuffer();
+    _outlineMaterial.createDescriptorSet();
+    outlineMaterial = std::make_unique<Material>(std::move(_outlineMaterial));
+
+    Material _idBufferMaterial = Material::instantiate(Shared::shaders[3].get());
     _idBufferMaterial.setValue("objectID", -2);
     _idBufferMaterial.createShaderInputBuffer();
     _idBufferMaterial.createDescriptorSet();
     idBufferMaterial = std::make_unique<Material>(std::move(_idBufferMaterial));
     
-    Material _skybox = Material::instantiate(Shared::shaders[3].get());
+    Material _skybox = Material::instantiate(Shared::shaders[5].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     _skybox.setValue("color", Color(0.f, 0.f, 0.f));
     _skybox.createShaderInputBuffer();
     _skybox.createDescriptorSet();
 
-    Material m1 = Material::instantiate(Shared::shaders[4].get());
+    Material outlineMat = Material::instantiate(Shared::shaders[4].get());
+    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    outlineMat.createShaderInputBuffer();
+    outlineMat.createDescriptorSet();
+    Shared::materials.emplace_back(std::move(outlineMat));
+
+    Material m1 = Material::instantiate(Shared::shaders[6].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m1.setValue("color", Color(1.f, 0.8f, 0.3f));
     m1.setValue("roughness", 0.4f);
@@ -508,14 +570,14 @@ void Graphics::loadMaterials()
     m1.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m1)); // Should probably be done in instantiate
 
-    Material m3 = Material::instantiate(Shared::shaders[5].get());
+    Material m3 = Material::instantiate(Shared::shaders[7].get());
     // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
     m3.setValue("color", Color(0.f, 0.f, 0.f));
     m3.createShaderInputBuffer();
     m3.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m3)); // Should probably be done in instantiate
 
-    Material m4 = Material::instantiate(Shared::shaders[6].get());
+    Material m4 = Material::instantiate(Shared::shaders[8].get());
     m4.setValue("color", Color(1.f, 1.f, 1.f));
     m4.setValue("normalMapStrength", 1.0f);
     m4.setTexture(0, textures[0].get()); // Albedo
@@ -528,7 +590,7 @@ void Graphics::loadMaterials()
     m4.createDescriptorSet();
     Shared::materials.emplace_back(std::move(m4));
 
-    Material m2 = Material::instantiate(Shared::shaders[7].get());
+    Material m2 = Material::instantiate(Shared::shaders[9].get());
     m2.setValue("coolColor", Color("#47376FFF"));
     m2.setValue("warmColor", Color("#FFCC3DFF"));
     m2.setValue("outlineColor", Color("#424242FF"));
@@ -577,10 +639,10 @@ void Graphics::drawSkybox()
 {
     core::Transform tempTransform{};
     tempTransform.setPosition(camera->transform.getPosition());
-    drawMesh(skyboxMesh, 4, tempTransform.getTransform());
+    drawMesh(skyboxMesh, 5, tempTransform.getTransform());
 }
 
-void Graphics::renderGameObjects(FrameInfo& frameInfo)
+void Graphics::renderMeshes(FrameInfo& frameInfo, const std::vector<MeshRenderData> &renderQueue)
 {
     VkCommandBuffer& commandBuffer = frameInfo.commandBuffer;
 
@@ -589,7 +651,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo)
     std::vector<VkDescriptorSet> localDescriptorSets;
     VkPipelineLayout pipelineLayout = nullptr;
     Material::id_t prevMaterial = UINT64_MAX;
-    for(MeshRenderData &renderData : sceneRenderQueue)
+    for(const MeshRenderData &renderData : renderQueue)
     {
         const Shader* shader = Shared::materials[renderData.materialIndex].getShader();
         GraphicsPipeline* pipeline = shader->getPipeline();
@@ -606,6 +668,7 @@ void Graphics::renderGameObjects(FrameInfo& frameInfo)
 
         if(prevMaterial != renderData.materialIndex) // Bind material info if changed
         {
+            Console::debug(std::to_string(renderData.materialIndex));
             vkCmdBindDescriptorSets(
                 commandBuffer, 
                 VK_PIPELINE_BIND_POINT_GRAPHICS, 
@@ -773,6 +836,17 @@ void Graphics::drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex,
     if(transforms.size() == 0) return; // No work to do with no transforms
 
     sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transforms, materialIndex));
+}
+
+void Graphics::drawMeshOutline(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4& transform)
+{
+    if(!graphicsMeshes.contains(mesh->getInstanceID()))
+    {
+        Console::log("Mesh " + std::to_string(mesh->getInstanceID()) + " has no GraphicsMesh. Creating one now...", "Graphics");
+        setGraphicsMesh(mesh);
+    }
+
+    outlineRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transform, 0));
 }
 
 std::unique_ptr<Buffer> Graphics::createInstanceBuffer(const std::vector<glm::mat4>& transforms)

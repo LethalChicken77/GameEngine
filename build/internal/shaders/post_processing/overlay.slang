@@ -10,7 +10,7 @@ static const float2 vertices[6] = {
     float2(1, 1),
 };
 
-struct MaterialInfo // Herp derp this shouldn't be here
+struct MaterialInfo
 {
     bool doSRGBTransform;
 };

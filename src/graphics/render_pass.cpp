@@ -34,7 +34,30 @@ void RenderPass::addColorAttachment(VkFormat imageFormat, VkImageLayout imageLay
     SamplerProperties sprops = SamplerProperties::getDefaultProperties();
     sprops.magFilter = VK_FILTER_LINEAR;
 
-    std::unique_ptr<Texture> tex = std::make_unique<Texture>(props, sprops, extent.width, extent.height);
+    addColorAttachment(props, sprops, imageFormat, imageLayout);
+}
+
+void RenderPass::addColorAttachment(TextureProperties textureProps, VkFormat imageFormat, VkImageLayout imageLayout)
+{
+    SamplerProperties sprops = SamplerProperties::getDefaultProperties();
+    sprops.magFilter = VK_FILTER_LINEAR;
+
+    addColorAttachment(textureProps, sprops, imageFormat, imageLayout);
+}
+
+void RenderPass::addColorAttachment(SamplerProperties samplerProps, VkFormat imageFormat, VkImageLayout imageLayout)
+{
+    TextureProperties props = TextureProperties::getDefaultProperties();
+    props.format = imageFormat;
+    props.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    props.finalLayout = imageLayout;
+
+    addColorAttachment(props, samplerProps, imageFormat, imageLayout);
+}
+
+void RenderPass::addColorAttachment(TextureProperties textureProps, SamplerProperties samplerProps, VkFormat imageFormat, VkImageLayout imageLayout)
+{
+    std::unique_ptr<Texture> tex = std::make_unique<Texture>(textureProps, samplerProps, extent.width, extent.height);
     tex->createTextureUninitialized();
     images.push_back(std::move(tex));
 

@@ -1,6 +1,6 @@
 import utils;
 import shading_models;
-import colorspace; // TODO: Perform colorspace transforms in post-processing
+import colorspace;
 
 import shaderInputs;
 
