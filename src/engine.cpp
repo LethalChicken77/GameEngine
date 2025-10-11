@@ -90,6 +90,7 @@ void Engine::update(double deltaTime)
         int mouseYPos = mousePos.y;
         Console::debug(std::to_string(mouseXPos) + " " + std::to_string(mouseYPos));
         Console::debug(std::to_string(graphicsModule.getClickedObjID(mouseXPos, mouseYPos)));
+        scene->selectedObject = graphicsModule.getClickedObjID(mouseXPos, mouseYPos);
     }
 
     if(core::Input::getButtonDown(GLFW_MOUSE_BUTTON_RIGHT))
@@ -156,6 +157,7 @@ void Engine::run()
     // );
     camera.transform.setPosition(glm::vec3(0.0f, 2.0f, -5.0f));
     camera.transform.setPosition(glm::vec3(glm::radians(20.0f), 0.0f, 0.0f));
+    // camera.transform.parent = &scene->getGameObjects()[0]->transform;
 
     graphicsModule.setCamera(&camera);
 

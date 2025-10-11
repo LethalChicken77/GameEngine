@@ -357,15 +357,25 @@ namespace graphics
 
     void Texture::updateOnGPU()
     {
-        transitionImageLayout(prevLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        VkImageLayout prevLayout = currentLayout;
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         copyDataToImage();
         transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, prevLayout);
     }
 
     void Texture::updateOnCPU()
     {
-        transitionImageLayout(prevLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        VkImageLayout prevLayout = currentLayout;
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         copyDataFromImage();
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, prevLayout);
+    }
+    
+    void Texture::updatePixelOnCPU(uint32_t x, uint32_t y)
+    {
+        VkImageLayout prevLayout = currentLayout;
+        transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+        copyPixelFromImage(x, y);
         transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, prevLayout);
     }
 
@@ -477,7 +487,6 @@ namespace graphics
 
     void Texture::transitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer)
     {
-        prevLayout = oldLayout;
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout = oldLayout;
@@ -685,6 +694,50 @@ namespace graphics
         Shared::device->copyImageToBuffer(image, stagingBuffer.getBuffer(), width, height, 1);
         
         stagingBuffer.readFromBuffer((void *)data.data());
+    }
+
+    void Texture::copyPixelFromImage(uint32_t x, uint32_t y)
+    {
+        if(x >= width || y >= height || x < 0 || y < 0)
+        {
+            Console::error("Cannot copy pixel outside texture bounds: " + std::to_string(x) + std::to_string(y), "Texture");
+        }
+
+        uint32_t pixelSize = sizeof(data[0]) * 4;
+        VkDeviceSize bufferSize = pixelSize;
+
+        // Ensure your data buffer has at least one pixel
+        if(data.size() < bufferSize)
+            throw std::runtime_error("Texture data buffer too small for a single pixel");
+
+        // Create a staging buffer for a single pixel
+        Buffer stagingBuffer{
+            *Shared::device,
+            pixelSize,
+            1, // only one pixel
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        };
+
+        stagingBuffer.map();
+
+        // Copy only the 1x1 region at (x,y)
+        VkBufferImageCopy copyRegion{};
+        copyRegion.bufferOffset = 0;
+        copyRegion.bufferRowLength = 0;   // tightly packed
+        copyRegion.bufferImageHeight = 0;
+        copyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        copyRegion.imageSubresource.mipLevel = 0;
+        copyRegion.imageSubresource.baseArrayLayer = 0;
+        copyRegion.imageSubresource.layerCount = 1;
+        copyRegion.imageOffset = { static_cast<int32_t>(x), static_cast<int32_t>(y), 0 };
+        copyRegion.imageExtent = { 1, 1, 1 };
+
+        Shared::device->copyImageToBuffer(image, stagingBuffer.getBuffer(), 1, 1, 1, copyRegion);
+
+        // Read the pixel into your data buffer
+        uint32_t pixelIndex = y * width + x;
+        stagingBuffer.readFromBuffer((void*)(data.data() + pixelIndex * 4));
     }
 
     void Texture::createDescriptorInfo()

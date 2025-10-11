@@ -25,10 +25,11 @@ namespace core
             void rotatePitch(float delta, bool local = true, bool refreshImmediate = true);
             void rotateRoll(float delta, bool local = true, bool refreshImmediate = true);
 
-            glm::vec3 getPosition() const { return position; }
-            glm::quat getRotation() const { return rotation; }
-            glm::vec3 getRotationEuler() const { return glm::eulerAngles(rotation); }
-            glm::vec3 getScale() const { return scale; }
+            glm::vec3 getPosition() const { return glm::vec3(getTransform()[3]); }
+            glm::vec3 getLocalPosition() const { return position; }
+            glm::quat getLocalRotation() const { return rotation; }
+            glm::vec3 getLocalRotationEuler() const { return glm::eulerAngles(rotation); }
+            glm::vec3 getLocalScale() const { return scale; }
             glm::mat4 getTransform() const 
             {
                 if(parent != nullptr && parent != this && !isDescendent(parent))

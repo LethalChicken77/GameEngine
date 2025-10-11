@@ -19,6 +19,8 @@ namespace graphics
         public:
             using id_t = uint64_t;
 
+            std::string name;
+
             Material() = delete;
             Material(const Material&) = delete;
             Material& operator=(const Material&) = delete;

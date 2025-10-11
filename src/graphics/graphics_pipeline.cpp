@@ -27,6 +27,9 @@ namespace graphics
             case ID_BUFFER:
                 createIDBufferLayout();
                 createIDBufferPipeline(cache);
+                break;
+            default:
+                Console::error("Unrecognized pipeline type: " + std::to_string((int)shader.configInfo.pipelineType), "Graphics Pipeline");
         }
     }
 

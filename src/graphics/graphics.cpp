@@ -172,6 +172,8 @@ void Graphics::drawFrame()
 
         idBufferRenderPass->resetLayouts();
         sceneRenderPass->resetLayouts();
+        outlineRenderPass->resetLayouts();
+        outlineBaseRenderPass->resetLayouts();
         imguiRenderPass->resetLayouts();
         finalRenderPass->resetLayouts();
         float frameScale = 1.0;
@@ -187,6 +189,8 @@ void Graphics::drawFrame()
             idBufferRenderPass->create(extent); // Maybe render at low resolution
             imguiRenderPass->create(extent);
             finalRenderPass->create(extent);
+            outlineBaseRenderPass->create(extent);
+            outlineRenderPass->create(extent);
         }
         // Object IDs render pass
         renderer.beginRenderPass(idBufferRenderPass->getRenderPass(), idBufferRenderPass->getFrameBuffer(), idBufferRenderPass->getExtent(), VkClearColorValue{-1, 0, 0, 0});
@@ -208,11 +212,41 @@ void Graphics::drawFrame()
         ppMaterial->setTexture(1, depthTexture.get());
         ppMaterial->createDescriptorSet();
 
+// Outline
+        renderer.beginRenderPass(outlineBaseRenderPass->getRenderPass(), outlineBaseRenderPass->getFrameBuffer(), outlineBaseRenderPass->getExtent(), {0,0,0,0});
+        renderMeshes(frameInfo, outlineRenderQueue);
+        renderer.endRenderPass();
         
-        // renderer.beginRenderPass(outlineBaseRenderPass->getRenderPass(), outlineBaseRenderPass->getFrameBuffer(), outlineBaseRenderPass->getExtent(), {0,0,0,1});
-        // renderMeshes(frameInfo, outlineRenderQueue);
-        // renderer.endRenderPass();
+        std::unique_ptr<Texture> &outlineBaseTexture = outlineBaseRenderPass->getColorTexture();
+        outlineBaseTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        outlineMaterial->setTexture(0, outlineBaseTexture.get());
+        outlineMaterial->createDescriptorSet();
+        
+        renderer.beginRenderPass(outlineRenderPass->getRenderPass(), outlineRenderPass->getFrameBuffer(), outlineRenderPass->getExtent(), {1.0,0.5,0,0});
+        pipelineManager->getPipeline(2)->bind(commandBuffer); // Outline Pipeline
 
+        localDescriptorSets = { outlineMaterial->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            pipelineManager->getPipeline(2)->getPipelineLayout(), 
+            0,
+            1,
+            localDescriptorSets.data(), 
+            0,
+            nullptr
+        );
+
+        // Draw 6 vertices (full-screen quad)
+        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+
+        renderer.endRenderPass();
+        std::unique_ptr<Texture> &outlineTexture = outlineRenderPass->getColorTexture();
+        outlineTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        outlineResultMaterial->setTexture(0, outlineTexture.get());
+        outlineResultMaterial->createDescriptorSet();
+        
+// ImGui
         renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), VkClearColorValue{0.0f, 0.0f, 0.0f, 0.0f});
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
         renderer.endRenderPass();
@@ -222,9 +256,9 @@ void Graphics::drawFrame()
         imguiMaterial->setTexture(0, imguiTexture.get());
         imguiMaterial->createDescriptorSet();
 
+// Final Render Pass
         renderer.beginRenderPass(finalRenderPass->getRenderPass(), finalRenderPass->getFrameBuffer(), finalRenderPass->getExtent(), defaultClearColor);
         pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
-
         localDescriptorSets = { ppMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
             commandBuffer, 
@@ -236,11 +270,24 @@ void Graphics::drawFrame()
             0,
             nullptr
         );
-
         // Draw 6 vertices (full-screen quad)
         vkCmdDraw(commandBuffer, 6, 1, 0, 0);
 
-        pipelineManager->getPipeline(1)->bind(commandBuffer); // Post-processing pipeline
+        pipelineManager->getPipeline(1)->bind(commandBuffer); // Outline
+        localDescriptorSets = { outlineResultMaterial->getDescriptorSet() };
+        vkCmdBindDescriptorSets(
+            commandBuffer, 
+            VK_PIPELINE_BIND_POINT_GRAPHICS, 
+            pipelineManager->getPipeline(1)->getPipelineLayout(), 
+            0,
+            1,
+            localDescriptorSets.data(), 
+            0,
+            nullptr
+        );
+        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+
+        pipelineManager->getPipeline(1)->bind(commandBuffer); // ImGui
         localDescriptorSets = { imguiMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
             commandBuffer, 
@@ -252,7 +299,6 @@ void Graphics::drawFrame()
             0,
             nullptr
         );
-
         vkCmdDraw(commandBuffer, 6, 1, 0, 0);
         renderer.endRenderPass();
 
@@ -282,6 +328,7 @@ void Graphics::drawFrame()
     }
     vkDeviceWaitIdle(Shared::device->device());
     sceneRenderQueue.clear();
+    outlineRenderQueue.clear();
 }
 
 void Graphics::createRenderPasses()
@@ -390,6 +437,7 @@ void Graphics::loadShaders()
     imguiConfigInfo.pipelineType = POST_PROCESSING;
     imguiConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
     imguiConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
+    imguiConfigInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
     imguiConfigInfo.renderPass = &imguiRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/post_processing/overlay.slang", //1
@@ -436,7 +484,7 @@ void Graphics::loadShaders()
     outlineBaseConfigInfo.depthStencilInfo.depthTestEnable = VK_FALSE;
     outlineBaseConfigInfo.depthStencilInfo.depthWriteEnable = VK_FALSE;
     outlineBaseConfigInfo.depthStencilInfo.stencilTestEnable = VK_FALSE;
-    outlineBaseConfigInfo.renderPass = &outlineRenderPass->getRenderPass();
+    outlineBaseConfigInfo.renderPass = &outlineBaseRenderPass->getRenderPass();
     Shared::shaders.push_back(std::make_unique<Shader>(
         "internal/shaders/outlineBase.slang", //4
         "internal/shaders/outlineBase.slang", 
@@ -444,7 +492,7 @@ void Graphics::loadShaders()
             {"filler", ShaderInput::DataType::FLOAT}
         },
         0,
-        idBufferConfigInfo
+        outlineBaseConfigInfo
     ));
 
     PipelineConfigInfo skyboxConfigInfo = Shader::getDefaultConfigInfo();
@@ -532,6 +580,12 @@ void Graphics::loadMaterials()
     _imguiMaterial.createDescriptorSet();
     imguiMaterial = std::make_unique<Material>(std::move(_imguiMaterial));
 
+    Material _outlineResultMaterial = Material::instantiate(Shared::shaders[1].get());
+    _outlineResultMaterial.setValue("doSRGBTransform", true);
+    _outlineResultMaterial.createShaderInputBuffer();
+    _outlineResultMaterial.createDescriptorSet();
+    outlineResultMaterial = std::make_unique<Material>(std::move(_outlineResultMaterial));
+
     Material _outputMaterial = Material::instantiate(Shared::shaders[1].get());
     _outputMaterial.setValue("doSRGBTransform", false);
     _outputMaterial.createShaderInputBuffer();
@@ -539,6 +593,8 @@ void Graphics::loadMaterials()
     outputMaterial = std::make_unique<Material>(std::move(_outputMaterial));
 
     Material _outlineMaterial = Material::instantiate(Shared::shaders[2].get());
+    _outlineMaterial.name = "Outline";
+    _outlineMaterial.setValue("filler", 0.0f);
     _outlineMaterial.createShaderInputBuffer();
     _outlineMaterial.createDescriptorSet();
     outlineMaterial = std::make_unique<Material>(std::move(_outlineMaterial));
@@ -556,7 +612,8 @@ void Graphics::loadMaterials()
     _skybox.createDescriptorSet();
 
     Material outlineMat = Material::instantiate(Shared::shaders[4].get());
-    // m1.setValue("color", glm::vec3(0.1f, 0.3f, 0.05f));
+    outlineMat.name = "Outline Base";
+    outlineMat.setValue("filler", 0.0f);
     outlineMat.createShaderInputBuffer();
     outlineMat.createDescriptorSet();
     Shared::materials.emplace_back(std::move(outlineMat));
@@ -668,7 +725,6 @@ void Graphics::renderMeshes(FrameInfo& frameInfo, const std::vector<MeshRenderDa
 
         if(prevMaterial != renderData.materialIndex) // Bind material info if changed
         {
-            Console::debug(std::to_string(renderData.materialIndex));
             vkCmdBindDescriptorSets(
                 commandBuffer, 
                 VK_PIPELINE_BIND_POINT_GRAPHICS, 
@@ -686,7 +742,7 @@ void Graphics::renderMeshes(FrameInfo& frameInfo, const std::vector<MeshRenderDa
         push.objectID = renderData.meshID; // TODO: Change to scene local ID
         vkCmdPushConstants(
             commandBuffer, 
-            pipeline->getPipelineLayout(), 
+            pipelineLayout, 
             VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 
             0, 
             sizeof(PushConstants), 
@@ -708,7 +764,7 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo)
 
     // pipelineManager.renderObjects(frameInfo, gameObjects, commandBuffer);
     std::vector<VkDescriptorSet> localDescriptorSets;
-    const Shader* shader = Shared::shaders[2].get();
+    const Shader* shader = Shared::shaders[3].get();
     GraphicsPipeline* pipeline = shader->getPipeline();
     VkPipelineLayout pipelineLayout = pipeline->getPipelineLayout();
     uint32_t setIndex = pipeline->getID() + 1;
@@ -721,7 +777,7 @@ void Graphics::renderGameObjectIDs(FrameInfo& frameInfo)
     {
         PushConstants push{};
 
-        push.objectID = renderData.meshID; // TODO: Change to scene local ID
+        push.objectID = renderData.objectID;
         // Console::debug(std::to_string(push.objectID), "Graphics");
         vkCmdPushConstants(
             commandBuffer, 
@@ -798,7 +854,7 @@ int Graphics::getClickedObjID(uint32_t x, uint32_t y)
         return -1;
     }
 
-    idTexture->updateOnCPU();
+    idTexture->updatePixelOnCPU(x, y);
 
     return idTexture->getPixelInt(x, y);
 }
@@ -815,7 +871,7 @@ void Graphics::destroyGraphicsMeshes()
     sceneRenderQueue.clear(); // Ensure no meshes are queued for drawing
 }
 
-void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4& transform)
+void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4& transform, uint32_t objectID)
 {
     if(!graphicsMeshes.contains(mesh->getInstanceID()))
     {
@@ -823,7 +879,7 @@ void Graphics::drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const gl
         setGraphicsMesh(mesh);
     }
 
-    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transform, materialIndex));
+    sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transform, materialIndex, objectID));
 }
 
 void Graphics::drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex, const std::vector<glm::mat4> &transforms)
@@ -838,7 +894,7 @@ void Graphics::drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex,
     sceneRenderQueue.push_back(MeshRenderData(mesh->getInstanceID(), transforms, materialIndex));
 }
 
-void Graphics::drawMeshOutline(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4& transform)
+void Graphics::drawMeshOutline(const core::Mesh& mesh, const glm::mat4& transform)
 {
     if(!graphicsMeshes.contains(mesh->getInstanceID()))
     {

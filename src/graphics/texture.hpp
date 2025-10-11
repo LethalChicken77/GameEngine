@@ -65,6 +65,10 @@ namespace graphics
         }
     };
     
+    // TODO: Static, persistent staging buffer
+    //      Ensure it is large enough for most textures
+    //      Allow larger textures to use their own buffer
+    //      Needs locks for multithreading
     class Texture
     {
     public:
@@ -122,6 +126,7 @@ namespace graphics
         void createTextureUninitialized();
         void updateOnGPU(); // Update the GPU texture data from the CPU
         void updateOnCPU(); // Update the CPU texture data from the GPU
+        void updatePixelOnCPU(uint32_t x, uint32_t y); // Update a single pixel from the GPU
         VkDescriptorImageInfo* getDescriptorInfo() { return &descriptorInfo; }
 
         // Need this public
@@ -155,7 +160,6 @@ namespace graphics
 
         VkDescriptorImageInfo descriptorInfo;
 
-        VkImageLayout prevLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 
@@ -174,6 +178,7 @@ namespace graphics
         void createDescriptorInfo();
 
         void copyDataFromImage();
+        void copyPixelFromImage(uint32_t x, uint32_t y);
         
         void cleanup();
     };

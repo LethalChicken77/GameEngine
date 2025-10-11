@@ -25,6 +25,8 @@ class Scene_t : public Object
         void drawScene();
 
         std::vector<glm::mat4> transforms{};
+
+        int selectedObject = -1;
         
     protected:
         Scene_t(id_t newID) : Object(newID) {}

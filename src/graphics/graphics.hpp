@@ -69,21 +69,22 @@ public:
     // Mesh management
     void setGraphicsMesh(const core::Mesh& mesh); // Create and update meshes
     void destroyGraphicsMeshes();
-    void drawMesh(const core::Mesh& mesh, uint32_t materialIndex /* TODO: Pass material smart reference*/, const glm::mat4 &transform); // Draw to scene
+    void drawMesh(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4 &transform, uint32_t objectID = -1); // Draw to scene
     void drawMeshInstanced(const core::Mesh& mesh, uint32_t materialIndex, const std::vector<glm::mat4> &transforms); // Draw to scene
-    void drawMeshOutline(const core::Mesh& mesh, uint32_t materialIndex, const glm::mat4 &transform);
+    void drawMeshOutline(const core::Mesh& mesh, const glm::mat4 &transform);
 
     void drawSkybox();
 
 private:
     struct MeshRenderData
     {
-        MeshRenderData(id_t id, const glm::mat4& _transform, uint32_t materialID = 0)
-            : meshID(id), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
-        MeshRenderData(id_t id, const std::vector<glm::mat4>& _transform, uint32_t materialID = 0)
-            : meshID(id), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
+        MeshRenderData(id_t id, const glm::mat4& _transform, uint32_t materialID = 0, id_t objID = -1)
+            : meshID(id), objectID(objID), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
+        MeshRenderData(id_t id, const std::vector<glm::mat4>& _transform, uint32_t materialID = 0, id_t objID = -1)
+            : meshID(id), objectID(objID), transforms{_transform}, materialIndex{materialID}, instanceBuffer{createInstanceBuffer(transforms)} {}
 
         id_t meshID;
+        uint32_t objectID;
         uint32_t materialIndex;
         std::vector<glm::mat4> transforms{};
         std::unique_ptr<Buffer> instanceBuffer{};
@@ -130,8 +131,8 @@ private:
     std::unique_ptr<Material> imguiMaterial{};
     std::unique_ptr<Material> outputMaterial{};
     std::unique_ptr<Material> idBufferMaterial{};
-    std::unique_ptr<Material> outlineBaseMaterial{};
     std::unique_ptr<Material> outlineMaterial{};
+    std::unique_ptr<Material> outlineResultMaterial{};
     core::Mesh skyboxMesh{};
     Texture *idTexture = nullptr;
 

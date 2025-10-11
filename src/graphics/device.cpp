@@ -538,31 +538,36 @@ void Device::copyBufferToImage(
   endSingleTimeCommands(commandBuffer);
 }
 
-void Device::copyImageToBuffer(
-    VkImage image, VkBuffer buffer, uint32_t width, uint32_t height, uint32_t layerCount) {
-  VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+void Device::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height, uint32_t layerCount) 
+{
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
 
-  VkBufferImageCopy region{};
-  region.bufferOffset = 0;
-  region.bufferRowLength = 0;
-  region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = layerCount;
 
-  region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  region.imageSubresource.mipLevel = 0;
-  region.imageSubresource.baseArrayLayer = 0;
-  region.imageSubresource.layerCount = layerCount;
+    region.imageOffset = {0, 0, 0};
+    region.imageExtent = {width, height, 1};
 
-  region.imageOffset = {0, 0, 0};
-  region.imageExtent = {width, height, 1};
+    copyImageToBuffer(image, buffer, width, height, layerCount, region);
+}
 
-  vkCmdCopyImageToBuffer(
-      commandBuffer,
-      image,
-      VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-      buffer,
-      1,
-      &region);
-  endSingleTimeCommands(commandBuffer);
+void Device::copyImageToBuffer(VkImage image, VkBuffer buffer, uint32_t width, uint32_t height, uint32_t layerCount, const VkBufferImageCopy &region) 
+{
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+    vkCmdCopyImageToBuffer(
+        commandBuffer,
+        image,
+        VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        buffer,
+        1,
+        &region);
+    endSingleTimeCommands(commandBuffer);
 }
 
 void Device::createImageWithInfo(

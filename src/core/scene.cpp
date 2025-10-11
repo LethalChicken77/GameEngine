@@ -60,8 +60,8 @@ void Scene_t::update(double deltaTime)
             obj->transform.rotateYaw(0.25f * deltaTime * 6.28f);
         if(obj->getInstanceID() == 7)
             obj->transform.rotatePitch(0.6666f * deltaTime * 6.28f);
-        // if(obj->getInstanceID() == 5)
-        //     obj->transform.rotateAboutAxis(glm::vec3(1,1,1), 0.25f * deltaTime * 6.28f);
+        if(obj->getInstanceID() == 5)
+            obj->transform.rotateAboutAxis(glm::vec3(1,1,1), 0.25f * deltaTime * 6.28f);
         // if(obj.get_id() == 2) break;
         // if(obj.get_id() == 1)
         // {
@@ -94,9 +94,12 @@ void Scene_t::drawScene()
         // }
         // }
         // }
-        graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform());
+        graphicsModule.drawMesh(obj->mesh, obj->materialID, obj->transform.getTransform(), obj->getInstanceID());
         // graphicsModule.drawMeshInstanced(obj->mesh, obj->materialID, transforms);
+        if(obj->getInstanceID() == selectedObject)
+            graphicsModule.drawMeshOutline(obj->mesh, obj->transform.getTransform());
     }
+
 }
 
 Scene::Scene(const std::string& sceneName)

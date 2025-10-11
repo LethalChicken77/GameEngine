@@ -59,12 +59,12 @@ namespace graphics
                 {
                 case ShaderInput::DataType::FLOAT:
                     if constexpr (std::is_same_v<T, float>) memcpy(&data[offset], &val, sizeof(float));
-                    else throw std::runtime_error("Type mismatch for FLOAT");
+                    else throw std::runtime_error("Type mismatch for FLOAT: " + input.name);
                     break;
 
                 case ShaderInput::DataType::VEC2:
                     if constexpr (std::is_same_v<T, glm::vec2>) memcpy(&data[offset], &val, sizeof(glm::vec2));
-                    else throw std::runtime_error("Type mismatch for VEC2");
+                    else throw std::runtime_error("Type mismatch for VEC2: " + input.name);
                     break;
 
                 case ShaderInput::DataType::VEC3:
@@ -73,22 +73,22 @@ namespace graphics
                         glm::vec4 vec4Value(val, 0.0f); // Promote to vec4 for alignment
                         memcpy(&data[offset], &vec4Value, sizeof(glm::vec4));
                     }
-                    else throw std::runtime_error("Type mismatch for VEC3");
+                    else throw std::runtime_error("Type mismatch for VEC3: " + input.name);
                     break;
 
                 case ShaderInput::DataType::VEC4:
                     if constexpr (std::is_same_v<T, glm::vec4>) memcpy(&data[offset], &val, sizeof(glm::vec4));
-                    else throw std::runtime_error("Type mismatch for VEC4");
+                    else throw std::runtime_error("Type mismatch for VEC4: " + input.name);
                     break;
 
                 case ShaderInput::DataType::COLOR:
                     if constexpr (std::is_same_v<T, Color>) memcpy(&data[offset], &val, sizeof(Color));
-                    else throw std::runtime_error("Type mismatch for COLOR");
+                    else throw std::runtime_error("Type mismatch for COLOR: " + input.name);
                     break;
 
                 case ShaderInput::DataType::MAT2:
                     if constexpr (std::is_same_v<T, glm::mat2>) memcpy(&data[offset], &val, sizeof(glm::mat2));
-                    else throw std::runtime_error("Type mismatch for MAT2");
+                    else throw std::runtime_error("Type mismatch for MAT2: " + input.name);
                     break;
 
                 case ShaderInput::DataType::MAT3:
@@ -98,17 +98,17 @@ namespace graphics
                         memcpy(&mat4Value, &val, sizeof(glm::mat3));
                         memcpy(&data[offset], &mat4Value, sizeof(glm::mat4));
                     }
-                    else throw std::runtime_error("Type mismatch for MAT3");
+                    else throw std::runtime_error("Type mismatch for MAT3: " + input.name);
                     break;
 
                 case ShaderInput::DataType::MAT4:
                     if constexpr (std::is_same_v<T, glm::mat4>) memcpy(&data[offset], &val, sizeof(glm::mat4));
-                    else throw std::runtime_error("Type mismatch for MAT4");
+                    else throw std::runtime_error("Type mismatch for MAT4: " + input.name);
                     break;
 
                 case ShaderInput::DataType::INT:
                     if constexpr (std::is_same_v<T, int>) memcpy(&data[offset], &val, sizeof(int));
-                    else throw std::runtime_error("Type mismatch for INT");
+                    else throw std::runtime_error("Type mismatch for INT: " + input.name);
                     break;
 
                 case ShaderInput::DataType::BOOL:
@@ -117,7 +117,7 @@ namespace graphics
                         int intValue = val ? 1 : 0; // Convert bool to 4-byte int
                         memcpy(&data[offset], &intValue, sizeof(int));
                     }
-                    else throw std::runtime_error("Type mismatch for BOOL");
+                    else throw std::runtime_error("Type mismatch for BOOL: " + input.name);
                     break;
 
                 default:
