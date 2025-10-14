@@ -165,7 +165,7 @@ namespace graphics
         // TODO: Re-add support for directly loading SPIR-V files
         // TODO: Add support for GLSL shaders
         Console::log("\tLoading vertex shader from " + vertexPath, "Shader");
-        std::vector<char> vertCode = file_util::readFileToCharVector(vertexPath);
+        std::vector<char> vertCode = FileUtil::readFileToCharVector(vertexPath);
         std::string vertCodeString(vertCode.begin(), vertCode.end());
         std::vector<uint32_t> vertCodeSPV = SlangToSpirv(vertCode, "VertexShader", "vsMain", SLANG_STAGE_VERTEX);
         if(vertCodeSPV.size() == 0) 
@@ -179,7 +179,7 @@ namespace graphics
         );
         
         Console::log("\tLoading fragment shader from " + fragmentPath, "Shader");
-        std::vector<char> fragCode = file_util::readFileToCharVector(fragmentPath);
+        std::vector<char> fragCode = FileUtil::readFileToCharVector(fragmentPath);
         std::string fragCodeString(fragCode.begin(), fragCode.end());
         std::vector<uint32_t> fragCodeSPV = SlangToSpirv(fragCode, "FragmentShader", "fsMain", SLANG_STAGE_FRAGMENT);
         if(fragCodeSPV.size() == 0) 

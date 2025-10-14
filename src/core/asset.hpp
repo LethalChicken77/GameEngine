@@ -3,21 +3,21 @@
 #include <memory>
 
 #include "object.hpp"
+#include "utils/smart_reference.hpp"
+#include "asset_manager.hpp"
 
 namespace core
 {
-    class AssetData : public Object
+    template<class T>
+    class Asset : public SmartRef<T>
     {
-    public:
-        AssetData(const AssetData&) = delete;
-        AssetData& operator=(const AssetData&) = delete;
-        AssetData(AssetData&&) = delete;
-        AssetData& operator=(AssetData&&) = delete;
-
-    protected:
-        id_t UUID; // Unique file ID assigned by asset manager
-        std::string path; // Located based on file ID
-        
-        AssetData(id_t newID) : Object(newID) {};
+        protected:
+            using SmartRef<T>::ptr;
+        public:
+            using SmartRef<T>::SmartRef;
+            Asset(const std::string &path)
+            {
+                ptr = AssetManager::Instantiate<T>(path);
+            }
     };
 } // namespace core

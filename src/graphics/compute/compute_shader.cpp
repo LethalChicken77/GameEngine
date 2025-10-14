@@ -49,7 +49,7 @@ namespace graphics
             vkDestroyShaderModule(Shared::device->device(), computeShaderModule, nullptr);
         }
 
-        std::vector<char> code = file_util::readFileToCharVector(path);
+        std::vector<char> code = FileUtil::readFileToCharVector(path);
         createShaderModule(code, &computeShaderModule);
         
         // std::vector<uint32_t> codeInts(code.begin(), code.end());

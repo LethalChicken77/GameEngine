@@ -1,6 +1,6 @@
 #pragma once
-#include "asset.hpp"
-#include "game_object.hpp"
+#include "core/asset_data.hpp"
+#include "core/game_object.hpp"
 
 namespace core
 {
@@ -22,7 +22,6 @@ class SceneAsset : AssetData
         
     private:
         SceneAsset(id_t newID) : AssetData(newID) {}
-        friend std::unique_ptr<SceneAsset> Object::Instantiate<SceneAsset>(std::string);
 
         // std::vector<GameObject> gameObjects;
 };
