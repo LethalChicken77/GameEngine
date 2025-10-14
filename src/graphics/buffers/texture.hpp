@@ -3,10 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include "buffer.hpp"
-#include "descriptors.hpp"
-#include "utils.hpp"
 #include "stb_image.h"
-#include "device.hpp"
+#include "graphics/internal/descriptors.hpp"
+#include "graphics/internal/device.hpp"
 #include "glm/glm.hpp"
 
 namespace graphics

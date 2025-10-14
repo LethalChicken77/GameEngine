@@ -3,7 +3,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "device.hpp"
+#include "graphics/internal/device.hpp"
 #include "compute_shader.hpp"
 
 namespace graphics

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device.hpp"
+#include "graphics/internal/device.hpp"
 #include "buffer.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -11,7 +11,7 @@
 #include <string>
 #include <iostream>
 
-#include "containers.hpp"
+#include "graphics/containers.hpp"
 #include "core/mesh.hpp"
 
 namespace graphics

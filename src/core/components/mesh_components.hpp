@@ -1,5 +1,5 @@
 #include "core/mesh.hpp"
-#include "graphics/material.hpp"
+#include "graphics/buffers/material.hpp"
 
 namespace core
 {

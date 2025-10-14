@@ -105,12 +105,33 @@ build CMakeFiles/GameEngine.dir/src/engine.cpp.obj: CXX_COMPILER__GameEngine_uns
   OBJECT_DIR = CMakeFiles\GameEngine.dir
   OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src
 
-build CMakeFiles/GameEngine.dir/src/graphics/buffer.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffer.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\buffer.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/buffers/buffer.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffers/buffer.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\buffers\buffer.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\buffers
+
+build CMakeFiles/GameEngine.dir/src/graphics/buffers/graphics_mesh.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffers/graphics_mesh.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\buffers\graphics_mesh.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
+  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
+  OBJECT_DIR = CMakeFiles\GameEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\buffers
+
+build CMakeFiles/GameEngine.dir/src/graphics/buffers/material.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffers/material.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\buffers\material.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
+  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
+  OBJECT_DIR = CMakeFiles\GameEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\buffers
+
+build CMakeFiles/GameEngine.dir/src/graphics/buffers/texture.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/buffers/texture.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\buffers\texture.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
+  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
+  OBJECT_DIR = CMakeFiles\GameEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\buffers
 
 build CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/camera.cpp || cmake_object_order_depends_target_GameEngine
   DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\camera.cpp.obj.d
@@ -126,43 +147,29 @@ build CMakeFiles/GameEngine.dir/src/graphics/color.cpp.obj: CXX_COMPILER__GameEn
   OBJECT_DIR = CMakeFiles\GameEngine.dir
   OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
 
-build CMakeFiles/GameEngine.dir/src/graphics/compute_pipeline.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute_pipeline.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute_pipeline.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/compute/compute_pipeline.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute/compute_pipeline.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute\compute_pipeline.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\compute
 
-build CMakeFiles/GameEngine.dir/src/graphics/compute_resource.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute_resource.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute_resource.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/compute/compute_resource.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute/compute_resource.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute\compute_resource.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\compute
 
-build CMakeFiles/GameEngine.dir/src/graphics/compute_shader.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute_shader.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute_shader.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/compute/compute_shader.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/compute/compute_shader.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\compute\compute_shader.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\compute
 
 build CMakeFiles/GameEngine.dir/src/graphics/containers.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/containers.cpp || cmake_object_order_depends_target_GameEngine
   DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\containers.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/descriptors.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/descriptors.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\descriptors.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/device.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/device.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\device.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
@@ -175,47 +182,61 @@ build CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj: CXX_COMPILER__Gam
   OBJECT_DIR = CMakeFiles\GameEngine.dir
   OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
 
-build CMakeFiles/GameEngine.dir/src/graphics/graphics_mesh.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/graphics_mesh.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\graphics_mesh.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/descriptors.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/descriptors.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\descriptors.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
-build CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/graphics_pipeline.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\graphics_pipeline.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/device.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/device.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\device.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
-build CMakeFiles/GameEngine.dir/src/graphics/material.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/material.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\material.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/graphics_pipeline.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/graphics_pipeline.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\graphics_pipeline.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
-build CMakeFiles/GameEngine.dir/src/graphics/pipeline_manager.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/pipeline_manager.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\pipeline_manager.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/pipeline_manager.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/pipeline_manager.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\pipeline_manager.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
-build CMakeFiles/GameEngine.dir/src/graphics/render_pass.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/render_pass.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\render_pass.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/render_pass.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/render_pass.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\render_pass.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
-build CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/renderer.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\renderer.cpp.obj.d
+build CMakeFiles/GameEngine.dir/src/graphics/internal/renderer.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/renderer.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\renderer.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
+
+build CMakeFiles/GameEngine.dir/src/graphics/internal/swap_chain.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/swap_chain.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\swap_chain.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
+  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
+  OBJECT_DIR = CMakeFiles\GameEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
+
+build CMakeFiles/GameEngine.dir/src/graphics/internal/window.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/internal/window.cpp || cmake_object_order_depends_target_GameEngine
+  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\internal\window.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
+  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
+  OBJECT_DIR = CMakeFiles\GameEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics\internal
 
 build CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/shader.cpp || cmake_object_order_depends_target_GameEngine
   DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\shader.cpp.obj.d
@@ -233,34 +254,6 @@ build CMakeFiles/GameEngine.dir/src/graphics/shader_base.cpp.obj: CXX_COMPILER__
 
 build CMakeFiles/GameEngine.dir/src/graphics/shader_resource.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/shader_resource.cpp || cmake_object_order_depends_target_GameEngine
   DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\shader_resource.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/swap_chain.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\swap_chain.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/texture.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/texture.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\texture.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/utils.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/utils.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\utils.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
-  INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
-  OBJECT_DIR = CMakeFiles\GameEngine.dir
-  OBJECT_FILE_DIR = CMakeFiles\GameEngine.dir\src\graphics
-
-build CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj: CXX_COMPILER__GameEngine_unscanned_Debug C$:/Users/dante/Desktop/Development/GameEngine/src/graphics/window.cpp || cmake_object_order_depends_target_GameEngine
-  DEP_FILE = CMakeFiles\GameEngine.dir\src\graphics\window.cpp.obj.d
   FLAGS = -g -std=gnu++20 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics
   INCLUDES = -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Desktop/Development/GameEngine/include -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Desktop/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Desktop/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Desktop/Development/GameEngine/lib/stbimage -IC:/Users/dante/Desktop/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Desktop/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Desktop/Development/GameEngine/src -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include
   OBJECT_DIR = CMakeFiles\GameEngine.dir
@@ -392,7 +385,7 @@ build CMakeFiles/GameEngine.dir/app.rc.obj: RC_COMPILER__GameEngine_unscanned_De
 #############################################
 # Link the executable GameEngine.exe
 
-build GameEngine.exe: CXX_EXECUTABLE_LINKER__GameEngine_Debug CMakeFiles/GameEngine.dir/src/core/components/transform.cpp.obj CMakeFiles/GameEngine.dir/src/core/game_object.cpp.obj CMakeFiles/GameEngine.dir/src/core/input.cpp.obj CMakeFiles/GameEngine.dir/src/core/mesh.cpp.obj CMakeFiles/GameEngine.dir/src/core/object_manager.cpp.obj CMakeFiles/GameEngine.dir/src/core/random.cpp.obj CMakeFiles/GameEngine.dir/src/core/scene.cpp.obj CMakeFiles/GameEngine.dir/src/engine.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/buffer.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/color.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute_pipeline.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute_resource.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute_shader.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/containers.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/descriptors.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/device.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/graphics_mesh.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/graphics_pipeline.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/material.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/pipeline_manager.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/render_pass.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/renderer.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader_base.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader_resource.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/swap_chain.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/texture.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/utils.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/window.cpp.obj CMakeFiles/GameEngine.dir/src/main.cpp.obj CMakeFiles/GameEngine.dir/src/modules.cpp.obj CMakeFiles/GameEngine.dir/src/procedural/noise.cpp.obj CMakeFiles/GameEngine.dir/src/utils/console.cpp.obj CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_demo.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_draw.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_tables.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_widgets.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_glfw.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_vulkan.cpp.obj CMakeFiles/GameEngine.dir/lib/miniz-3.0.2/miniz.c.obj CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_common.c.obj CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_win.cpp.obj CMakeFiles/GameEngine.dir/app.rc.obj | C$:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a C$:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib C$:/VulkanSDK/1.4.309.0/Lib/slang.lib
+build GameEngine.exe: CXX_EXECUTABLE_LINKER__GameEngine_Debug CMakeFiles/GameEngine.dir/src/core/components/transform.cpp.obj CMakeFiles/GameEngine.dir/src/core/game_object.cpp.obj CMakeFiles/GameEngine.dir/src/core/input.cpp.obj CMakeFiles/GameEngine.dir/src/core/mesh.cpp.obj CMakeFiles/GameEngine.dir/src/core/object_manager.cpp.obj CMakeFiles/GameEngine.dir/src/core/random.cpp.obj CMakeFiles/GameEngine.dir/src/core/scene.cpp.obj CMakeFiles/GameEngine.dir/src/engine.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/buffers/buffer.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/buffers/graphics_mesh.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/buffers/material.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/buffers/texture.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/camera.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/color.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute/compute_pipeline.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute/compute_resource.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/compute/compute_shader.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/containers.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/graphics.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/descriptors.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/device.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/graphics_pipeline.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/pipeline_manager.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/render_pass.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/renderer.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/swap_chain.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/internal/window.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader_base.cpp.obj CMakeFiles/GameEngine.dir/src/graphics/shader_resource.cpp.obj CMakeFiles/GameEngine.dir/src/main.cpp.obj CMakeFiles/GameEngine.dir/src/modules.cpp.obj CMakeFiles/GameEngine.dir/src/procedural/noise.cpp.obj CMakeFiles/GameEngine.dir/src/utils/console.cpp.obj CMakeFiles/GameEngine.dir/src/utils/debug.cpp.obj CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_demo.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_draw.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_tables.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_widgets.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_glfw.cpp.obj CMakeFiles/GameEngine.dir/lib/imgui-1.91.8/imgui_impl_vulkan.cpp.obj CMakeFiles/GameEngine.dir/lib/miniz-3.0.2/miniz.c.obj CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_common.c.obj CMakeFiles/GameEngine.dir/lib/nativefiledialog-release_116/src/nfd_win.cpp.obj CMakeFiles/GameEngine.dir/app.rc.obj | C$:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a C$:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib C$:/VulkanSDK/1.4.309.0/Lib/slang.lib
   FLAGS = -g
   LINK_LIBRARIES = C:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a  C:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib  C:/VulkanSDK/1.4.309.0/Lib/slang.lib  -lgdi32  -luser32  -lshell32  -lDwmapi  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\GameEngine.dir

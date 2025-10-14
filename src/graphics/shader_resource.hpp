@@ -6,10 +6,10 @@
 #include <variant>
 #include <memory>
 #include <stdexcept>
-#include "descriptors.hpp"
-#include "device.hpp"
-#include "buffer.hpp"
-#include "texture.hpp"
+#include "internal/descriptors.hpp"
+#include "internal/device.hpp"
+#include "buffers/buffer.hpp"
+#include "buffers/texture.hpp"
 // static_assert(sizeof(graphics::Texture) > 0, "Texture is not defined!");
 #include "shader.hpp"
 // #include "containers.hpp"

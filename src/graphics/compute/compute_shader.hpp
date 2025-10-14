@@ -7,9 +7,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "device.hpp"
-#include "shader.hpp"
-#include "shader_base.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/shader_base.hpp"
 
 namespace graphics
 {

@@ -6,7 +6,7 @@
 #include "engine.hpp"
 #include "modules.hpp"
 #include "core/input.hpp"
-#include "graphics/graphics_mesh.hpp"
+#include "graphics/buffers/graphics_mesh.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

@@ -6,10 +6,10 @@
 #include <variant>
 #include <memory>
 #include <stdexcept>
-#include "shader.hpp"
-#include "shader_resource.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/shader_resource.hpp"
 #include "imgui.h"
-#include "color.hpp"
+#include "graphics/color.hpp"
 // #include "containers.hpp"
 
 namespace graphics

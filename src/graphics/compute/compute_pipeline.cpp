@@ -6,7 +6,7 @@
 
 #include "compute_pipeline.hpp"
 #include "utils/file_util.hpp"
-#include "graphics_mesh.hpp"
+#include "graphics/buffers/graphics_mesh.hpp"
 
 using namespace std;
 

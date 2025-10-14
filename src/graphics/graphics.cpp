@@ -7,9 +7,9 @@
 #include "imgui_impl_glfw.h"
 
 #include "graphics.hpp"
-#include "graphics_mesh.hpp"
+#include "buffers/graphics_mesh.hpp"
 #include "core/input.hpp"
-#include "material.hpp"
+#include "buffers/material.hpp"
 #include "core/random.hpp"
 #include "procedural/noise.hpp"
 

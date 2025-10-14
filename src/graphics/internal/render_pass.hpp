@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-#include "texture.hpp"
+#include "graphics/buffers/texture.hpp"
 
 namespace graphics
 {

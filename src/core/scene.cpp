@@ -1,5 +1,4 @@
 #include "scene.hpp"
-#include "graphics/graphics_mesh.hpp"
 #include "modules.hpp"
 
 namespace core

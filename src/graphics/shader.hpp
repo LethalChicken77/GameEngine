@@ -7,8 +7,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "device.hpp"
-#include "descriptors.hpp"
+#include "internal/device.hpp"
+#include "internal/descriptors.hpp"
 #include "shader_base.hpp"
 // #include "graphics_pipeline.hpp"
 

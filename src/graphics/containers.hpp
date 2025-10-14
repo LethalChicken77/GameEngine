@@ -2,10 +2,10 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <memory>
-#include "buffer.hpp"
-#include "texture.hpp"
-#include "descriptors.hpp"
-#include "material.hpp"
+#include "buffers/buffer.hpp"
+#include "buffers/texture.hpp"
+#include "internal/descriptors.hpp"
+#include "buffers/material.hpp"
 #include "shader.hpp"
 // #include "compute_shader.hpp"
 

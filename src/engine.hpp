@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "modules.hpp"
-#include "graphics/window.hpp"
+#include "graphics/internal/window.hpp"
 #include "graphics/graphics.hpp"
 #include "graphics/camera.hpp"
 #include "core/game_object.hpp"

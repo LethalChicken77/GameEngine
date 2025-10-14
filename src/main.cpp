@@ -10,10 +10,7 @@
 #include "utils/console.hpp"
 #include "engine.hpp"
 #include "utils/debug.hpp"
-#include "graphics/window.hpp"
-#include "graphics/graphics_pipeline.hpp"
-#include "graphics/swap_chain.hpp"
-#include "graphics/device.hpp"
+#include "graphics/internal/window.hpp"
 #include "graphics/graphics.hpp"
 #include "core/input.hpp"
 

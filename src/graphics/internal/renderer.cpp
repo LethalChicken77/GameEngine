@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "renderer.hpp"
-#include "graphics_mesh.hpp"
+#include "graphics/buffers/graphics_mesh.hpp"
 #include "core/input.hpp"
 
 namespace graphics

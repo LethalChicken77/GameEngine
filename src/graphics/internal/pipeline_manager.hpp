@@ -3,11 +3,10 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "frame_info.hpp"
-#include "containers.hpp"
-#include "device.hpp"
-#include "renderer.hpp"
-#include "shader.hpp"
+#include "graphics/containers.hpp"
+#include "graphics/internal/device.hpp"
+#include "graphics/internal/renderer.hpp"
+#include "graphics/shader.hpp"
 #include "graphics_pipeline.hpp"
 #include "core/game_object.hpp"
 
@@ -22,8 +21,6 @@ class PipelineManager
         void createPipelines();
         void destroyPipelines();
         void reloadPipelines();
-
-        void renderObjects(FrameInfo& frameInfo, std::vector<core::GameObject_t>& gameObjects, VkCommandBuffer& commandBuffer);
 
         std::unique_ptr<GraphicsPipeline> &getPipeline(uint32_t index) { return graphicsPipelines[index]; }
 

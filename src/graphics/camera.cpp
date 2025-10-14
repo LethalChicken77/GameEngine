@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "camera.hpp"
-#include "utils/debug.hpp"
 
 namespace graphics
 {

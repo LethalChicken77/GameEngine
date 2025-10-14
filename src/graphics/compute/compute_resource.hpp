@@ -1,5 +1,5 @@
 #pragma once
-#include "shader_resource.hpp"
+#include "graphics/shader_resource.hpp"
 #include "compute_shader.hpp"
 
 namespace graphics

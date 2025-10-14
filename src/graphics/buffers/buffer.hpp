@@ -1,9 +1,11 @@
 #pragma once
 
-#include "device.hpp"
+#include "graphics/internal/device.hpp"
 
 namespace graphics {
 
+// Made by Brendan Galea
+// TODO: Replace with my own implementation, more similar to textures
 class Buffer {
  public:
   Buffer(

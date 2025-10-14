@@ -11,8 +11,8 @@
 #include <variant>
 
 #include "utils/console.hpp"
-#include "device.hpp"
-#include "descriptors.hpp"
+#include "internal/device.hpp"
+#include "internal/descriptors.hpp"
 
 #include "color.hpp"
 

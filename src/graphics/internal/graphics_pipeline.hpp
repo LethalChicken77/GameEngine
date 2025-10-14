@@ -3,9 +3,9 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "device.hpp"
-#include "shader.hpp"
-#include "containers.hpp"
+#include "graphics/internal/device.hpp"
+#include "graphics/shader.hpp"
+#include "graphics/containers.hpp"
 
 namespace graphics
 {

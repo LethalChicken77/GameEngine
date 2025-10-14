@@ -3,6 +3,8 @@
 #include <string>
 #include <vulkan/vulkan.h>
 
+// Obsolete
+// TODO: Delete
 namespace debug
 {
     extern void log(const std::string& message);
