@@ -65,6 +65,7 @@ std::vector<std::string> FileUtil::getFiles(const std::string& directoryPath)
         if(entry.is_regular_file())
             paths.push_back(entry.path().string());
     }
+    return paths;
 }
 
 std::vector<std::string> FileUtil::getFilesRecursive(const std::string& directoryPath)
@@ -83,6 +84,7 @@ std::vector<std::string> FileUtil::getFilesRecursive(const std::string& director
         std::vector<std::string> subPaths = getFilesRecursive(subDir);
         paths.insert(paths.end(), subPaths.begin(), subPaths.end());
     }
+    return paths;
 }
 
 std::vector<std::string> FileUtil::getSubdirectories(const std::string& directoryPath)
@@ -93,19 +95,20 @@ std::vector<std::string> FileUtil::getSubdirectories(const std::string& director
         if(entry.is_directory())
             paths.push_back(entry.path().string());
     }
+    return paths;
 }
 
-inline bool FileUtil::fileExists(const std::string& path)
+bool FileUtil::fileExists(const std::string& path)
 {
     return std::filesystem::is_regular_file(path);
 }
 
-inline bool FileUtil::directoryExists(const std::string& directoryPath)
+bool FileUtil::directoryExists(const std::string& directoryPath)
 {
     return std::filesystem::is_directory(directoryPath);
 }
 
-inline bool FileUtil::folderExists(const std::string& directoryPath)
+bool FileUtil::folderExists(const std::string& directoryPath)
 {
     return directoryExists(directoryPath);
 }

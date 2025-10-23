@@ -9,7 +9,7 @@ message(STATUS "Compiler path: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Compiler version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 # Specify the C++ standard
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set flags
@@ -43,7 +43,7 @@ find_package(Vulkan REQUIRED)
 # set(Vulkan_INCLUDE_DIRS "C:/VulkanSDK/1.4.309.0/Include")
 # set(Vulkan_LIBRARIES "C:/VulkanSDK/1.4.309.0/Lib/vulkan-1.lib")
 
-# Set GLFW Include Directory\
+# Set GLFW Include Directory
 set(GLFW_INCLUDE_DIR "C:/glfw-3.4.bin.WIN64/include")
 include_directories(${GLFW_INCLUDE_DIR})
 
@@ -103,6 +103,10 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.9
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
 target_include_directories(GameEngine PRIVATE "${Vulkan_INCLUDE_DIRS}/slang")
 
+# target_link_options(GameEngine PRIVATE
+#     -static-libstdc++
+#     -static-libgcc
+# )
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 
     C:/glfw-3.4.bin.WIN64/lib-mingw-w64/libglfw3.a  # Link GLFW
@@ -115,4 +119,5 @@ target_link_libraries(GameEngine PRIVATE
 # if(WIN32)
     Dwmapi
 # endif()
+
 )
