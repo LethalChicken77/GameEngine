@@ -68,8 +68,6 @@ void Transform::rotateRoll(float delta, bool local, bool refreshImmediate)
     rotateAboutAxis(axis, delta, refreshImmediate);
 }
 
-
-
 void Transform::recomputeMatrix()
 {
     glm::mat4 translation = glm::translate(glm::mat4(1.0f), {position.x, position.y, position.z});

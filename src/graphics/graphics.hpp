@@ -65,6 +65,9 @@ public:
     void reloadShaders();
     
     int getClickedObjID(uint32_t x, uint32_t y);
+    VkDescriptorSet getViewportDescriptorSet() const {
+        return viewportDescriptorSet;
+    };
     
     // Mesh management
     void setGraphicsMesh(const core::Mesh& mesh); // Create and update meshes
@@ -74,6 +77,8 @@ public:
     void drawMeshOutline(const core::Mesh& mesh, const glm::mat4 &transform);
 
     void drawSkybox();
+
+    VkExtent2D viewportSize{};
 
 private:
     struct MeshRenderData
@@ -135,11 +140,14 @@ private:
     std::unique_ptr<Material> outlineResultMaterial{};
     core::Mesh skyboxMesh{};
     Texture *idTexture = nullptr;
+    Texture *viewportTexture = nullptr;
 
     // Store graphics meshes based on instance ID
     std::unordered_map<id_t, std::unique_ptr<GraphicsMesh>> graphicsMeshes{};
 
     VkClearColorValue defaultClearColor{0.04f, 0.08f, 0.2f, 1.0f};
+
+    VkDescriptorSet viewportDescriptorSet;
 };
 
 } // namespace graphics

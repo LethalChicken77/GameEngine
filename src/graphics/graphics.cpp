@@ -3,8 +3,8 @@
 #include <array>
 #include <GLFW/glfw3.h>
 #include "imgui.h"
-#include "imgui_impl_vulkan.h"
-#include "imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_glfw.h"
 
 #include "graphics.hpp"
 #include "buffers/graphics_mesh.hpp"
@@ -107,6 +107,7 @@ void Graphics::init(const std::string& name, const std::string& engine_name)
     loadMaterials();
     skyboxMesh = core::Mesh::createSkybox(100);
     pipelineManager = std::make_unique<PipelineManager>(renderer);
+
     // pipelineManager->createPipelines();
 
     Console::log("Successfully initialized graphics", "Graphics");
@@ -178,19 +179,34 @@ void Graphics::drawFrame()
         finalRenderPass->resetLayouts();
         float frameScale = 1.0;
         VkExtent2D scaledExtent{
-            static_cast<uint32_t>(extent.width * frameScale), 
-            static_cast<uint32_t>(extent.height * frameScale)};
+            static_cast<uint32_t>(viewportSize.width * frameScale), 
+            static_cast<uint32_t>(viewportSize.height * frameScale)};
         if(sceneRenderPass->getExtent().width != scaledExtent.width || sceneRenderPass->getExtent().height != scaledExtent.height)
         {
             sceneRenderPass->create(scaledExtent);
         }
         if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
         {
-            idBufferRenderPass->create(extent); // Maybe render at low resolution
             imguiRenderPass->create(extent);
-            finalRenderPass->create(extent);
-            outlineBaseRenderPass->create(extent);
-            outlineRenderPass->create(extent);
+        }
+        if(imguiRenderPass->getExtent().width != viewportSize.width || imguiRenderPass->getExtent().height != viewportSize.height)
+        {
+            idBufferRenderPass->create(viewportSize); // Maybe render at low resolution
+            outlineBaseRenderPass->create(viewportSize);
+            outlineRenderPass->create(viewportSize);
+            // finalRenderPass->create(extent);
+            
+            // viewportTexture = finalRenderPass->getColorTexture().get();
+            // waitForDevice();
+            // if(viewportDescriptorSet != VK_NULL_HANDLE)
+            // {
+            //     ImGui_ImplVulkan_RemoveTexture(viewportDescriptorSet);
+            // }
+            // viewportDescriptorSet = ImGui_ImplVulkan_AddTexture(
+            //     viewportTexture->getSampler(),
+            //     viewportTexture->getImageView(),
+            //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            // );
         }
         // Object IDs render pass
         renderer.beginRenderPass(idBufferRenderPass->getRenderPass(), idBufferRenderPass->getFrameBuffer(), idBufferRenderPass->getExtent(), VkClearColorValue{-1, 0, 0, 0});
@@ -246,16 +262,6 @@ void Graphics::drawFrame()
         outlineResultMaterial->setTexture(0, outlineTexture.get());
         outlineResultMaterial->createDescriptorSet();
         
-// ImGui
-        renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), VkClearColorValue{0.0f, 0.0f, 0.0f, 0.0f});
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-        renderer.endRenderPass();
-
-        std::unique_ptr<Texture> &imguiTexture = imguiRenderPass->getColorTexture();
-        imguiTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
-        imguiMaterial->setTexture(0, imguiTexture.get());
-        imguiMaterial->createDescriptorSet();
-
 // Final Render Pass
         renderer.beginRenderPass(finalRenderPass->getRenderPass(), finalRenderPass->getFrameBuffer(), finalRenderPass->getExtent(), defaultClearColor);
         pipelineManager->getPipeline(0)->bind(commandBuffer); // Post-processing pipeline
@@ -287,6 +293,25 @@ void Graphics::drawFrame()
         );
         vkCmdDraw(commandBuffer, 6, 1, 0, 0);
 
+        renderer.endRenderPass();
+        
+        viewportTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+// ImGui
+        renderer.beginRenderPass(imguiRenderPass->getRenderPass(), imguiRenderPass->getFrameBuffer(), imguiRenderPass->getExtent(), VkClearColorValue{0.0f, 0.0f, 0.0f, 0.0f});
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+        renderer.endRenderPass();
+
+        std::unique_ptr<Texture> &imguiTexture = imguiRenderPass->getColorTexture();
+        imguiTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        imguiMaterial->setTexture(0, imguiTexture.get());
+        imguiMaterial->createDescriptorSet();
+
+        std::unique_ptr<Texture> &outputTexture = finalRenderPass->getColorTexture();
+        outputTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
+        outputMaterial->setTexture(0, outputTexture.get());
+        outputMaterial->createDescriptorSet();
+
+        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), extent, defaultClearColor);
         pipelineManager->getPipeline(1)->bind(commandBuffer); // ImGui
         localDescriptorSets = { imguiMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
@@ -300,28 +325,20 @@ void Graphics::drawFrame()
             nullptr
         );
         vkCmdDraw(commandBuffer, 6, 1, 0, 0);
-        renderer.endRenderPass();
+        // outputMaterial->getShader()->getPipeline()->bind(commandBuffer);
+        // localDescriptorSets = { outputMaterial->getDescriptorSet() };
+        // vkCmdBindDescriptorSets(
+        //     commandBuffer, 
+        //     VK_PIPELINE_BIND_POINT_GRAPHICS, 
+        //     outputMaterial->getShader()->getPipeline()->getPipelineLayout(), 
+        //     0,
+        //     1,
+        //     localDescriptorSets.data(), 
+        //     0,
+        //     nullptr
+        // );
 
-        std::unique_ptr<Texture> &outputTexture = finalRenderPass->getColorTexture();
-        outputTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
-        outputMaterial->setTexture(0, outputTexture.get());
-        outputMaterial->createDescriptorSet();
-
-        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), extent, defaultClearColor);
-        outputMaterial->getShader()->getPipeline()->bind(commandBuffer); // Post-processing pipeline
-        localDescriptorSets = { outputMaterial->getDescriptorSet() };
-        vkCmdBindDescriptorSets(
-            commandBuffer, 
-            VK_PIPELINE_BIND_POINT_GRAPHICS, 
-            outputMaterial->getShader()->getPipeline()->getPipelineLayout(), 
-            0,
-            1,
-            localDescriptorSets.data(), 
-            0,
-            nullptr
-        );
-
-        vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+        // vkCmdDraw(commandBuffer, 6, 1, 0, 0);
         renderer.endRenderPass();
 
         renderer.endFrame();
@@ -361,7 +378,7 @@ void Graphics::createRenderPasses()
 
     Console::log("Creating ImGui render pass", "Graphics");
     imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
-    imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
+    imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_UNORM);
     imguiRenderPass->addDepthAttachment();
     imguiRenderPass->create(renderer.getExtent());
     
@@ -370,6 +387,7 @@ void Graphics::createRenderPasses()
     finalRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB); // Maybe change to UNORM
     finalRenderPass->addDepthAttachment();
     finalRenderPass->create(renderer.getExtent());
+    viewportTexture = finalRenderPass->getColorTexture().get();
 }
 
 void Graphics::loadTextures()
@@ -581,7 +599,7 @@ void Graphics::loadMaterials()
     imguiMaterial = std::make_unique<Material>(std::move(_imguiMaterial));
 
     Material _outlineResultMaterial = Material::instantiate(Shared::shaders[1].get());
-    _outlineResultMaterial.setValue("doSRGBTransform", true);
+    _outlineResultMaterial.setValue("doSRGBTransform", false);
     _outlineResultMaterial.createShaderInputBuffer();
     _outlineResultMaterial.createDescriptorSet();
     outlineResultMaterial = std::make_unique<Material>(std::move(_outlineResultMaterial));
@@ -824,7 +842,7 @@ void Graphics::graphicsInitImgui()
     initInfo.Queue = device.graphicsQueue();
     initInfo.PipelineCache = VK_NULL_HANDLE;
     initInfo.DescriptorPool = Descriptors::imguiPool->getPool();
-    initInfo.RenderPass = imguiRenderPass->getRenderPass();
+    initInfo.PipelineInfoMain.RenderPass = imguiRenderPass->getRenderPass();
     initInfo.Allocator = nullptr;
     initInfo.MinImageCount = 2;
     initInfo.ImageCount = SwapChain::MAX_FRAMES_IN_FLIGHT;
@@ -834,6 +852,14 @@ void Graphics::graphicsInitImgui()
         }
     };
     ImGui_ImplVulkan_Init(&initInfo);
+
+    
+    // std::cout << viewportTexture->getSampler() << std::endl;
+    viewportDescriptorSet = ImGui_ImplVulkan_AddTexture(
+        viewportTexture->getSampler(),
+        viewportTexture->getImageView(),
+        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    );
 }
 
 void Graphics::reloadShaders()

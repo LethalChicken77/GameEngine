@@ -14,8 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_vulkan.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
 #include "utils/imgui_styles.hpp"
 
 using namespace graphics;
@@ -137,11 +137,10 @@ void Engine::run()
     // style.ItemSpacing = ImVec2(8, 4);
 
     // Modify colors
-    // StyleColorsDarkLinear(&style); // Done in post processing now
-
 
     ImGui_ImplGlfw_InitForVulkan(graphicsModule.getWindow()->getWindow(), true);
     graphicsModule.graphicsInitImgui();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 
     Input::initializeKeys();
@@ -161,6 +160,7 @@ void Engine::run()
 
     graphicsModule.setCamera(&camera);
 
+    VkDescriptorSet viewPortDS = nullptr;
 
     std::cout << "Entering main loop" << std::endl;
     double time = 0.0f;
@@ -178,6 +178,21 @@ void Engine::run()
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
+        viewPortDS = graphicsModule.getViewportDescriptorSet();
+        if(viewPortDS != nullptr)
+        {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
+            ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
+            ImVec2 size = ImGui::GetContentRegionAvail();
+            graphicsModule.viewportSize = VkExtent2D{(uint32_t)size.x, (uint32_t)size.y};
+            ImGui::Image((void*)reinterpret_cast<uintptr_t>(viewPortDS), size);
+            ImGui::End();
+            ImGui::PopStyleVar(2);
+        }
 
         Console::drawImGui();
         ObjectManager::drawImGui();
