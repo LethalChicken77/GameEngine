@@ -56,7 +56,7 @@ include_directories("${CMAKE_SOURCE_DIR}/lib/tinyobjloader")
 include_directories("${CMAKE_SOURCE_DIR}/lib/miniz-3.0.2")
 include_directories("${CMAKE_SOURCE_DIR}/lib/tinyexr-1.0.12")
 include_directories("${CMAKE_SOURCE_DIR}/lib/stbimage")
-include_directories("${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
+include_directories("${CMAKE_SOURCE_DIR}/lib/imgui")
 include_directories("${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
 
 
@@ -65,15 +65,19 @@ include_directories("${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/in
 #     IMPORTED_LOCATION "${Vulkan_SDK_ROOT}/Bin/slang.dll"
 #     INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_SDK_ROOT}/Include/slang"
 # )
+
 # Add ImGui source files
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/lib/imgui)
+set(IMGUI_BACKENDS ${IMGUI_DIR}/backends)
+
 set(IMGUI_SOURCES
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_demo.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_widgets.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8/imgui_impl_vulkan.cpp
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_BACKENDS}/imgui_impl_glfw.cpp
+    ${IMGUI_BACKENDS}/imgui_impl_vulkan.cpp
 )
 
 set(LIB_SOURCES
@@ -101,7 +105,7 @@ target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/tinyexr-1
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/stbimage")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/imgui-1.91.8")
 target_include_directories(GameEngine PRIVATE "${CMAKE_SOURCE_DIR}/lib/nativefiledialog-release_116/src/include")
-target_include_directories(GameEngine PRIVATE "${Vulkan_INCLUDE_DIRS}/slang")
+target_include_directories(GameEngine PRIVATE SYSTEM "${Vulkan_INCLUDE_DIRS}/slang")
 
 # Link libraries
 target_link_libraries(GameEngine PRIVATE 

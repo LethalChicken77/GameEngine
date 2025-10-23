@@ -84,17 +84,10 @@ void Console::drawImGui()
     ImVec2 viewportPos = ImGui::GetMainViewport()->Pos;
     ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
 
-    // Set the window position at the bottom-left
-    ImVec2 windowPos = ImVec2(viewportPos.x - 1, viewportPos.y + viewportSize.y - 1); // bottom-left, outside the window so the edges can't be grabbed
-    ImVec2 pivot     = ImVec2(0.0f, 1.0f); // window bottom-left aligns with this position
-
     // Apply the position to the next window
-    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, pivot);
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 60), ImVec2(FLT_MAX, FLT_MAX));
 
-    ImGui::Begin("Console", nullptr,
-        ImGuiWindowFlags_NoMove
-    );
+    ImGui::Begin("Console", nullptr, ImGuiWindowFlags_None);
 
     if(!ImGui::IsWindowCollapsed())
     {

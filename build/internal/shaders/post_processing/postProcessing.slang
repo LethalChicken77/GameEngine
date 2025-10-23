@@ -56,6 +56,7 @@ float4 fsMain(VOut input)
     outColor = ACESFilmCurve(outColor);
     float gamma = materialInfo.gamma;
     outColor = pow(outColor, gamma);
+    outColor = LinearToSRGB(outColor);
     return float4(outColor, 1.0);
     // return float4(input.UV.xy, 0.0, 1.0);
 }
