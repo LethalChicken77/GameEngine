@@ -7,6 +7,7 @@
 #include "graphics/internal/descriptors.hpp"
 #include "graphics/internal/device.hpp"
 #include "glm/glm.hpp"
+#include "utils/console.hpp"
 
 namespace graphics
 {
@@ -97,7 +98,8 @@ namespace graphics
         {
             if(properties.format != VK_FORMAT_R32_SFLOAT)
             {
-                throw std::runtime_error("Cannot get pixel on non-float texture");
+                Console::error("Cannot get float pixel on non-float texture", "Texture");
+                return 0;
             }
             x = glm::clamp(x, 0u, width - 1);
             y = glm::clamp(y, 0u, height - 1);
@@ -111,7 +113,8 @@ namespace graphics
         {
             if(properties.format != VK_FORMAT_R32_SINT)
             {
-                throw std::runtime_error("Cannot get pixel on non-int texture");
+                Console::error("Cannot get int pixel on non-int texture", "Texture");
+                return -1;
             }
             x = glm::clamp(x, 0u, width - 1);
             y = glm::clamp(y, 0u, height - 1);

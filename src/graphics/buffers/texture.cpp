@@ -700,7 +700,7 @@ namespace graphics
     {
         if(x >= width || y >= height || x < 0 || y < 0)
         {
-            Console::error("Cannot copy pixel outside texture bounds: " + std::to_string(x) + std::to_string(y), "Texture");
+            Console::error("Cannot copy pixel outside texture bounds: (" + std::to_string(x) + ", " + std::to_string(y) + ")", "Texture");
         }
 
         uint32_t pixelSize = sizeof(data[0]) * 4;

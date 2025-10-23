@@ -175,24 +175,26 @@ void Engine::run()
             graphicsModule.reloadShaders();
         }
 
+
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
+        ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
+        ImVec2 size = ImGui::GetContentRegionAvail();
+        graphicsModule.viewportSize = VkExtent2D{(uint32_t)size.x, (uint32_t)size.y};
+        graphicsModule.updateExtent();
         viewPortDS = graphicsModule.getViewportDescriptorSet();
         if(viewPortDS != nullptr)
         {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0,0));
-            ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
-            ImVec2 size = ImGui::GetContentRegionAvail();
-            graphicsModule.viewportSize = VkExtent2D{(uint32_t)size.x, (uint32_t)size.y};
             ImGui::Image((void*)reinterpret_cast<uintptr_t>(viewPortDS), size);
-            ImGui::End();
-            ImGui::PopStyleVar(2);
         }
+        ImGui::End();
+        ImGui::PopStyleVar(2);
 
         Console::drawImGui();
         ObjectManager::drawImGui();

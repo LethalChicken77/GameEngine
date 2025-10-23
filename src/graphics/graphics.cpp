@@ -137,14 +137,7 @@ void Graphics::cleanup()
 
 
 void Graphics::drawFrame()
-{
-    VkExtent2D extent = renderer.getExtent();
-    if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
-    if(camera != nullptr)
-    {
-        camera->setAspectRatio(static_cast<float>(extent.width) / static_cast<float>(extent.height));
-    }
-    
+{    
     // std::cout << "Drawing Frame" << std::endl;
     std::vector<VkDescriptorSet> localDescriptorSets;
     if(VkCommandBuffer commandBuffer = renderer.startFrame())
@@ -177,37 +170,7 @@ void Graphics::drawFrame()
         outlineBaseRenderPass->resetLayouts();
         imguiRenderPass->resetLayouts();
         finalRenderPass->resetLayouts();
-        float frameScale = 1.0;
-        VkExtent2D scaledExtent{
-            static_cast<uint32_t>(viewportSize.width * frameScale), 
-            static_cast<uint32_t>(viewportSize.height * frameScale)};
-        if(sceneRenderPass->getExtent().width != scaledExtent.width || sceneRenderPass->getExtent().height != scaledExtent.height)
-        {
-            sceneRenderPass->create(scaledExtent);
-        }
-        if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
-        {
-            imguiRenderPass->create(extent);
-        }
-        if(imguiRenderPass->getExtent().width != viewportSize.width || imguiRenderPass->getExtent().height != viewportSize.height)
-        {
-            idBufferRenderPass->create(viewportSize); // Maybe render at low resolution
-            outlineBaseRenderPass->create(viewportSize);
-            outlineRenderPass->create(viewportSize);
-            // finalRenderPass->create(extent);
-            
-            // viewportTexture = finalRenderPass->getColorTexture().get();
-            // waitForDevice();
-            // if(viewportDescriptorSet != VK_NULL_HANDLE)
-            // {
-            //     ImGui_ImplVulkan_RemoveTexture(viewportDescriptorSet);
-            // }
-            // viewportDescriptorSet = ImGui_ImplVulkan_AddTexture(
-            //     viewportTexture->getSampler(),
-            //     viewportTexture->getImageView(),
-            //     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-            // );
-        }
+        
         // Object IDs render pass
         renderer.beginRenderPass(idBufferRenderPass->getRenderPass(), idBufferRenderPass->getFrameBuffer(), idBufferRenderPass->getExtent(), VkClearColorValue{-1, 0, 0, 0});
         renderGameObjectIDs(frameInfo);
@@ -311,7 +274,7 @@ void Graphics::drawFrame()
         outputMaterial->setTexture(0, outputTexture.get());
         outputMaterial->createDescriptorSet();
 
-        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), extent, defaultClearColor);
+        renderer.beginRenderPass(renderer.getSCRenderPass(), renderer.getSCFrameBuffer(), renderer.getExtent(), defaultClearColor);
         pipelineManager->getPipeline(1)->bind(commandBuffer); // ImGui
         localDescriptorSets = { imguiMaterial->getDescriptorSet() };
         vkCmdBindDescriptorSets(
@@ -348,6 +311,48 @@ void Graphics::drawFrame()
     outlineRenderQueue.clear();
 }
 
+void Graphics::updateExtent()
+{
+    VkExtent2D extent = renderer.getExtent();
+    if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
+    if(camera != nullptr)
+    {
+        camera->setAspectRatio(static_cast<float>(viewportSize.width) / static_cast<float>(viewportSize.height));
+    }
+
+    float frameScale = 1.0;
+    VkExtent2D scaledExtent{
+        static_cast<uint32_t>(viewportSize.width * frameScale), 
+        static_cast<uint32_t>(viewportSize.height * frameScale)};
+    if(sceneRenderPass->getExtent().width != scaledExtent.width || sceneRenderPass->getExtent().height != scaledExtent.height)
+    {
+        sceneRenderPass->create(scaledExtent);
+    }
+    if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
+    {
+        imguiRenderPass->create(extent);
+    }
+    if(imguiRenderPass->getExtent().width != viewportSize.width || imguiRenderPass->getExtent().height != viewportSize.height)
+    {
+        idBufferRenderPass->create(viewportSize); // Maybe render at low resolution
+        outlineBaseRenderPass->create(viewportSize);
+        outlineRenderPass->create(viewportSize);
+        
+        waitForDevice();
+        if(viewportDescriptorSet != VK_NULL_HANDLE)
+        {
+            ImGui_ImplVulkan_RemoveTexture(viewportDescriptorSet);
+        }
+        finalRenderPass->create(viewportSize);
+        viewportTexture = finalRenderPass->getColorTexture().get();
+        viewportDescriptorSet = ImGui_ImplVulkan_AddTexture(
+            viewportTexture->getSampler(),
+            viewportTexture->getImageView(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+    }
+}
+
 void Graphics::createRenderPasses()
 {
     Console::log("Creating ID buffer render pass", "Graphics");
@@ -378,7 +383,7 @@ void Graphics::createRenderPasses()
 
     Console::log("Creating ImGui render pass", "Graphics");
     imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
-    imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_UNORM);
+    imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
     imguiRenderPass->addDepthAttachment();
     imguiRenderPass->create(renderer.getExtent());
     

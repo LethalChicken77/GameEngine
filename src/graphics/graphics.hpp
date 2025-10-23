@@ -49,7 +49,8 @@ public:
     void init(const std::string& name, const std::string& engine_name);
     void cleanup();
     bool isOpen() const { return window.isOpen(); }
-
+    
+    void updateExtent();
     void drawFrame();
     void setCamera(Camera* _camera) { camera = _camera; }
 
@@ -98,6 +99,7 @@ private:
     std::vector<MeshRenderData> outlineRenderQueue{};
 
     static std::unique_ptr<Buffer> createInstanceBuffer(const std::vector<glm::mat4>& transforms);
+
 
     void createRenderPasses();
     void loadTextures(); // TODO: Put in asset manager
