@@ -8,6 +8,7 @@
 
 namespace core
 {
+    class AssetManager;
     class AssetData : public Object
     {
     public:
@@ -27,6 +28,7 @@ namespace core
         std::vector<char> data;
         using Object::Object;
         
+        friend class AssetManager;
         // AssetData(id_t newID) : Object(newID) {};
     };
 } // namespace core

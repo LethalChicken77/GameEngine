@@ -15,9 +15,5 @@ namespace core
             using SmartRef<T>::ptr;
         public:
             using SmartRef<T>::SmartRef;
-            Asset(const std::string &path)
-            {
-                ptr = AssetManager::Instantiate<T>(path);
-            }
     };
 } // namespace core
