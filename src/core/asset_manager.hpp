@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include "asset_data.hpp"
 #include "object_manager.hpp"
+#include "utils/file_util.hpp"
+#include "utils/console.hpp"
 #include <regex>
 #include <random>
 
@@ -21,6 +23,10 @@ namespace core
         {
             static_assert(std::is_base_of<AssetData, T>::value, "Instantiated assets must derive from AssetData");
             // Check if file exists
+            if(!FileUtil::fileExists(path))
+            {
+                Console::warn("File not found: " + path, "Asset Manager");
+            }
             
 
             // Extract filename
@@ -37,6 +43,7 @@ namespace core
                 newID = createUUID();
             }
             assetData->UUID = newID;
+            assets[newID] = assetData;
             // assetData->LoadAsset();
 
             return obj;

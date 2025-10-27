@@ -11,7 +11,7 @@
 #include "graphics/camera.hpp"
 #include "core/game_object.hpp"
 #include "utils/debug.hpp"
-#include "core/random.hpp"
+#include "utils/random.hpp"
 #include "utils/console.hpp"
 #include "core/scene.hpp"
 

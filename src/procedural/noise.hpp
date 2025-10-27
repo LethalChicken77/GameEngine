@@ -1,5 +1,5 @@
 #pragma once
-#include "core/random.hpp"
+#include "utils/random.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 

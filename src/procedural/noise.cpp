@@ -14,8 +14,8 @@ inline float calculateCornerContribution(float x, float y, int gridX, int gridY,
     }
 
     // Generate pseudo-random gradient
-    int rngSeed = core::Random::SeedFrom2D(gridX, gridY, seed);
-    float angle = static_cast<float>(core::Random::getRandomFloat(0, 2.0f * glm::pi<float>(), rngSeed));
+    int rngSeed = Random::SeedFrom2D(gridX, gridY, seed);
+    float angle = static_cast<float>(Random::getRandomFloat(0, 2.0f * glm::pi<float>(), rngSeed));
 
     // Gradient vector components using GLM
     float gx = glm::cos(angle);
@@ -58,10 +58,14 @@ float simplex2D(float x, float y, uint32_t seed)
 
 float simplex3D(float x, float y, float z, uint32_t seed)
 {
+    // TODO: Implement
+    return 0;
 }
 
 float simplex4D(float xin, float y, float z, float w, uint32_t seed)
 {
+    // TODO: Implement
+    return 0;
 }
 
 } // namespace procedural

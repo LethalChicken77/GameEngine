@@ -10,7 +10,6 @@
 #include "buffers/graphics_mesh.hpp"
 #include "core/input.hpp"
 #include "buffers/material.hpp"
-#include "core/random.hpp"
 #include "procedural/noise.hpp"
 
 #define GLM_FORCE_RADIANS
@@ -138,6 +137,8 @@ void Graphics::cleanup()
 
 void Graphics::drawFrame()
 {    
+    VkExtent2D extent = renderer.getExtent();
+    if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
     // std::cout << "Drawing Frame" << std::endl;
     std::vector<VkDescriptorSet> localDescriptorSets;
     if(VkCommandBuffer commandBuffer = renderer.startFrame())
@@ -176,8 +177,6 @@ void Graphics::drawFrame()
         renderGameObjectIDs(frameInfo);
         renderer.endRenderPass();
         
-        idTexture = idBufferRenderPass->getColorTexture().get();
-        // idTexture->transitionImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, commandBuffer);
         // Objects render pass
         renderer.beginRenderPass(sceneRenderPass->getRenderPass(), sceneRenderPass->getFrameBuffer(), sceneRenderPass->getExtent(), defaultClearColor);
         renderMeshes(frameInfo, sceneRenderQueue);
@@ -314,11 +313,17 @@ void Graphics::drawFrame()
 void Graphics::updateExtent()
 {
     VkExtent2D extent = renderer.getExtent();
-    if(extent.width <= 0 || extent.height <= 0) return; // Don't draw frame if minimized
+    if(extent.width <= 0 || extent.height <= 0) return; // Don't update extents if minimized
     if(camera != nullptr)
     {
         camera->setAspectRatio(static_cast<float>(viewportSize.width) / static_cast<float>(viewportSize.height));
     }
+    if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
+    {
+        imguiRenderPass->create(extent);
+    }
+
+    if(viewportSize.width <= 0 || viewportSize.height <= 0) return;
 
     float frameScale = 1.0;
     VkExtent2D scaledExtent{
@@ -328,10 +333,7 @@ void Graphics::updateExtent()
     {
         sceneRenderPass->create(scaledExtent);
     }
-    if(imguiRenderPass->getExtent().width != extent.width || imguiRenderPass->getExtent().height != extent.height)
-    {
-        imguiRenderPass->create(extent);
-    }
+    // if(viewportSize.width <= 0 || viewportSize.height <= 0) return;
     if(imguiRenderPass->getExtent().width != viewportSize.width || imguiRenderPass->getExtent().height != viewportSize.height)
     {
         idBufferRenderPass->create(viewportSize); // Maybe render at low resolution
@@ -880,6 +882,7 @@ void Graphics::reloadShaders()
 
 int Graphics::getClickedObjID(uint32_t x, uint32_t y)
 {
+    idTexture = idBufferRenderPass->getColorTexture().get();
     if(!idTexture)
     {
         return -1;

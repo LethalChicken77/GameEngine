@@ -43,12 +43,6 @@
 },
 {
   "directory": "C:/Users/dante/Development/GameEngine/build",
-  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Development/GameEngine/include -IC:/Users/dante/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Development/GameEngine/lib/stbimage -IC:/Users/dante/Development/GameEngine/lib/imgui -IC:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Development/GameEngine/src -IC:/Users/dante/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Development/GameEngine/SYSTEM -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include -g -std=gnu++23 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics -o CMakeFiles\\GameEngine.dir\\src\\core\\random.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\core\\random.cpp",
-  "file": "C:/Users/dante/Development/GameEngine/src/core/random.cpp",
-  "output": "C:/Users/dante/Development/GameEngine/build/CMakeFiles/GameEngine.dir/src/core/random.cpp.obj"
-},
-{
-  "directory": "C:/Users/dante/Development/GameEngine/build",
   "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Development/GameEngine/include -IC:/Users/dante/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Development/GameEngine/lib/stbimage -IC:/Users/dante/Development/GameEngine/lib/imgui -IC:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Development/GameEngine/src -IC:/Users/dante/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Development/GameEngine/SYSTEM -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include -g -std=gnu++23 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics -o CMakeFiles\\GameEngine.dir\\src\\core\\scene.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\core\\scene.cpp",
   "file": "C:/Users/dante/Development/GameEngine/src/core/scene.cpp",
   "output": "C:/Users/dante/Development/GameEngine/build/CMakeFiles/GameEngine.dir/src/core/scene.cpp.obj"
@@ -226,6 +220,12 @@
   "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Development/GameEngine/include -IC:/Users/dante/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Development/GameEngine/lib/stbimage -IC:/Users/dante/Development/GameEngine/lib/imgui -IC:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Development/GameEngine/src -IC:/Users/dante/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Development/GameEngine/SYSTEM -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include -g -std=gnu++23 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics -o CMakeFiles\\GameEngine.dir\\src\\utils\\file_util.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\utils\\file_util.cpp",
   "file": "C:/Users/dante/Development/GameEngine/src/utils/file_util.cpp",
   "output": "C:/Users/dante/Development/GameEngine/build/CMakeFiles/GameEngine.dir/src/utils/file_util.cpp.obj"
+},
+{
+  "directory": "C:/Users/dante/Development/GameEngine/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\Clang++.exe -IC:/glfw-3.4.bin.WIN64/include -IC:/Users/dante/Development/GameEngine/include -IC:/Users/dante/Development/GameEngine/lib/tinyobjloader -IC:/Users/dante/Development/GameEngine/lib/miniz-3.0.2 -IC:/Users/dante/Development/GameEngine/lib/tinyexr-1.0.12 -IC:/Users/dante/Development/GameEngine/lib/stbimage -IC:/Users/dante/Development/GameEngine/lib/imgui -IC:/Users/dante/Development/GameEngine/lib/nativefiledialog-release_116/src/include -IC:/Users/dante/Development/GameEngine/src -IC:/Users/dante/Development/GameEngine/lib/imgui-1.91.8 -IC:/Users/dante/Development/GameEngine/SYSTEM -IC:/VulkanSDK/1.4.309.0/Include/slang -isystem C:/VulkanSDK/1.4.309.0/Include -g -std=gnu++23 -g -fno-caret-diagnostics -fno-diagnostics-show-option -fno-diagnostics-show-note-include-stack -fcolor-diagnostics -o CMakeFiles\\GameEngine.dir\\src\\utils\\random.cpp.obj -c C:\\Users\\dante\\Development\\GameEngine\\src\\utils\\random.cpp",
+  "file": "C:/Users/dante/Development/GameEngine/src/utils/random.cpp",
+  "output": "C:/Users/dante/Development/GameEngine/build/CMakeFiles/GameEngine.dir/src/utils/random.cpp.obj"
 },
 {
   "directory": "C:/Users/dante/Development/GameEngine/build",

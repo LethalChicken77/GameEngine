@@ -373,6 +373,8 @@ namespace graphics
     
     void Texture::updatePixelOnCPU(uint32_t x, uint32_t y)
     {
+        x = glm::clamp(x, 0u, width - 1);
+        y = glm::clamp(y, 0u, height - 1);
         VkImageLayout prevLayout = currentLayout;
         transitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
         copyPixelFromImage(x, y);
