@@ -11,7 +11,6 @@ namespace graphics
 class RenderPass
 {
     public:
-        RenderPass(VkExtent2D _extent);
         ~RenderPass();
 
         RenderPass(const RenderPass&) = delete; // No copy
@@ -36,6 +35,7 @@ class RenderPass
 
         void create(VkExtent2D _extent);
     private:
+        RenderPass();
         VkRenderPass renderPass = VK_NULL_HANDLE;
         VkFramebuffer frameBuffer = VK_NULL_HANDLE;
         VkExtent2D extent;
@@ -44,7 +44,10 @@ class RenderPass
         VkImageLayout depthImageLayout;
 
         std::vector<std::unique_ptr<Texture>> images{};
+        std::vector<VkImage> externalImages{};
+        std::map<std::string, std::unique_ptr<Texture>&> imageRefs{};
         std::unique_ptr<Texture> depthImage = nullptr;
+        GraphicsPipeline* pipeline = nullptr;
 
         void updateImageSizes();
         void createRenderPass();
@@ -53,6 +56,26 @@ class RenderPass
         VkFormat findDepthFormat();
 
         void destroyBuffers();
+
+        friend class RenderPassBuilder;
+};
+
+class RenderPassBuilder
+{
+    private:
+        RenderPass newPass;
+    public:
+        RenderPassBuilder &AddExternalColorAttachment();
+        RenderPassBuilder &AddColorAttachment(std::string_view passName, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        RenderPassBuilder &AddColorAttachment(std::string_view passName, TextureProperties textureProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        RenderPassBuilder &AddColorAttachment(std::string_view passName, SamplerProperties samplerProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        RenderPassBuilder &AddColorAttachment(std::string_view passName, TextureProperties textureProps, SamplerProperties samplerProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+        
+        RenderPassBuilder &AddDepthAttachment(VkImageLayout imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+        
+        RenderPassBuilder &SetDrawFunction();
+
+        std::unique_ptr<RenderPass> Build();
 };
 
 } // namespace graphics

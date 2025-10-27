@@ -3,10 +3,10 @@
 
 namespace graphics
 {
-RenderPass::RenderPass(VkExtent2D _extent) : extent(_extent)
-{
+// RenderPass::RenderPass(VkExtent2D _extent) : extent(_extent)
+// {
 
-}
+// }
 
 RenderPass::~RenderPass()
 {

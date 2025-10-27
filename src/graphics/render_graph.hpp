@@ -15,7 +15,7 @@ namespace graphics
             {
                 std::unique_ptr<RenderPass> renderPass;
                 float renderScale;
-                std::vector<std::string> dependencies;
+                std::vector<RenderPassNode*> dependencies;
             };
         public:
             ~RenderGraph() = default;
@@ -40,16 +40,18 @@ namespace graphics
 
     class RenderGraphBuilder
     {
+        private:
+            RenderGraph newGraph;
         public:
-            RenderGraphBuilder &renderPass(std::string_view name);
-            RenderGraphBuilder &renderPass(std::string_view name, const std::vector<const std::string> &dependencies);
+            RenderGraphBuilder &AddRenderPass(std::string_view name);
+            RenderGraphBuilder &AddRenderPass(std::string_view name, const std::vector<const std::string> &dependencies);
             // Add an external render pass
             // NOTE: Render graph takes ownership of the render pass
-            RenderGraphBuilder &renderPass(std::string_view name, std::unique_ptr<RenderPass> &&renderPass);
-            RenderGraphBuilder &renderPass(std::string_view name, std::unique_ptr<RenderPass> &&renderPass, const std::vector<const std::string> &dependencies);
+            RenderGraphBuilder &AddRenderPass(std::string_view name, std::unique_ptr<RenderPass> &&renderPass);
+            RenderGraphBuilder &AddRenderPass(std::string_view name, std::unique_ptr<RenderPass> &&renderPass, const std::vector<const std::string> &dependencies);
             
-            RenderGraphBuilder &target(const Texture &texture);
+            RenderGraphBuilder &Target(const Texture &texture);
             
-            RenderGraph *build();
+            std::unique_ptr<RenderGraph> Build();
     };
 } // namespace graphics

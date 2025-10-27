@@ -358,19 +358,19 @@ void Graphics::updateExtent()
 void Graphics::createRenderPasses()
 {
     Console::log("Creating ID buffer render pass", "Graphics");
-    idBufferRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    idBufferRenderPass = std::make_unique<RenderPass>();
     idBufferRenderPass->addColorAttachment(VK_FORMAT_R32_SINT);
     idBufferRenderPass->addDepthAttachment();
     idBufferRenderPass->create(renderer.getExtent());
 
     Console::log("Creating scene render pass", "Graphics");
-    sceneRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    sceneRenderPass = std::make_unique<RenderPass>();
     sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
     sceneRenderPass->addDepthAttachment();
     sceneRenderPass->create(renderer.getExtent());
 
     Console::log("Creating outline base render pass", "Graphics");
-    outlineBaseRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    outlineBaseRenderPass = std::make_unique<RenderPass>();
     SamplerProperties outlineBaseSamplerProperties = SamplerProperties::getDefaultProperties();
     outlineBaseSamplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
     outlineBaseRenderPass->addColorAttachment(outlineBaseSamplerProperties, VK_FORMAT_R16G16B16A16_SFLOAT);
@@ -378,19 +378,19 @@ void Graphics::createRenderPasses()
     outlineBaseRenderPass->create(renderer.getExtent());
     
     Console::log("Creating outline render pass", "Graphics");
-    outlineRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    outlineRenderPass = std::make_unique<RenderPass>();
     outlineRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
     outlineRenderPass->addDepthAttachment();
     outlineRenderPass->create(renderer.getExtent());
 
     Console::log("Creating ImGui render pass", "Graphics");
-    imguiRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    imguiRenderPass = std::make_unique<RenderPass>();
     imguiRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB);
     imguiRenderPass->addDepthAttachment();
     imguiRenderPass->create(renderer.getExtent());
     
     Console::log("Creating Final render pass", "Graphics");
-    finalRenderPass = std::make_unique<RenderPass>(renderer.getExtent());
+    finalRenderPass = std::make_unique<RenderPass>();
     finalRenderPass->addColorAttachment(VK_FORMAT_B8G8R8A8_SRGB); // Maybe change to UNORM
     finalRenderPass->addDepthAttachment();
     finalRenderPass->create(renderer.getExtent());
