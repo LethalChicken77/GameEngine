@@ -2,8 +2,10 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <map>
 
 #include "graphics/buffers/texture.hpp"
+#include "graphics/internal/graphics_pipeline.hpp"
 
 namespace graphics
 {
@@ -35,7 +37,7 @@ class RenderPass
 
         void create(VkExtent2D _extent);
     private:
-        RenderPass();
+        RenderPass(VkExtent2D initialExtent);
         VkRenderPass renderPass = VK_NULL_HANDLE;
         VkFramebuffer frameBuffer = VK_NULL_HANDLE;
         VkExtent2D extent;
@@ -53,7 +55,7 @@ class RenderPass
         void createRenderPass();
         void createFrameBuffers();
 
-        VkFormat findDepthFormat();
+        static VkFormat findDepthFormat();
 
         void destroyBuffers();
 
@@ -65,7 +67,9 @@ class RenderPassBuilder
     private:
         RenderPass newPass;
     public:
-        RenderPassBuilder &AddExternalColorAttachment();
+        RenderPassBuilder(VkExtent2D initialExtent);
+
+        RenderPassBuilder &AddExternalColorAttachment(Texture *texture);
         RenderPassBuilder &AddColorAttachment(std::string_view passName, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         RenderPassBuilder &AddColorAttachment(std::string_view passName, TextureProperties textureProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
         RenderPassBuilder &AddColorAttachment(std::string_view passName, SamplerProperties samplerProps, VkFormat imageFormat = VK_FORMAT_R8G8B8A8_SRGB, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
@@ -73,7 +77,7 @@ class RenderPassBuilder
         
         RenderPassBuilder &AddDepthAttachment(VkImageLayout imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         
-        RenderPassBuilder &SetDrawFunction();
+        RenderPassBuilder &SetDrawFunction(void (*func)());
 
         std::unique_ptr<RenderPass> Build();
 };

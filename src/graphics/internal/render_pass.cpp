@@ -55,28 +55,6 @@ void RenderPass::addColorAttachment(SamplerProperties samplerProps, VkFormat ima
     addColorAttachment(props, samplerProps, imageFormat, imageLayout);
 }
 
-void RenderPass::addColorAttachment(TextureProperties textureProps, SamplerProperties samplerProps, VkFormat imageFormat, VkImageLayout imageLayout)
-{
-    std::unique_ptr<Texture> tex = std::make_unique<Texture>(textureProps, samplerProps, extent.width, extent.height);
-    tex->createTextureUninitialized();
-    images.push_back(std::move(tex));
-
-    colorImageLayout = imageLayout;
-}
-
-void RenderPass::addDepthAttachment(VkImageLayout imageLayout)
-{
-    TextureProperties props = TextureProperties::getDefaultProperties();
-    props.format = findDepthFormat();
-    props.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-    props.imageSubResourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-    props.finalLayout = imageLayout;
-
-    depthImage = std::make_unique<Texture>(props, extent.width, extent.height);
-    depthImage->createTextureUninitialized();
-
-    depthImageLayout = imageLayout;
-}
 
 void RenderPass::updateImageSizes()
 {
@@ -254,5 +232,49 @@ VkFormat RenderPass::findDepthFormat()
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+}
+
+RenderPassBuilder::RenderPassBuilder(VkExtent2D initialExtent) : newPass(initialExtent) {}
+
+RenderPassBuilder &RenderPassBuilder::AddExternalColorAttachment(Texture *texture)
+{
+
+}
+
+RenderPassBuilder &RenderPassBuilder::AddColorAttachment(std::string_view passName, VkFormat imageFormat, VkImageLayout imageLayout);
+RenderPassBuilder &RenderPassBuilder::AddColorAttachment(std::string_view passName, TextureProperties textureProps, VkFormat imageFormat, VkImageLayout imageLayout);
+RenderPassBuilder &RenderPassBuilder::AddColorAttachment(std::string_view passName, SamplerProperties samplerProps, VkFormat imageFormat, VkImageLayout imageLayout);
+RenderPassBuilder &RenderPassBuilder::AddColorAttachment(std::string_view passName, TextureProperties textureProps, SamplerProperties samplerProps, VkFormat imageFormat, VkImageLayout imageLayout)
+{
+    std::unique_ptr<Texture> tex = std::make_unique<Texture>(textureProps, samplerProps, newPass.extent.width, newPass.extent.height);
+    tex->createTextureUninitialized();
+    newPass.images.push_back(std::move(tex));
+
+    newPass.colorImageLayout = imageLayout; // TODO: keep a list of layouts so different attachments can have different layouts
+}
+
+RenderPassBuilder &RenderPassBuilder::AddDepthAttachment(VkImageLayout imageLayout)
+{
+    TextureProperties props = TextureProperties::getDefaultProperties();
+    props.format = RenderPass::findDepthFormat();
+    props.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    props.imageSubResourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    props.finalLayout = imageLayout;
+
+    newPass.depthImage = std::make_unique<Texture>(props, newPass.extent.width, newPass.extent.height);
+    newPass.depthImage->createTextureUninitialized();
+
+    newPass.depthImageLayout = imageLayout;
+}
+
+RenderPassBuilder &RenderPassBuilder::SetDrawFunction(void (*func)())
+{
+    // TODO: implement
+    // newPass.drawFunction = func;
+}
+
+std::unique_ptr<RenderPass> RenderPassBuilder::Build()
+{
+    return std::make_unique<RenderPass>(std::move(newPass));
 }
 } // namespace graphics
