@@ -357,24 +357,35 @@ void Graphics::updateExtent()
 
 void Graphics::createRenderPasses()
 {
+
     Console::log("Creating ID buffer render pass", "Graphics");
-    idBufferRenderPass = std::make_unique<RenderPass>();
-    idBufferRenderPass->addColorAttachment(VK_FORMAT_R32_SINT);
-    idBufferRenderPass->addDepthAttachment();
-    idBufferRenderPass->create(renderer.getExtent());
+    // idBufferRenderPass = std::make_unique<RenderPass>();
+    // idBufferRenderPass->addColorAttachment(VK_FORMAT_R32_SINT);
+    // idBufferRenderPass->addDepthAttachment();
+    // idBufferRenderPass->create(renderer.getExtent());
+    idBufferRenderPass = RenderPassBuilder(renderer.getExtent())
+        .AddColorAttachment("ID Buffer", VK_FORMAT_R32_SINT)
+        .AddDepthAttachment()
+        .SetDrawFunction(renderGameObjectIDs) // TODO: Object draw function
+        .Build();
 
     Console::log("Creating scene render pass", "Graphics");
-    sceneRenderPass = std::make_unique<RenderPass>();
-    sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
-    sceneRenderPass->addDepthAttachment();
-    sceneRenderPass->create(renderer.getExtent());
+    // sceneRenderPass = std::make_unique<RenderPass>();
+    // sceneRenderPass->addColorAttachment(VK_FORMAT_R16G16B16A16_SFLOAT);
+    // sceneRenderPass->addDepthAttachment();
+    // sceneRenderPass->create(renderer.getExtent());
+    sceneRenderPass = RenderPassBuilder(renderer.getExtent())
+        .AddColorAttachment("Scene", VK_FORMAT_R16G16B16A16_SFLOAT)
+        .AddDepthAttachment()
+        .SetDrawFunction() // TODO: Object draw function
+        .Build();
 
     Console::log("Creating outline base render pass", "Graphics");
     outlineBaseRenderPass = std::make_unique<RenderPass>();
     SamplerProperties outlineBaseSamplerProperties = SamplerProperties::getDefaultProperties();
     outlineBaseSamplerProperties.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
     outlineBaseRenderPass->addColorAttachment(outlineBaseSamplerProperties, VK_FORMAT_R16G16B16A16_SFLOAT);
-    // outlineRenderPass->addDepthAttachment(); 
+    // outlineRenderPass->addDepthAttachment();
     outlineBaseRenderPass->create(renderer.getExtent());
     
     Console::log("Creating outline render pass", "Graphics");

@@ -6,6 +6,7 @@
 
 #include "graphics/buffers/texture.hpp"
 #include "graphics/internal/graphics_pipeline.hpp"
+#include "graphics/frame_info.hpp"
 
 namespace graphics
 {
@@ -77,7 +78,7 @@ class RenderPassBuilder
         
         RenderPassBuilder &AddDepthAttachment(VkImageLayout imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
         
-        RenderPassBuilder &SetDrawFunction(void (*func)());
+        RenderPassBuilder &SetDrawFunction(void (*func)(FrameInfo));
 
         std::unique_ptr<RenderPass> Build();
 };
