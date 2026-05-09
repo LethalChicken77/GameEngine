@@ -22,7 +22,7 @@
             "cStandard": "c11",
             "cppStandard": "c++23",
             "intelliSenseMode": "windows-gcc-x64",
-            "compilerPath": "C:/msys64/ucrt64/bin/clang++.exe"
+            "compilerPath": "C:/msys64/clang64/bin/clang++.exe"
         }
     ],
     "version": 4

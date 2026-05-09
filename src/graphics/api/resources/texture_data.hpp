@@ -14,8 +14,10 @@ namespace graphics
     class TextureData
     {
         public:
-            TextureData(uint32_t width, uint32_t height, TextureConfig props = {});
-            TextureData(uint32_t width, uint32_t height, uint32_t depth, TextureConfig props = {});
+            std::string name = "";
+
+            TextureData(uint32_t width, uint32_t height, std::string_view name = "New Texture", TextureConfig props = {});
+            TextureData(uint32_t width, uint32_t height, uint32_t depth, std::string_view name = "New Texture", TextureConfig props = {});
             ~TextureData() = default;
 
             // TODO: Replace with asset importer

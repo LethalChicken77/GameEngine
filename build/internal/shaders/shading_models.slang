@@ -298,11 +298,11 @@ public float3 pbrBRDF(
     float3 kD = (1.0 - metallic) * (1.0 - F);
     
     float3 diffuse = kD * DiffEON(normal, lightDir, viewDir, roughness, albedo, true);
-    // float3 diffuse = (1 - metallic) * DiffFON(normal, lightDir, viewDir, roughness, albedo);
+    // float3 diffuse = kD * DiffFON(normal, lightDir, viewDir, roughness, albedo);
     // float3 diffuse = kD * DiffOrenNayar(normal, lightDir, viewDir, roughness, albedo);
     // float3 diffuse = kD * DiffBurley(normal, lightDir, viewDir, roughness) * albedo;
-    // float3 diffuse = (1 - metallic) * DiffBurley(normal, lightDir, viewDir, roughness) * albedo;
-    // float3 diffuse = (1 - metallic) * DiffLambertian(normal, lightDir) * albedo / PI;
+    // float3 diffuse = DiffBurley(normal, lightDir, viewDir, roughness) * albedo;
+    // float3 diffuse = DiffLambertian(normal, lightDir) * albedo / PI;
     float3 specular = SpecCookTorrance(normal, lightDir, viewDir, roughness, F0);
     // float3 specTint = lerp(float3(1), albedo, 0.5);
     // specular *= specTint;

@@ -4,14 +4,15 @@
 #include <format>
 #include "utils/console.hpp"
 #include "buffer.hpp"
+#include "debug.hpp"
 
 namespace graphics
 {
 Image::Image(
-    VkDeviceSize width,
-    VkDeviceSize height,
+    vk::DeviceSize width,
+    vk::DeviceSize height,
     const ImageProperties &properties,
-    VkMemoryPropertyFlags memoryProperties
+    vk::MemoryPropertyFlags memoryProperties
     ) : Image(
         graphicsData->GetBackend().GetDevice(),
         width,
@@ -22,10 +23,10 @@ Image::Image(
 
 Image::Image(
     internal::Device &device,
-    VkDeviceSize width,
-    VkDeviceSize height,
+    vk::DeviceSize width,
+    vk::DeviceSize height,
     const ImageProperties &properties,
-    VkMemoryPropertyFlags memoryProperties
+    vk::MemoryPropertyFlags memoryProperties
     ) : Image(
         device,
         width,
@@ -35,11 +36,11 @@ Image::Image(
         memoryProperties) {}
 
 Image::Image(
-    VkDeviceSize width,
-    VkDeviceSize height,
-    VkDeviceSize depth,
+    vk::DeviceSize width,
+    vk::DeviceSize height,
+    vk::DeviceSize depth,
     const ImageProperties &properties,
-    VkMemoryPropertyFlags memoryProperties
+    vk::MemoryPropertyFlags memoryProperties
     ) : Image(
         graphicsData->GetBackend().GetDevice(),
         width,
@@ -50,19 +51,18 @@ Image::Image(
 
 Image::Image(
     internal::Device &_device,
-    VkDeviceSize _width,
-    VkDeviceSize _height,
-    VkDeviceSize _depth,
+    vk::DeviceSize _width,
+    vk::DeviceSize _height,
+    vk::DeviceSize _depth,
     const ImageProperties &_properties,
-    VkMemoryPropertyFlags _memoryProperties
-) : device(_device)
+    vk::MemoryPropertyFlags _memoryProperties
+) : device(_device),
+    width(_width),
+    height(_height),
+    depth(_depth),
+    properties(_properties),
+    memoryPropertyFlags(_memoryProperties)
 {
-    width = _width;
-    height = _height;
-    depth = _depth;
-    properties = _properties;
-    memoryPropertyFlags = _memoryProperties;
-
     #ifdef DEBUG
     Console::debug(std::format("Creating image: width: {}, height: {}, depth: {}", _width, _height, _depth), "Image");
     #endif
@@ -72,21 +72,25 @@ Image::Image(
 
 Image::Image(
     const TextureData &textureData,
-    const ImageProperties &properties,
-    VkMemoryPropertyFlags memoryProperties
-) : Image(graphicsData->GetBackend().GetDevice(), textureData.GetWidth(), textureData.GetHeight(), textureData.GetDepth(), properties, memoryProperties)
+    const ImageProperties &_properties,
+    vk::MemoryPropertyFlags _memoryProperties
+) : Image(graphicsData->GetBackend().GetDevice(), textureData, _properties, _memoryProperties)
 {
-    SetData(textureData);
 }
 
 Image::Image(
     internal::Device &_device,
     const TextureData &textureData,
-    const ImageProperties &properties,
-    VkMemoryPropertyFlags memoryProperties
-) : Image(_device, textureData.GetWidth(), textureData.GetHeight(), textureData.GetDepth(), properties, memoryProperties)
+    const ImageProperties &_properties,
+    vk::MemoryPropertyFlags _memoryProperties
+) : device(_device),
+    width(textureData.GetWidth()),
+    height(textureData.GetHeight()),
+    depth(textureData.GetDepth()),
+    properties(_properties),
+    memoryPropertyFlags(_memoryProperties)
 {
-    SetData(textureData);
+    createInitialized(textureData);
 }
 
 /// @brief Create a copy of an existing image on the same device
@@ -140,8 +144,7 @@ Image::~Image()
 /// @brief Create the Vulkan image
 void Image::createImage()
 {
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    vk::ImageCreateInfo imageInfo{};
     imageInfo.imageType = properties.imageType;
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
@@ -150,17 +153,14 @@ void Image::createImage()
     imageInfo.arrayLayers = properties.arrayLayers;
     imageInfo.format = properties.format;
     imageInfo.tiling = properties.tiling;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    imageInfo.initialLayout = vk::ImageLayout::eUndefined;
     imageInfo.usage = properties.usage;
     imageInfo.samples = properties.sampleCount;
     imageInfo.sharingMode = properties.sharingMode;
-    
-    VmaAllocationCreateInfo allocCreateInfo = {};
-    allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-    // allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT; // For large images
-    // allocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT; // Persistent mapping
-    vmaCreateImage(
-        device.GetAllocator(),
+
+    vma::AllocationCreateInfo allocCreateInfo = {};
+    allocCreateInfo.usage = vma::MemoryUsage::eAuto;
+    device.GetAllocator().createImage(
         &imageInfo,
         &allocCreateInfo,
         &image,
@@ -169,41 +169,32 @@ void Image::createImage()
     );
 }
 
-VkComponentSwizzle getSwizzle(SwizzleChannel swiz)
+vk::ComponentSwizzle getSwizzle(SwizzleChannel swiz)
 {
     switch(swiz)
     {
-    case SwizzleChannel::Red: return VK_COMPONENT_SWIZZLE_R;
-    case SwizzleChannel::Green: return VK_COMPONENT_SWIZZLE_G;
-    case SwizzleChannel::Blue: return VK_COMPONENT_SWIZZLE_B;
-    case SwizzleChannel::Alpha: return VK_COMPONENT_SWIZZLE_A;
-    case SwizzleChannel::Zero: return VK_COMPONENT_SWIZZLE_ONE;
-    case SwizzleChannel::One: return VK_COMPONENT_SWIZZLE_ZERO;
+    case SwizzleChannel::Red: return    vk::ComponentSwizzle::eR;
+    case SwizzleChannel::Green: return  vk::ComponentSwizzle::eG;
+    case SwizzleChannel::Blue: return   vk::ComponentSwizzle::eB;
+    case SwizzleChannel::Alpha: return  vk::ComponentSwizzle::eA;
+    case SwizzleChannel::Zero: return   vk::ComponentSwizzle::eOne;
+    case SwizzleChannel::One: return    vk::ComponentSwizzle::eZero;
     }
 }
 
 /// @brief Create the image view for the image
 void Image::createImageView()
 {
-    VkImageViewCreateInfo viewInfo{};
-    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    vk::ImageViewCreateInfo viewInfo{};
     viewInfo.image = image;
     viewInfo.viewType = properties.imageViewType;
     viewInfo.format = properties.format;
 
     // TODO: Handle swizzle from TextureConfig
 
-    // viewInfo.subresourceRange = properties.imageSubResourceRange;
-    viewInfo.subresourceRange.aspectMask = properties.imageSubResourceRange.aspectMask;
-    viewInfo.subresourceRange.baseMipLevel = 0;
-    viewInfo.subresourceRange.levelCount = 1;
-    viewInfo.subresourceRange.baseArrayLayer = 0;
-    viewInfo.subresourceRange.layerCount = 1;
+    viewInfo.subresourceRange = GetSubresourceRange();
 
-    if(vkCreateImageView(device.Get(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create texture image view");
-    }
+    VK_CHECK(device.Get().createImageView(&viewInfo, nullptr, &imageView), "Failed to create texture image view");
 }
 
 /// @brief Create image without initializing with data
@@ -211,17 +202,19 @@ void Image::create()
 {
     createImage();
     createImageView();
-    TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, defaultLayout);
+    TransitionImageLayout(vk::ImageLayout::eUndefined, defaultLayout);
+    generateMipmaps();
 }
 
 /// @brief Create image and initialize with data from textureData
-void Image::createInitialized()
+void Image::createInitialized(const TextureData& data)
 {
     createImage();
     createImageView();
-    TransitionImageLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    // copyDataToImage();
-    TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, defaultLayout);
+    TransitionImageLayout(vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
+    SetData(data);
+    TransitionImageLayout(vk::ImageLayout::eTransferDstOptimal, defaultLayout);
+    generateMipmaps();
 }
 
 size_t getFormatSize(VkFormat format)
@@ -256,14 +249,99 @@ size_t getFormatSize(VkFormat format)
     }
 }
 
+void Image::generateMipmaps()
+{
+    Console::debugf("Mip levels: {}", properties.mipLevels);
+    if(properties.mipLevels <= 1) return;
+
+    vk::ImageSubresourceRange fullRange = GetSubresourceRange();
+    
+    int mipWidth =  width;
+    int mipHeight = height;
+    int mipDepth =  depth;
+
+    vk::CommandBuffer cmd = device.BeginSingleTimeCommands();
+
+    vk::ImageSubresourceRange prevRange{};
+    prevRange.aspectMask = fullRange.aspectMask;
+    prevRange.baseMipLevel = 0;
+    prevRange.levelCount = 1;
+    prevRange.baseArrayLayer = fullRange.baseArrayLayer;
+    prevRange.layerCount = fullRange.layerCount;
+
+    for(uint32_t i = 1; i < properties.mipLevels; i++)
+    {
+        Console::debugf("Generating mip {}", i);
+        vk::ImageBlit2 blit{};
+        blit.srcSubresource.aspectMask = fullRange.aspectMask;
+        blit.srcSubresource.mipLevel = i - 1;
+        blit.srcSubresource.baseArrayLayer = fullRange.baseArrayLayer;
+        blit.srcSubresource.layerCount = fullRange.layerCount;
+
+        blit.srcOffsets[0] = vk::Offset3D{0,0,0};
+        blit.srcOffsets[1] = vk::Offset3D{
+            mipWidth,
+            mipHeight,
+            mipDepth
+        };
+
+        mipWidth =  glm::max(mipWidth  / 2, 1);
+        mipHeight = glm::max(mipHeight / 2, 1);
+        mipDepth =  glm::max(mipDepth  / 2, 1);
+
+        blit.dstSubresource.aspectMask = fullRange.aspectMask;
+        blit.dstSubresource.mipLevel = i;
+        blit.dstSubresource.baseArrayLayer = fullRange.baseArrayLayer;
+        blit.dstSubresource.layerCount = fullRange.layerCount;
+
+        blit.dstOffsets[0] = vk::Offset3D{0,0,0};
+        blit.dstOffsets[1] = vk::Offset3D{
+            mipWidth,
+            mipHeight,
+            mipDepth
+        };
+    
+        vk::BlitImageInfo2 blitInfo{};
+        blitInfo.srcImage = image;
+        blitInfo.srcImageLayout = vk::ImageLayout::eTransferSrcOptimal;
+        blitInfo.dstImage = image;
+        blitInfo.dstImageLayout = vk::ImageLayout::eTransferDstOptimal;
+        blitInfo.regionCount = 1;
+        blitInfo.pRegions = &blit;
+        blitInfo.filter = vk::Filter::eLinear;
+
+        vk::ImageSubresourceRange newRange{};
+        newRange.aspectMask = fullRange.aspectMask;
+        newRange.baseMipLevel = i;
+        newRange.levelCount = 1;
+        newRange.baseArrayLayer = fullRange.baseArrayLayer;
+        newRange.layerCount = 1;
+
+        TransitionVkImageLayout(image, currentLayout, vk::ImageLayout::eTransferDstOptimal, cmd, newRange);
+        if(i == 1)
+            TransitionVkImageLayout(image, currentLayout, vk::ImageLayout::eTransferSrcOptimal, cmd, prevRange);
+        else
+            TransitionVkImageLayout(image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, cmd, prevRange);
+
+        cmd.blitImage2(&blitInfo);
+
+        prevRange = newRange;
+    }
+    TransitionVkImageLayout(image, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, cmd, prevRange);
+    TransitionImageLayout(vk::ImageLayout::eTransferSrcOptimal, currentLayout, cmd);
+
+    device.EndSingleTimeCommands(cmd);
+}
+
 void Image::SetData(const TextureData &data)
 {
     format = data.properties.format;
-    if(!ImageFormatToVkFormat().contains(format))
+    VkFormat vkFmt = ImageFormatToVkFormat(format);
+    if(vkFmt == VK_FORMAT_UNDEFINED)
     {
         throw std::runtime_error("Unsupported format: " + format.ToString());
     }
-    properties.format = ImageFormatToVkFormat().at(data.properties.format);
+    properties.format = vk::Format(vkFmt);
     
     uint32_t pixelCount = width * height;
     uint32_t pixelSize = format.PixelSize();
@@ -299,8 +377,8 @@ void Image::SetData(const TextureData &data)
 
 void Image::CopyFromBuffer(const Buffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount)
 {
-    VkImageLayout prevLayout = currentLayout;
-    TransitionImageLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    vk::ImageLayout prevLayout = currentLayout;
+    TransitionImageLayout(vk::ImageLayout::eTransferDstOptimal);
     VkCommandBuffer commandBuffer = device.BeginSingleTimeCommands();
 
     VkBufferImageCopy region{};
@@ -362,7 +440,7 @@ void Image::GetData(TextureData *data) const
 
 /// @brief Change the layout of the image
 /// @param newLayout New layout to transition to
-void Image::TransitionImageLayout(VkImageLayout newLayout)
+void Image::TransitionImageLayout(vk::ImageLayout newLayout)
 {
     TransitionImageLayout(currentLayout, newLayout);
 }
@@ -370,7 +448,7 @@ void Image::TransitionImageLayout(VkImageLayout newLayout)
 /// @brief Change the layout of the image using a provided command buffer
 /// @param newLayout New layout to transition to
 /// @param commmandBuffer Command buffer to use for the transition
-void Image::TransitionImageLayout(VkImageLayout newLayout, VkCommandBuffer commmandBuffer)
+void Image::TransitionImageLayout(vk::ImageLayout newLayout, vk::CommandBuffer commmandBuffer)
 {
     TransitionImageLayout(currentLayout, newLayout, commmandBuffer);
 }
@@ -378,9 +456,9 @@ void Image::TransitionImageLayout(VkImageLayout newLayout, VkCommandBuffer commm
 /// @brief Transition the image layout
 /// @param oldLayout
 /// @param newLayout
-void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout)
+void Image::TransitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout)
 {
-    VkCommandBuffer commandBuffer = device.BeginSingleTimeCommands(); // Begin recording a command buffer
+    vk::CommandBuffer commandBuffer = device.BeginSingleTimeCommands(); // Begin recording a command buffer
     TransitionImageLayout(oldLayout, newLayout, commandBuffer);
     device.EndSingleTimeCommands(commandBuffer); // Submit and free the command buffer
 }
@@ -389,7 +467,7 @@ void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayo
 /// @param oldLayout
 /// @param newLayout 
 /// @param commandBuffer Command buffer to use for the transition
-void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer)
+void Image::TransitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer)
 {
     TransitionImageLayout(*this, oldLayout, newLayout, commandBuffer);
 }
@@ -399,15 +477,9 @@ void Image::TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayo
 /// @param oldLayout
 /// @param newLayout 
 /// @param commandBuffer Command buffer to use for the transition
-void Image::TransitionImageLayout(Image& image, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer)
+void Image::TransitionImageLayout(Image& image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer)
 {
-    VkImageSubresourceRange subresourceRange{};
-    subresourceRange.aspectMask = image.properties.imageSubResourceRange.aspectMask;
-    subresourceRange.baseMipLevel = 0;
-    subresourceRange.levelCount = 1;
-    subresourceRange.baseArrayLayer = 0;
-    subresourceRange.layerCount = 1;
-    TransitionVkImageLayout(image.image, oldLayout, newLayout, commandBuffer, subresourceRange);
+    TransitionVkImageLayout(image.image, oldLayout, newLayout, commandBuffer, image.GetSubresourceRange());
 
     image.currentLayout = newLayout;
 }
@@ -712,7 +784,7 @@ void Image::TransitionVkImageLayout(VkImage image, VkImageLayout oldLayout, VkIm
 using DT = TextureDataType;
 using CO = ChannelOrder;
 
-const std::unordered_map<ImageFormat, VkFormat, ImageFormat::Hash>& ImageFormatToVkFormat()
+const VkFormat ImageFormatToVkFormat(ImageFormat fmt)
 {
     static std::unordered_map<ImageFormat, VkFormat, ImageFormat::Hash> if2vf{
         // 8 bit formats
@@ -845,12 +917,19 @@ const std::unordered_map<ImageFormat, VkFormat, ImageFormat::Hash>& ImageFormatT
         {{false, 1, 4, DT::D24_UNorm,          CO::RGBA}, VK_FORMAT_D24_UNORM_S8_UINT},
         {{false, 1, 4, DT::D32_SFloat_S8_UInt, CO::RGBA}, VK_FORMAT_D32_SFLOAT_S8_UINT},
         {{false, 1, 4, DT::S8_UInt,            CO::RGBA}, VK_FORMAT_S8_UINT},
-
     };
-    return if2vf;
+    auto it = if2vf.find(fmt);
+    if(it != if2vf.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return VK_FORMAT_UNDEFINED;
+    }
 }
 
-const std::unordered_map<VkFormat, ImageFormat>& VkFormatToImageFormat()
+const ImageFormat VkFormatToImageFormat(VkFormat vkFmt)
 {
     static std::unordered_map<VkFormat, ImageFormat> vf2if{
         // 8 bit formats
@@ -964,7 +1043,15 @@ const std::unordered_map<VkFormat, ImageFormat>& VkFormatToImageFormat()
         {VK_FORMAT_S8_UINT,             {false, 1, 4, DT::S8_UInt,            CO::RGBA}},
 
     };
-    return vf2if;
+    auto it = vf2if.find(vkFmt);
+    if(it != vf2if.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return {};
+    }
 }
 
 }

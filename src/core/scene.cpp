@@ -39,11 +39,11 @@ void Scene_t::loadScene()
     // obj->transform.rotation.x = glm::radians(-90.0f);
 
     // obj2.mesh = GraphicsMesh::loadObj("internal/models/monkey_high_res.obj");
-    // obj2->mesh = Mesh::createGrid(16,16, {50.0f, 50.0f});
-    obj2->mesh = terrainMesh;
+    obj2->mesh = Mesh::createGrid(250,250, {500.0f, 500.0f});
+    // obj2->mesh = terrainMesh;
     // obj2->material = gameData->materials.Get(0);
     obj2->material = gameData->materials.Get(2);
-    obj2->transform.setPosition(glm::vec3(0, 0, 0));
+    obj2->transform.setPosition(glm::vec3(0, -2, 0));
     obj2->transform.setScale(glm::vec3(8));
 
     obj3->mesh = monkeyMesh;

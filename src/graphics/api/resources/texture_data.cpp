@@ -11,11 +11,11 @@
 namespace graphics
 {
 
-TextureData::TextureData(uint32_t _width, uint32_t _height, TextureConfig props)
-    : TextureData(_width, _height, 1, props) {}
+TextureData::TextureData(uint32_t _width, uint32_t _height, std::string_view _name, TextureConfig props)
+    : TextureData(_width, _height, 1, _name, props) {}
 
-TextureData::TextureData(uint32_t _width, uint32_t _height, uint32_t _depth, TextureConfig props)
-    : width(_width), height(_height), depth(_depth), properties(props)
+TextureData::TextureData(uint32_t _width, uint32_t _height, uint32_t _depth, std::string_view _name, TextureConfig props)
+    : width(_width), height(_height), depth(_depth), name(_name), properties(props)
 {
     data.resize(width * height * depth * properties.format.PixelSize());
 }
@@ -71,7 +71,7 @@ std::unique_ptr<TextureData> TextureData::LoadFromFile(const std::string& path)
     format.isSRGB = true;
     format.dataType = TextureDataType::UNorm;
     format.channelOrder = ChannelOrder::RGBA;
-    std::unique_ptr<TextureData> texture = std::make_unique<TextureData>(texWidth, texHeight, texConfig);
+    std::unique_ptr<TextureData> texture = std::make_unique<TextureData>(texWidth, texHeight, std::filesystem::path(path).stem().string(), texConfig);
     memcpy(texture->data.data(), pixels, pixelCount * numChannels * sizeof(stbi_uc));
 
     texture->width = texWidth;
@@ -197,7 +197,7 @@ std::unique_ptr<TextureData> TextureData::LoadFromFileEXR(const std::string& pat
         }
     // }
     format.channelOrder = ChannelOrder::RGBA; // TODO: Allow user specified order
-    std::unique_ptr<TextureData> texture = std::make_unique<TextureData>(texWidth, texHeight, texConfig);
+    std::unique_ptr<TextureData> texture = std::make_unique<TextureData>(texWidth, texHeight, std::filesystem::path(path).stem().string(), texConfig);
 
     texture->data.resize(pixelCount * sizeof(float) * effectiveNumChannels);
 
@@ -233,6 +233,7 @@ std::unique_ptr<TextureData> TextureData::LoadFromFileEXR(const std::string& pat
 
     texture->width = texWidth;
     texture->height = texHeight;
+    texture->name = std::filesystem::path(path).stem().string();
 
     return std::move(texture);
 }

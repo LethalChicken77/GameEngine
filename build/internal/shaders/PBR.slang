@@ -11,6 +11,8 @@ struct MaterialInfo
 {
     float4 color;
     float normalMapStrength;
+    float2 UVOffset = float2(0,0);
+    float2 UVScale = float2(1,1);
 };
 [[vk::binding(0, 2)]] ConstantBuffer<MaterialInfo> materialInfo;
 [[vk::binding(1, 2)]] Sampler2D albedoMap; // SRGB
@@ -36,7 +38,7 @@ VOut vsMain(VertexData vertex, InstanceData instance)
     output.Tangent = float4(normalize(mul(normalMatrix, rawTangent.xyz)), vertex.Tangent.z);
     output.Bitangent = normalize(mul(normalMatrix, cross(rawNormal.xyz, rawTangent.xyz)));
     output.Color = vertex.Color;
-    output.UV = vertex.UV;
+    output.UV = vertex.UV * materialInfo.UVScale + materialInfo.UVOffset;
 
     return output;
 }
@@ -55,7 +57,7 @@ float4 fsMain(FIn input)
     float3 halfDir = 0.5 * (lightDir - viewDir);
     float3 lightColor = float3(1.0, 1.0, 1.0) * 4.0;
     float3 ambientColor = globalData.ambientLight;//invLinearToSRGB(float3(0.04f, 0.08f, 0.2f));
-    float2 UV = input.UV * 10;
+    float2 UV = input.UV;
 
     // float3 albedo = SRGBToLinear(input.Color * materialInfo.color.xyz * albedoMap.Sample(UV).xyz);
     float3 albedo = albedoMap.Sample(UV).xyz;
@@ -108,7 +110,7 @@ float4 fsMain(FIn input)
     // outColor = PhongBRDF(albedo, 80, lightColor, ambientColor, normal, lightDir, viewDir);
 
     float depth = length(input.Position - cameraPos);
-    float fog = pow(2.0, -depth * 0.0005);
+    float fog = pow(2.0, -depth * 0.0001);
 
     float3 fogColor = ambientColor * 4;
     outColor = lerp(fogColor, outColor, fog);
@@ -131,6 +133,7 @@ float4 fsMain(FIn input)
     // outColor = outColor / luminance(outColor) * 0.25;
     // outColor = outColor / (outColor.x + outColor.y + outColor.z) * 0.25;
     // outColor = float3(luminance(outColor));
+    // outColor = albedo;
     return float4(outColor, 1.0);
     // return float4(normalMap.Sample(UV).xyz, 1.0);
 }

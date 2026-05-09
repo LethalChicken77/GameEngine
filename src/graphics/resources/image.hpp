@@ -10,32 +10,45 @@
 namespace graphics
 {
 
-const std::unordered_map<ImageFormat, VkFormat, ImageFormat::Hash>& ImageFormatToVkFormat();
-const std::unordered_map<VkFormat, ImageFormat>& VkFormatToImageFormat();
+const VkFormat ImageFormatToVkFormat(ImageFormat fmt);
+const ImageFormat VkFormatToImageFormat(VkFormat vkFmt);
 
 struct ImageProperties
 {
-    VkFormat format = VK_FORMAT_R8G8B8A8_SRGB; // Data format
-    VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
-    VkImageUsageFlags usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-    VkImageType imageType = VK_IMAGE_TYPE_2D;
-    VkImageViewType imageViewType = VK_IMAGE_VIEW_TYPE_2D;
-    VkSampleCountFlagBits sampleCount = VK_SAMPLE_COUNT_1_BIT;
+    vk::Format format = vk::Format::eR8G8B8A8Srgb; // Data format
+    vk::ImageTiling tiling = vk::ImageTiling::eOptimal;
+    vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
+    vk::ImageType imageType = vk::ImageType::e2D;
+    vk::ImageViewType imageViewType = vk::ImageViewType::e2D;
+    vk::SampleCountFlagBits sampleCount = vk::SampleCountFlagBits::e1;
     uint32_t mipLevels = 1;
     uint32_t arrayLayers = 1;
-    VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    VkImageSubresourceRange imageSubResourceRange{
-        VK_IMAGE_ASPECT_COLOR_BIT,
-        0,
-        1,
-        0,
-        1
-    };
+    vk::SharingMode sharingMode = vk::SharingMode::eExclusive;
 
-    [[deprecated]]
-    static ImageProperties getDefaultProperties()
+    inline vk::ImageAspectFlags GetAspectMask() const noexcept
     {
-        return ImageProperties();
+        switch(format)
+        {
+            case vk::Format::eD32Sfloat:
+            case vk::Format::eD16Unorm:
+            case vk::Format::eX8D24UnormPack32:
+                return vk::ImageAspectFlagBits::eDepth;
+            
+            case vk::Format::eD16UnormS8Uint:
+            case vk::Format::eD24UnormS8Uint:
+            case vk::Format::eD32SfloatS8Uint:
+                return vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
+            
+            case vk::Format::eS8Uint:
+                return vk::ImageAspectFlagBits::eStencil;
+            
+            case vk::Format::eUndefined:
+                // Console::warn("Cannot determine image aspect mask from undefined format.");
+                return {};
+
+            default:
+                return vk::ImageAspectFlagBits::eColor;
+        }
     }
 };
 
@@ -43,44 +56,44 @@ class Image
 {
 public:
     Image(
-        VkDeviceSize width,
-        VkDeviceSize height,
+        vk::DeviceSize width,
+        vk::DeviceSize height,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
     Image(
         internal::Device &device,
-        VkDeviceSize width,
-        VkDeviceSize height,
+        vk::DeviceSize width,
+        vk::DeviceSize height,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
     Image(
-        VkDeviceSize width,
-        VkDeviceSize height,
-        VkDeviceSize depth,
+        vk::DeviceSize width,
+        vk::DeviceSize height,
+        vk::DeviceSize depth,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
     Image(
         internal::Device &device,
-        VkDeviceSize width,
-        VkDeviceSize height,
-        VkDeviceSize depth,
+        vk::DeviceSize width,
+        vk::DeviceSize height,
+        vk::DeviceSize depth,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
 
     Image(
         const TextureData &textureData,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
     Image(
         internal::Device &device,
         const TextureData &textureData,
         const ImageProperties &properties = {},
-        VkMemoryPropertyFlags memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+        vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eDeviceLocal
     );
 
     ~Image();
@@ -89,12 +102,12 @@ public:
     Image(const Image&, internal::Device& device);
     Image& operator=(const Image&) = delete;
 
-    static void TransitionImageLayout(Image& image, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer);
+    static void TransitionImageLayout(Image& image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer);
 
-    void TransitionImageLayout(VkImageLayout newLayout);
-    void TransitionImageLayout(VkImageLayout newLayout, VkCommandBuffer commandBuffer);
-    void TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout);
-    void TransitionImageLayout(VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer);
+    void TransitionImageLayout(vk::ImageLayout newLayout);
+    void TransitionImageLayout(vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer);
+    void TransitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
+    void TransitionImageLayout(vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer);
     static void TransitionVkImageLayout(internal::Device& device, VkImage& image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageSubresourceRange subresourceRange);
     static void TransitionVkImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkCommandBuffer commandBuffer, VkImageSubresourceRange subresourceRange);
     static inline void TransitionVkImageLayout(vk::Image image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout, vk::CommandBuffer commandBuffer, vk::ImageSubresourceRange subresourceRange)
@@ -110,21 +123,31 @@ public:
     /// @brief Reset to default image layout
     inline void ResetImageLayout() { TransitionImageLayout(defaultLayout); }
     /// @brief Reset to default image layout with command buffer
-    inline void ResetImageLayout(VkCommandBuffer commandBuffer) { TransitionImageLayout(defaultLayout, commandBuffer); }
+    inline void ResetImageLayout(vk::CommandBuffer commandBuffer) { TransitionImageLayout(defaultLayout, commandBuffer); }
 
     void CopyFromBuffer(const Buffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount);
 
     void SetData(const TextureData &data);
     void GetData(TextureData *data) const;
-    VkImage GetImage() const { return image; }
-    VkImageView GetImageView() const { return imageView; }
+    inline vk::Image GetImage() const noexcept { return image; }
+    inline vk::ImageView GetImageView() const noexcept { return imageView; }
+    inline vk::ImageSubresourceRange GetSubresourceRange() const noexcept
+    {
+        vk::ImageSubresourceRange range{};
+        range.aspectMask = properties.GetAspectMask();
+        range.baseMipLevel = 0;
+        range.levelCount = properties.mipLevels;
+        range.baseArrayLayer = 0;
+        range.layerCount = 1;
+        return range;
+    }
 
 
     /// @brief Get Vulkan descriptor for this image. Does not include a sampler.
     /// @return Vulkan descriptor image info
-    VkDescriptorImageInfo GetDescriptorInfo() const
+    vk::DescriptorImageInfo GetDescriptorInfo() const
     {
-        VkDescriptorImageInfo imageInfo{};
+        vk::DescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = currentLayout;
         imageInfo.imageView = imageView;
         imageInfo.sampler = VK_NULL_HANDLE;
@@ -134,25 +157,27 @@ private:
     internal::Device &device;
     ImageFormat format{};
 
-    VkImage image = VK_NULL_HANDLE;
-    VkImageView imageView = VK_NULL_HANDLE;
-    VmaAllocation imageAllocation = VK_NULL_HANDLE;
-    VmaAllocationInfo imageAllocationInfo;
+    vk::Image image = VK_NULL_HANDLE;
+    vk::ImageView imageView = VK_NULL_HANDLE;
+    vma::Allocation imageAllocation = VK_NULL_HANDLE;
+    vma::AllocationInfo imageAllocationInfo;
     
     ImageProperties properties{};
-    VkImageLayout currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    VkImageLayout defaultLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    VkMemoryPropertyFlags memoryPropertyFlags{};
+    vk::ImageLayout currentLayout = vk::ImageLayout::eUndefined;
+    vk::ImageLayout defaultLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+    vk::MemoryPropertyFlags memoryPropertyFlags{};
 
-    VkDeviceSize width = 0;
-    VkDeviceSize height = 0;
-    VkDeviceSize depth = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    uint32_t depth = 0;
 
     void create();
-    void createInitialized();
+    void createInitialized(const TextureData& data);
     void createImage();
     void createImageView();
     void copyDataToImage();
+
+    void generateMipmaps();
 
     friend class Buffer;
 };

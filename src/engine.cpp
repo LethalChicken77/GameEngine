@@ -76,17 +76,17 @@ void Engine::init()
     // Shader* pbr = shaderPool.New(pbrShader, pbrShader);
 
 
-    // std::unique_ptr<TextureData> texa = TextureData::LoadFromFile("./internal/textures/worn_tile_floor/worn_tile_floor_diff_1k.jpg");
-    // std::unique_ptr<TextureData> texr = TextureData::LoadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_rough_1k.exr");
-    // std::unique_ptr<TextureData> texm = TextureData::LoadFromFileEXR("./internal/textures/defaults/default_metal.exr");
-    // std::unique_ptr<TextureData> texs = TextureData::LoadFromFileEXR("./internal/textures/defaults/default_spec.exr");
-    // std::unique_ptr<TextureData> texn = TextureData::LoadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_nor_gl_1k.exr");
-    std::unique_ptr<TextureData> texa = TextureData::LoadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg");
-    // std::unique_ptr<TextureData> texr = TextureData::LoadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png");
-    std::unique_ptr<TextureData> texr = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.exr");
+    std::unique_ptr<TextureData> texa = TextureData::LoadFromFile("./internal/textures/worn_tile_floor/worn_tile_floor_diff_1k.jpg");
+    std::unique_ptr<TextureData> texr = TextureData::LoadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_rough_1k.exr");
     std::unique_ptr<TextureData> texm = TextureData::LoadFromFileEXR("./internal/textures/defaults/default_metal.exr");
-    std::unique_ptr<TextureData> texs = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_spec_4k.exr");
-    std::unique_ptr<TextureData> texn = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.exr");
+    std::unique_ptr<TextureData> texs = TextureData::LoadFromFileEXR("./internal/textures/defaults/default_spec.exr");
+    std::unique_ptr<TextureData> texn = TextureData::LoadFromFileEXR("./internal/textures/worn_tile_floor/worn_tile_floor_nor_gl_1k.exr");
+    // std::unique_ptr<TextureData> texa = TextureData::LoadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_diff_4k.jpg");
+    // // std::unique_ptr<TextureData> texr = TextureData::LoadFromFile("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_512.png");
+    // std::unique_ptr<TextureData> texr = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_rough_4k.exr");
+    // std::unique_ptr<TextureData> texm = TextureData::LoadFromFileEXR("./internal/textures/defaults/default_metal.exr");
+    // std::unique_ptr<TextureData> texs = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_spec_4k.exr");
+    // std::unique_ptr<TextureData> texn = TextureData::LoadFromFileEXR("./internal/textures/rocky_terrain_02/rocky_terrain_02_nor_gl_4k.exr");
 
     TextureHandle thA{};
     TextureHandle thR{};
@@ -130,6 +130,8 @@ void Engine::init()
     // pbrMat->SetVector("color", glm::vec4(0.1f, 0.5f, 0.1f, 1.0f));
     pbrMat->SetVector("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
     pbrMat->SetFloat("normalMapStrength", 1.f);
+    pbrMat->SetVector("UVOffset", glm::vec2(0,0));
+    pbrMat->SetVector("UVScale", glm::vec2(250,250));
     // gameData->materials[2].SetFloat("roughness", 0.8f);
     // gameData->materials[2].SetFloat("metallic", 0.0f);
     pbrMat->SetTexture("albedoMap", thA);
@@ -310,7 +312,7 @@ void Engine::run()
 
         ImGui::Begin("Material Properties");
 
-        gameData->materials.Get(0)->DrawImGui();
+        gameData->materials.Get(2)->DrawImGui();
         // for(Material &mat : Shared::materials)
         // {
         //     mat.drawImGui();

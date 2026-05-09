@@ -147,7 +147,7 @@ struct TextureConfig
 {
     // Preprocessing properties
     TextureType type = TextureType::Default; // Perform preprocessing based on type
-    bool generateMipmaps = false; // Change to true when mipmaps are implemented
+    bool generateMipmaps = true;
     
     // Texture properties
     ImageFormat format{};
@@ -162,7 +162,7 @@ struct TextureConfig
     TextureFilterMode magFilter = TextureFilterMode::Bilinear;
     TextureFilterMode minFilter = TextureFilterMode::Bilinear;
 
-    MipmapMode mipmapMode = MipmapMode::None;
+    MipmapMode mipmapMode = MipmapMode::Linear;
     float mipLodBias = 0;
 
     BorderColorMode borderColorMode = BorderColorMode::FOpaqueBlack;
