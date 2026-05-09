@@ -182,6 +182,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
     endif()
 endif()
+if(WIN32)
+# set_target_properties(GameEngine PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
 # target_link_options(GameEngine PRIVATE
 #     -static-libstdc++
 #     -static-libgcc
